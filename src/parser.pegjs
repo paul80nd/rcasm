@@ -1,5 +1,6 @@
+
 {
-  var ast = require('./ast')
+   var ast = require('./ast')
 
   function extractList(list, index) {
     return list.map(function(element) { return element[index]; });
@@ -9,9 +10,9 @@
     return [head].concat(extractList(tail, index));
   }
 
-  function loc() {
-    return { ...location(), source: options.source }
-  }
+   function loc() {
+     return { ...location(), source: options.source }
+   }
 }
 
 statements =
@@ -25,10 +26,20 @@ insnLineWithComment =
   }
 
 insnLine =
-  __ {
+    label:label {
+      return ast.mkAsmLine(label, null, loc());
+    }
+  / __ {
     // empty line is a no-op
     return ast.mkAsmLine(null, null, loc());
   }
+
+label = lbl:identNoWS ":" __  { return ast.mkLabel(lbl, loc()); }
+
+identNoWS = (alpha+ alphanum*) { return text(); }
+
+alpha = [a-zA-Z_]
+alphanum = [a-zA-Z_0-9]
 
 ws "whitespace" = WhiteSpace*
 __ = ws
