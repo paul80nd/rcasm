@@ -1,0 +1,6 @@
+{
+  "ui": "tdd",
+  "color": true,
+  "spec": "./build/test/*.test.js",
+  "recursive": true
+}
