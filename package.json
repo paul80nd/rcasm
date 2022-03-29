@@ -1,0 +1,17 @@
+{
+  "name": "@paul80nd/rcasm",
+  "version": "1.0.0",
+  "description": "Relay Compuer Assembler",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/paul80nd/rcasm.git"
+  },
+  "scripts": {
+    "watch": "tsc --watch -p ."
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^4.1.3"
+  }
+}
