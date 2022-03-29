@@ -9,6 +9,7 @@
   },
   "scripts": {
     "compile": "tsc -p .",
+    "gen": "npx pegjs -o build/src/g_parser.js src/parser.pegjs",
     "test": "npm run compile && mocha ./build/test/*.js",
     "watch": "tsc --watch -p ."
   },
