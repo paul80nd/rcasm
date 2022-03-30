@@ -1,6 +1,5 @@
-
 {
-   var ast = require('./ast')
+  var ast = require('./ast')
 
   function extractList(list, index) {
     return list.map(function(element) { return element[index]; });
@@ -11,51 +10,84 @@
   }
 
    function loc() {
-     return { ...location(), source: options.source }
+     return { ...location() }
    }
 }
 
-statements =
-    head:insnLineWithComment tail:(LineTerminator insnLineWithComment)* {
+// ----- G.1 Grammer Parser -----
+
+Lines 
+  = head:LineWithComment tail:(EOL LineWithComment)* {
       return buildList(head, tail, 1);
     }
 
-insnLineWithComment =
-  __ insn:insnLine lineComment? {
-    return insn
-  }
+LineWithComment 
+  = __ line:Line __ COMMENT? { return line }
 
-insnLine =
-    label:label {
-      return ast.mkAsmLine(label, null, loc());
-    }
-  / __ {
-    // empty line is a no-op
-    return ast.mkAsmLine(null, null, loc());
-  }
+Line 
+  = l:LABEL __ s:Statement   { return ast.mkAsmLine(l,s,loc()); }
+  / l:LABEL                  { return ast.mkAsmLine(l,null,loc()); }
+  / o:ORG                    { return ast.mkAsmLine(null,o,loc()); }
+  / s:Statement              { return ast.mkAsmLine(null,s,loc()); }
+  / __                       { return ast.mkAsmLine(null,null,loc()); }
 
-label = lbl:identNoWS ":" __  { return ast.mkLabel(lbl, loc()); }
+Statement
+  = insn:Instruction         { return insn; }
+  // Directives potentially in future
 
-identNoWS = (alpha+ alphanum*) { return text(); }
+Instruction
+  = m:MNEMONIC __ o1:Operand __ CMA __ o2:Operand { return ast.mkInsn(m,o1,o2,loc()); }
+  / m:MNEMONIC __ o1:Operand                      { return ast.mkInsn(m,o1,null,loc()); }
+  / m:MNEMONIC                                    { return ast.mkInsn(m,null,null,loc()); }
 
-alpha = [a-zA-Z_]
-alphanum = [a-zA-Z_0-9]
+Operand
+  = (LITERAL / IDENTIFIER)
 
-ws "whitespace" = WhiteSpace*
-__ = ws
+// ----- G.2 Lexical Scanner -----
 
-WhiteSpace "whitespace"
-  = "\t"
-  / "\v"
-  / "\f"
-  / " "
-  / "\u00A0"
-  / "\uFEFF"
-  / Zs
+// Macros
 
-// Separator, Space
-Zs = [\u0020\u00A0\u1680\u2000-\u200A\u202F\u205F\u3000]
+hexadecimal = [0-9a-f]i+
+binary      = [0-1]+
+decimal     = [+-]? [0-9]+
+ident       = [a-z]i+ [0-9a-z_]i*
 
-lineComment = (';' (!LineTerminator .)*)
+B = 'b'i
+D = 'd'i
+G = 'g'i
+H = 'h'i
+O = 'o'i
+R = 'r'i
 
-LineTerminator = [\n\r]
+CMA = ','
+COL = ':'
+SEM = ';'
+
+BIN = v:$binary B       { return parseInt(v,2); }
+HEX = v:$hexadecimal H  { return parseInt(v,16); }
+DEC = v:$decimal D?     { return parseInt(v); } 
+
+// Tokens
+
+__ = WSS
+WSS "whitespace" = WS*
+WS  "whitespace"
+  = '\t'      // tab
+  / '\v'      // vertical tab
+  / '\f'      // form feed
+  / ' '       // space
+  / '\u00A0'  // no break space
+  / '\uFEFF'  // zero width no break space
+
+EOL        "end of line" = [\n\r]
+COMMENT    "comment"     = (SEM (!EOL .)*)
+
+LABEL      "label"       = s:$ident COL     { return ast.mkLabel(s,loc()); }
+ORG        "ORG"         = O R G __ v:HEX   { return ast.mkOrg(v, loc()); }
+IDENTIFIER "identifier"  = s:$ident         { return ast.mkIdent(s, loc()); }
+MNEMONIC   "mnemonic"    = [a-z]i+          { return text(); }
+
+LITERAL "literal"
+  = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }
+  / v:HEX  { return ast.mkLiteral(v, 'h', loc()); }
+  / v:DEC  { return ast.mkLiteral(v, 'd', loc()); }
