@@ -1124,6 +1124,8 @@ class Assembler {
     let val = this.checkLiteral(stmt.p1, 0x00, 0xFF);
     if (val == undefined) return;
     opcode |= opc.p1.op(val);
+
+    this.emit(opcode);
   }
 
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {

@@ -84,6 +84,12 @@ suite('rcasm - Compiler', () => {
     assertHasError('opc 256', '1:5: error: Literal out of range (must be between 0 and 255)');
   });
 
+  test('opc ops', function () {
+    assertProgram('opc FFh \n opc ACh \n opc 52h', [0, 0, 0xFF, 0xAC, 0x52]);
+    assertProgram('opc 255 \n opc 172 \n opc 82', [0, 0, 0xFF, 0xAC, 0x52]);
+    assertProgram('opc 11111111b \n opc 10101100b \n opc 01010010b', [0, 0, 0xFF, 0xAC, 0x52]);
+  });
+
   test('full program', function () {
     const source = [
       ';*****************************************************',
