@@ -59,17 +59,17 @@ interface EvalValue<T> {
   completeFirstPass: boolean; // fully evaluated in first pass?
 }
 
-// function mkErrorValue<T>(v: T): EvalValue<T> {
-//     return { value: v, errors: true, completeFirstPass: false };
-// }
+function mkErrorValue<T>(v: T): EvalValue<T> {
+  return { value: v, errors: true, completeFirstPass: false };
+}
 
 function mkEvalValue<T>(v: T, complete: boolean): EvalValue<T> {
   return { value: v, errors: false, completeFirstPass: complete };
 }
 
-// function anyErrors(...args: (EvalValue<any> | undefined)[]) {
-//     return args.some(e => e !== undefined && e.errors);
-// }
+function anyErrors(...args: (EvalValue<any> | undefined)[]) {
+  return args.some(e => e !== undefined && e.errors);
+}
 
 // // Compute "computeFirstPass" info for a multiple expression values
 // // Any non-first pass value means the result expression is also
@@ -99,42 +99,42 @@ class NamedScope<T> {
   //         return newScope;
   //     }
 
-  //     // Find symbol from current and all parent scopes
-  //     findSymbol(name: string): T & {seen: number} | undefined {
-  //         for (let cur: NamedScope<T>|null = this; cur !== null; cur = cur.parent) {
-  //             const n = cur.syms.get(name);
-  //             if (n !== undefined) {
-  //                 return n;
-  //             }
-  //         }
-  //         return undefined;
-  //     }
+  // Find symbol from current and all parent scopes
+  findSymbol(name: string): T & { seen: number } | undefined {
+    for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
+      const n = cur.syms.get(name);
+      if (n !== undefined) {
+        return n;
+      }
+    }
+    return undefined;
+  }
 
-  //     // Find relative label::path::sym style references from the symbol table
-  //     findSymbolPath(path: string[]): T & {seen: number} | undefined {
-  //         if (path.length == 1) {
-  //             return this.findSymbol(path[0]);
-  //         }
+  // Find relative label::path::sym style references from the symbol table
+  findSymbolPath(path: string[]): T & { seen: number } | undefined {
+    if (path.length == 1) {
+      return this.findSymbol(path[0]);
+    }
 
-  //         // Go up the scope tree until we find the start of
-  //         // the relative path.
-  //         let tab: NamedScope<T> | null | undefined = this;
-  //         while (tab.children.get(path[0]) == undefined) {
-  //             tab = tab.parent;
-  //             if (tab == null) {
-  //                 return undefined;
-  //             }
-  //         }
+    // Go up the scope tree until we find the start of
+    // the relative path.
+    let tab: NamedScope<T> | null | undefined = this;
+    while (tab.children.get(path[0]) == undefined) {
+      tab = tab.parent;
+      if (tab == null) {
+        return undefined;
+      }
+    }
 
-  //         // Go down the tree to match the path to a symbol
-  //         for (let i = 0; i < path.length-1; i++) {
-  //             tab = tab.children.get(path[i]);
-  //             if (tab == undefined) {
-  //                 return undefined;
-  //             }
-  //         }
-  //         return tab.syms.get(path[path.length-1]);
-  //     }
+    // Go down the tree to match the path to a symbol
+    for (let i = 0; i < path.length - 1; i++) {
+      tab = tab.children.get(path[i]);
+      if (tab == undefined) {
+        return undefined;
+      }
+    }
+    return tab.syms.get(path[path.length - 1]);
+  }
 
   addSymbol(name: string, val: T, pass: number): void {
     this.syms.set(name, { ...val, seen: pass });
@@ -179,13 +179,13 @@ class Scopes {
   passCount: number = 0;
   root: NamedScope<SymEntry> = new NamedScope<SymEntry>(null, '');
   curSymtab = this.root;
-  //     private anonScopeCount = 0;
+  private anonScopeCount = 0;
 
-  //     startPass(pass: number): void {
-  //         this.curSymtab = this.root;
-  //         this.anonScopeCount = 0;
-  //         this.passCount = pass;
-  //     }
+  startPass(pass: number): void {
+    this.curSymtab = this.root;
+    this.anonScopeCount = 0;
+    this.passCount = pass;
+  }
 
   //     withAnonScope(body: () => void, parent?: NamedScope<SymEntry>) {
   //         const anonLabel = `__anon_scope_${this.anonScopeCount}`;
@@ -200,16 +200,16 @@ class Scopes {
   //         this.curSymtab = curSym;
   //     }
 
-  //     findPath(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
-  //         if (absolute) {
-  //             return this.root.findSymbolPath(path);
-  //         }
-  //         return this.curSymtab.findSymbolPath(path);
-  //     }
+  findPath(path: string[], absolute: boolean): SymEntry & { seen: number } | undefined {
+    if (absolute) {
+      return this.root.findSymbolPath(path);
+    }
+    return this.curSymtab.findSymbolPath(path);
+  }
 
-  //     findQualifiedSym(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
-  //         return this.findPath(path, absolute);
-  //     }
+  findQualifiedSym(path: string[], absolute: boolean): SymEntry & { seen: number } | undefined {
+    return this.findPath(path, absolute);
+  }
 
   symbolSeen(name: string): boolean {
     const n = this.curSymtab.syms.get(name);
@@ -378,9 +378,9 @@ class Scopes {
 //     return typeName;
 // }
 
-// function formatSymbolPath(p: ast.ScopeQualifiedIdent): string {
-//     return `${p.absolute ? '::' : ''}${p.path.join('::')}`;
-// }
+function formatSymbolPath(p: ast.ScopeQualifiedIdent): string {
+  return `${p.absolute ? '::' : ''}${p.path.join('::')}`;
+}
 
 // interface BranchOffset {
 //     offset: number;
@@ -428,8 +428,8 @@ class Assembler {
   private lineLoc: SourceLoc;
   private curSegmentName = '';
   private curSegment: Segment = new Segment(0, 0, false, 0); // invalid, setup at start of pass
-  //     private pass = 0;
-  //     needPass = false;
+  private pass = 0;
+  needPass = false;
   private scopes = new Scopes();
   private segments: [string, Segment][] = [];
   private errorList: Error[] = [];
@@ -557,9 +557,9 @@ class Assembler {
   //         this.includeStack.pop();
   //     }
 
-  //     anyErrors (): boolean {
-  //         return this.errorList.length !== 0;
-  //     }
+  anyErrors(): boolean {
+    return this.errorList.length !== 0;
+  }
 
   private formatErrors(diags: Error[], errType: 'error' | 'warning'): Diagnostic[] {
     // Remove duplicate errors
@@ -595,10 +595,10 @@ class Assembler {
   }
 
   startPass(pass: number): void {
-    //         this.pass = pass;
-    //         this.needPass = false;
+    this.pass = pass;
+    this.needPass = false;
     this.errorList = [];
-    //         this.scopes.startPass(pass);
+    this.scopes.startPass(pass);
     //         this.outOfRangeBranches = [];
     //         this.debugInfo = new DebugInfoTracker();
 
@@ -772,245 +772,245 @@ class Assembler {
   //         return this.evalKwargTypeMaybe(kwargs, argName, 'number', loc);
   //     }
 
-  //     evalExpr(node: ast.Expr): EvalValue<any> {
-  //         switch (node.type) {
-  //             case 'binary': {
-  //                 const left = this.evalExpr(node.left);
-  //                 const right = this.evalExpr(node.right);
-  //                 if (anyErrors(left, right)) {
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 if (typeof left.value !== typeof right.value) {
-  //                     this.addError(`Binary expression operands are expected to be of the same type.  Got: '${formatTypename(left.value)}' (left), '${formatTypename(right.value)}' (right)`, node.loc);
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 if (typeof left.value !== 'string' && typeof left.value !== 'number') {
-  //                     this.addError(`Binary expression operands can only operator on numbers or strings.  Got: '${formatTypename(left.value)}'`, node.loc);
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 // Allow only a subset of operators for strings
-  //                 if (typeof left.value == 'string') {
-  //                     const okOps = ['+', '==', '<', '<=', '>', '>='];
-  //                     if (okOps.indexOf(node.op) < 0) {
-  //                         this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
-  //                         return mkErrorValue(0);
-  //                     }
-  //                 }
-  //                 switch (node.op) {
-  //                     case '+': return  runBinop(left, right, (a,b) => a + b)
-  //                     case '-': return  runBinop(left, right, (a,b) => a - b)
-  //                     case '*': return  runBinop(left, right, (a,b) => a * b)
-  //                     case '/': return  runBinop(left, right, (a,b) => a / b)
-  //                     case '%': return  runBinop(left, right, (a,b) => a % b)
-  //                     case '&': return  runBinop(left, right, (a,b) => a & b)
-  //                     case '|': return  runBinop(left, right, (a,b) => a | b)
-  //                     case '^': return  runBinop(left, right, (a,b) => a ^ b)
-  //                     case '<<': return runBinop(left, right, (a,b) => a << b)
-  //                     case '>>': return runBinop(left, right, (a,b) => a >> b)
-  //                     case '==': return runBinop(left, right, (a,b) => a == b)
-  //                     case '!=': return runBinop(left, right, (a,b) => a != b)
-  //                     case '<':  return runBinop(left, right, (a,b) => a <  b)
-  //                     case '<=': return runBinop(left, right, (a,b) => a <= b)
-  //                     case '>':  return runBinop(left, right, (a,b) => a >  b)
-  //                     case '>=': return runBinop(left, right, (a,b) => a >= b)
-  //                     case '&&': return runBinop(left, right, (a,b) => a && b)
-  //                     case '||': return runBinop(left, right, (a,b) => a || b)
-  //                     default:
-  //                         throw new Error(`Unhandled binary operator ${node.op}`);
-  //                 }
-  //             }
-  //             case 'unary': {
-  //                 const v = this.evalExprToInt(node.expr, 'operand');
-  //                 if (v.errors) {
-  //                     return v;
-  //                 }
-  //                 switch (node.op) {
-  //                     case '+': return runUnaryOp(v, v => +v);
-  //                     case '-': return runUnaryOp(v, v => -v);
-  //                     case '~': return runUnaryOp(v, v => ~v);
-  //                     default:
-  //                         throw new Error(`Unhandled unary operator ${node.op}`);
-  //                 }
-  //             }
-  //             case 'literal': {
-  //                 return mkEvalValue(node.lit, true);
-  //             }
-  //             case 'array': {
-  //                 const evals = node.list.map(v => this.evalExpr(v));
-  //                 return {
-  //                     value: evals.map(e => e.value),
-  //                     errors: anyErrors(...evals),
-  //                     completeFirstPass: combineEvalPassInfo(...evals)
-  //                 }
-  //             }
-  //             case 'object': {
-  //                 const kvs: [string|number, EvalValue<any>][] = node.props.map(p => {
-  //                     const v = this.evalExpr(p.val);
-  //                     return [p.key.type === 'literal' ? p.key.lit : p.key.name, v];
-  //                 });
-  //                 return {
-  //                     value: kvs.reduce((o, [key, value]) => ({...o, [key]: value.value}), {}),
-  //                     errors: anyErrors(...kvs.map(([_, e]) => e)),
-  //                     completeFirstPass: combineEvalPassInfo(...kvs.map(([_, e]) => e))
-  //                 }
-  //             }
-  //             case 'ident': {
-  //                 throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser')
-  //             }
-  //             case 'qualified-ident': {
-  //                 // Namespace qualified ident, like foo::bar::baz
-  //                 const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
-  //                 if (sym == undefined) {
-  //                     if (this.pass >= 1) {
-  //                         this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc)
-  //                         return mkErrorValue(0);
-  //                     }
-  //                     // Return a placeholder that should be resolved in the next pass
-  //                     this.needPass = true;
-  //                     // Evaluated value is marked as "incomplete in first pass"
-  //                     return mkEvalValue(0, false);
-  //                 }
+  evalExpr(node: ast.Expr): EvalValue<any> {
+    switch (node.type) {
+      //             case 'binary': {
+      //                 const left = this.evalExpr(node.left);
+      //                 const right = this.evalExpr(node.right);
+      //                 if (anyErrors(left, right)) {
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 if (typeof left.value !== typeof right.value) {
+      //                     this.addError(`Binary expression operands are expected to be of the same type.  Got: '${formatTypename(left.value)}' (left), '${formatTypename(right.value)}' (right)`, node.loc);
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 if (typeof left.value !== 'string' && typeof left.value !== 'number') {
+      //                     this.addError(`Binary expression operands can only operator on numbers or strings.  Got: '${formatTypename(left.value)}'`, node.loc);
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 // Allow only a subset of operators for strings
+      //                 if (typeof left.value == 'string') {
+      //                     const okOps = ['+', '==', '<', '<=', '>', '>='];
+      //                     if (okOps.indexOf(node.op) < 0) {
+      //                         this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
+      //                         return mkErrorValue(0);
+      //                     }
+      //                 }
+      //                 switch (node.op) {
+      //                     case '+': return  runBinop(left, right, (a,b) => a + b)
+      //                     case '-': return  runBinop(left, right, (a,b) => a - b)
+      //                     case '*': return  runBinop(left, right, (a,b) => a * b)
+      //                     case '/': return  runBinop(left, right, (a,b) => a / b)
+      //                     case '%': return  runBinop(left, right, (a,b) => a % b)
+      //                     case '&': return  runBinop(left, right, (a,b) => a & b)
+      //                     case '|': return  runBinop(left, right, (a,b) => a | b)
+      //                     case '^': return  runBinop(left, right, (a,b) => a ^ b)
+      //                     case '<<': return runBinop(left, right, (a,b) => a << b)
+      //                     case '>>': return runBinop(left, right, (a,b) => a >> b)
+      //                     case '==': return runBinop(left, right, (a,b) => a == b)
+      //                     case '!=': return runBinop(left, right, (a,b) => a != b)
+      //                     case '<':  return runBinop(left, right, (a,b) => a <  b)
+      //                     case '<=': return runBinop(left, right, (a,b) => a <= b)
+      //                     case '>':  return runBinop(left, right, (a,b) => a >  b)
+      //                     case '>=': return runBinop(left, right, (a,b) => a >= b)
+      //                     case '&&': return runBinop(left, right, (a,b) => a && b)
+      //                     case '||': return runBinop(left, right, (a,b) => a || b)
+      //                     default:
+      //                         throw new Error(`Unhandled binary operator ${node.op}`);
+      //                 }
+      //             }
+      //             case 'unary': {
+      //                 const v = this.evalExprToInt(node.expr, 'operand');
+      //                 if (v.errors) {
+      //                     return v;
+      //                 }
+      //                 switch (node.op) {
+      //                     case '+': return runUnaryOp(v, v => +v);
+      //                     case '-': return runUnaryOp(v, v => -v);
+      //                     case '~': return runUnaryOp(v, v => ~v);
+      //                     default:
+      //                         throw new Error(`Unhandled unary operator ${node.op}`);
+      //                 }
+      //             }
+      //             case 'literal': {
+      //                 return mkEvalValue(node.lit, true);
+      //             }
+      //             case 'array': {
+      //                 const evals = node.list.map(v => this.evalExpr(v));
+      //                 return {
+      //                     value: evals.map(e => e.value),
+      //                     errors: anyErrors(...evals),
+      //                     completeFirstPass: combineEvalPassInfo(...evals)
+      //                 }
+      //             }
+      //             case 'object': {
+      //                 const kvs: [string|number, EvalValue<any>][] = node.props.map(p => {
+      //                     const v = this.evalExpr(p.val);
+      //                     return [p.key.type === 'literal' ? p.key.lit : p.key.name, v];
+      //                 });
+      //                 return {
+      //                     value: kvs.reduce((o, [key, value]) => ({...o, [key]: value.value}), {}),
+      //                     errors: anyErrors(...kvs.map(([_, e]) => e)),
+      //                     completeFirstPass: combineEvalPassInfo(...kvs.map(([_, e]) => e))
+      //                 }
+      //             }
+      case 'ident': {
+        throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser')
+      }
+      case 'qualified-ident': {
+        // Namespace qualified ident, like foo::bar::baz
+        const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
+        if (sym == undefined) {
+          if (this.pass >= 1) {
+            this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc)
+            return mkErrorValue(0);
+          }
+          // Return a placeholder that should be resolved in the next pass
+          this.needPass = true;
+          // Evaluated value is marked as "incomplete in first pass"
+          return mkEvalValue(0, false);
+        }
 
-  //                 switch (sym.type) {
-  //                     case 'label':
-  //                         return {
-  //                             errors: sym.data.errors,
-  //                             value: sym.data.value.addr,
-  //                             completeFirstPass: sym.seen == this.pass
-  //                         }
-  //                     case 'var':
-  //                         if (sym.seen < this.pass) {
-  //                             this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
-  //                         }
-  //                         return sym.data;
-  //                     case 'macro':
-  //                     case 'segment':
-  //                         this.addError(`Must have a label or a variable identifier here, got ${sym.type} name`, node.loc);
-  //                         return mkErrorValue(0);
-  //                     }
-  //                 break;
-  //             }
-  //             case 'member': {
-  //                 const evaledObject = this.evalExpr(node.object);
-  //                 if (anyErrors(evaledObject)) {
-  //                     return mkErrorValue(0);
-  //                 }
+        switch (sym.type) {
+          case 'label':
+            return {
+              errors: sym.data.errors,
+              value: sym.data.value.addr,
+              completeFirstPass: sym.seen == this.pass
+            }
+          //                     case 'var':
+          //                         if (sym.seen < this.pass) {
+          //                             this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
+          //                         }
+          //                         return sym.data;
+          //                     case 'macro':
+          //                     case 'segment':
+          //                         this.addError(`Must have a label or a variable identifier here, got ${sym.type} name`, node.loc);
+          //                         return mkErrorValue(0);
+        }
+        break;
+      }
+      //             case 'member': {
+      //                 const evaledObject = this.evalExpr(node.object);
+      //                 if (anyErrors(evaledObject)) {
+      //                     return mkErrorValue(0);
+      //                 }
 
-  //                 const { value: object } = evaledObject;
+      //                 const { value: object } = evaledObject;
 
-  //                 if (object == undefined) {
-  //                     this.addError(`Cannot access properties of an undefined object`, node.loc);
-  //                     return mkErrorValue(0);
-  //                 }
+      //                 if (object == undefined) {
+      //                     this.addError(`Cannot access properties of an undefined object`, node.loc);
+      //                     return mkErrorValue(0);
+      //                 }
 
-  //                 const checkProp = (prop: string|number, loc: SourceLoc) => {
-  //                     if (!(prop in object)) {
-  //                         this.addError(`Property '${prop}' does not exist in object`, loc);
-  //                         return false;
-  //                     }
-  //                     return true;
-  //                 }
+      //                 const checkProp = (prop: string|number, loc: SourceLoc) => {
+      //                     if (!(prop in object)) {
+      //                         this.addError(`Property '${prop}' does not exist in object`, loc);
+      //                         return false;
+      //                     }
+      //                     return true;
+      //                 }
 
-  //                 // Eval non-computed access (array, object)
-  //                 const evalProperty = (node: ast.Member, typeName: string) => {
-  //                     if (node.property.type !== 'ident') {
-  //                         this.addError(`${typeName} property must be a string, got ${formatTypename(node.property.type)}`, node.loc);
-  //                     } else {
-  //                         if (checkProp(node.property.name, node.property.loc)) {
-  //                             return mkEvalValue((object as any)[node.property.name], evaledObject.completeFirstPass);
-  //                         }
-  //                     }
-  //                     return mkErrorValue(0);
-  //                 }
+      //                 // Eval non-computed access (array, object)
+      //                 const evalProperty = (node: ast.Member, typeName: string) => {
+      //                     if (node.property.type !== 'ident') {
+      //                         this.addError(`${typeName} property must be a string, got ${formatTypename(node.property.type)}`, node.loc);
+      //                     } else {
+      //                         if (checkProp(node.property.name, node.property.loc)) {
+      //                             return mkEvalValue((object as any)[node.property.name], evaledObject.completeFirstPass);
+      //                         }
+      //                     }
+      //                     return mkErrorValue(0);
+      //                 }
 
-  //                 if (object instanceof Array) {
-  //                     if (!node.computed) {
-  //                         return evalProperty(node, 'Array');
-  //                     }
-  //                     const { errors, value: idx, completeFirstPass } = this.evalExprToInt(node.property, 'array index');
-  //                     if (errors) {
-  //                         return mkErrorValue(0);
-  //                     }
-  //                     if (!(idx in object)) {
-  //                         this.addError(`Out of bounds array index ${idx}`, node.property.loc)
-  //                         return mkErrorValue(0);
-  //                     }
-  //                     return mkEvalValue(object[idx], evaledObject.completeFirstPass && completeFirstPass);
-  //                 }  else if (typeof object == 'object') {
-  //                     if (!node.computed) {
-  //                         return evalProperty(node, 'Object');
-  //                     } else {
-  //                         let { errors, value: prop, completeFirstPass } = this.evalExpr(node.property);
-  //                         if (errors) {
-  //                             return mkErrorValue(0);
-  //                         }
-  //                         if (typeof prop !== 'string' && typeof prop !== 'number') {
-  //                             this.addError(`Object property must be a string or an integer, got ${formatTypename(prop)}`, node.loc);
-  //                             return mkErrorValue(0);
-  //                         }
-  //                         if (checkProp(prop, node.property.loc)) {
-  //                             return mkEvalValue(object[prop], completeFirstPass && evaledObject.completeFirstPass);
-  //                         }
-  //                         return mkErrorValue(0);
-  //                     }
-  //                 }
+      //                 if (object instanceof Array) {
+      //                     if (!node.computed) {
+      //                         return evalProperty(node, 'Array');
+      //                     }
+      //                     const { errors, value: idx, completeFirstPass } = this.evalExprToInt(node.property, 'array index');
+      //                     if (errors) {
+      //                         return mkErrorValue(0);
+      //                     }
+      //                     if (!(idx in object)) {
+      //                         this.addError(`Out of bounds array index ${idx}`, node.property.loc)
+      //                         return mkErrorValue(0);
+      //                     }
+      //                     return mkEvalValue(object[idx], evaledObject.completeFirstPass && completeFirstPass);
+      //                 }  else if (typeof object == 'object') {
+      //                     if (!node.computed) {
+      //                         return evalProperty(node, 'Object');
+      //                     } else {
+      //                         let { errors, value: prop, completeFirstPass } = this.evalExpr(node.property);
+      //                         if (errors) {
+      //                             return mkErrorValue(0);
+      //                         }
+      //                         if (typeof prop !== 'string' && typeof prop !== 'number') {
+      //                             this.addError(`Object property must be a string or an integer, got ${formatTypename(prop)}`, node.loc);
+      //                             return mkErrorValue(0);
+      //                         }
+      //                         if (checkProp(prop, node.property.loc)) {
+      //                             return mkEvalValue(object[prop], completeFirstPass && evaledObject.completeFirstPass);
+      //                         }
+      //                         return mkErrorValue(0);
+      //                     }
+      //                 }
 
-  //                 // Don't report errors in first compiler pass because an identifier may
-  //                 // still have been unresolved.  These cases should be reported by
-  //                 // name resolution in pass 1.
-  //                 if (this.pass !== 0) {
-  //                     if (!evaledObject.errors) {
-  //                         if (node.computed) {
-  //                             this.addError(`Cannot use []-operator on non-array/object values`, node.loc)
-  //                         } else {
-  //                             this.addError(`Cannot use the dot-operator on non-object values`, node.loc)
-  //                         }
-  //                     }
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 return mkEvalValue(0, false); // dummy value as we couldn't resolve in pass 0
-  //             }
-  //             case 'callfunc': {
-  //                 const callee = this.evalExpr(node.callee);
-  //                 const argValues = node.args.map(expr => this.evalExpr(expr));
-  //                 if (callee.errors) {
-  //                     return mkErrorValue(0); // suppress further errors if the callee is bonkers
-  //                 }
-  //                 if (typeof callee.value !== 'function') {
-  //                     this.addError(`Callee must be a function type.  Got '${formatTypename(callee)}'`, node.loc);
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 if (anyErrors(...argValues)) {
-  //                     return mkErrorValue(0);
-  //                 }
-  //                 try {
-  //                     const complete = callee.completeFirstPass && combineEvalPassInfo(...argValues);
-  //                     return mkEvalValue(callee.value(...argValues.map(v => v.value)), complete);
-  //                 } catch(err) {
-  //                     if (node.callee.type == 'qualified-ident') {
-  //                         this.addError(`Call to '${formatSymbolPath(node.callee)}' failed with an error: ${err.message}`, node.loc);
-  //                     } else {
-  //                         // Generic error message as callees that are computed
-  //                         // expressions have lost their name once we get here.
-  //                         this.addError(`Plugin call failed with an error: ${err.message}`, node.loc);
-  //                     }
-  //                     // Convert JS call exception info into c64jasm errors that
-  //                     // refer to the errored .js file.
-  //                     if (isJsCallError(err)) {
-  //                         this.addJSStackErrors(err, node.loc);
-  //                     }
-  //                     return mkErrorValue(0);
-  //                 }
-  //             }
-  //             case 'getcurpc': {
-  //                 return mkEvalValue(this.getPC(), true);
-  //             }
-  //             default:
-  //                 break;
-  //         }
-  //         throw new Error('should be unreachable?');
-  //         return mkErrorValue(0); // TODO is this even reachable?
-  //     }
+      //                 // Don't report errors in first compiler pass because an identifier may
+      //                 // still have been unresolved.  These cases should be reported by
+      //                 // name resolution in pass 1.
+      //                 if (this.pass !== 0) {
+      //                     if (!evaledObject.errors) {
+      //                         if (node.computed) {
+      //                             this.addError(`Cannot use []-operator on non-array/object values`, node.loc)
+      //                         } else {
+      //                             this.addError(`Cannot use the dot-operator on non-object values`, node.loc)
+      //                         }
+      //                     }
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 return mkEvalValue(0, false); // dummy value as we couldn't resolve in pass 0
+      //             }
+      //             case 'callfunc': {
+      //                 const callee = this.evalExpr(node.callee);
+      //                 const argValues = node.args.map(expr => this.evalExpr(expr));
+      //                 if (callee.errors) {
+      //                     return mkErrorValue(0); // suppress further errors if the callee is bonkers
+      //                 }
+      //                 if (typeof callee.value !== 'function') {
+      //                     this.addError(`Callee must be a function type.  Got '${formatTypename(callee)}'`, node.loc);
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 if (anyErrors(...argValues)) {
+      //                     return mkErrorValue(0);
+      //                 }
+      //                 try {
+      //                     const complete = callee.completeFirstPass && combineEvalPassInfo(...argValues);
+      //                     return mkEvalValue(callee.value(...argValues.map(v => v.value)), complete);
+      //                 } catch(err) {
+      //                     if (node.callee.type == 'qualified-ident') {
+      //                         this.addError(`Call to '${formatSymbolPath(node.callee)}' failed with an error: ${err.message}`, node.loc);
+      //                     } else {
+      //                         // Generic error message as callees that are computed
+      //                         // expressions have lost their name once we get here.
+      //                         this.addError(`Plugin call failed with an error: ${err.message}`, node.loc);
+      //                     }
+      //                     // Convert JS call exception info into c64jasm errors that
+      //                     // refer to the errored .js file.
+      //                     if (isJsCallError(err)) {
+      //                         this.addJSStackErrors(err, node.loc);
+      //                     }
+      //                     return mkErrorValue(0);
+      //                 }
+      //             }
+      //             case 'getcurpc': {
+      //                 return mkEvalValue(this.getPC(), true);
+      //             }
+      default:
+        break;
+    }
+    throw new Error('should be unreachable?');
+    return mkErrorValue(0); // TODO is this even reachable?
+  }
 
   //     topLevelSourceLoc (): SourceLoc {
   //         const topFilename = this.includeStack[0];
@@ -1157,10 +1157,10 @@ class Assembler {
   }
 
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
-    if (given.type != 'ident') {
+    if (given.type != 'qualified-ident') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.name];
+      let reg = available.cs![given.path[0]];
       if (reg === undefined) {
         this.addError(`Invalid register (must be one of [${Object.keys(available.cs!).join(',')}])`, given.loc);
       }
@@ -1185,32 +1185,21 @@ class Assembler {
     return undefined;
   }
 
-  //     checkAbs (param: ast.Expr, opcode: number | null, bits: number): boolean {
-  //         if (opcode === null || param === null) {
-  //             return false;
-  //         }
-  //         const ev = this.evalExprToInt(param, 'absolute address');
-  //         if (anyErrors(ev)) {
-  //             return true;
-  //         }
-  //         const { value: v } = ev;
-  //         if (bits === 8) {
-  //             if (v < 0 || v >= (1<<bits)) {
-  //                 return false;
-  //             }
-  //             this.emit(opcode);
-  //             this.emit(v);
-  //         } else {
-  //             this.emit(opcode);
-  //             this.emit16(v);
-  //         }
-  //         return true
-  //     }
+  assembleBranch(opc: opc.OpCode, stmt: ast.StmtInsn) {
+    // Form: xxx label
+    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+    if (!stmt.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
+    if (stmt.p1.type != 'qualified-ident') {
+      this.addError(`Identifier required`, stmt.p1.loc);
+      return;
+    }
 
-  //     checkBranch (param: ast.Expr, opcode: number | null): boolean {
-  //         if (opcode === null || param === null) {
-  //             return false;
-  //         }
+    const ev = this.evalExpr(stmt.p1);
+  }
+
   //         const ev = this.evalExpr(param);
   //         if (anyErrors(ev)) {
   //             return true;
@@ -1706,9 +1695,9 @@ class Assembler {
         case opc.ParamForm.SetTgtVal:
           this.assembleSetInstr(op, stmt);
           break;
-        //                 if (this.checkBranch(insn.abs, op[11])) {
-        //                     return;
-        //                 }
+        case opc.ParamForm.GtoTgt:
+          this.assembleBranch(op, stmt);
+          break;
         default:
           this.addError(`Couldn't encode instruction '${stmt.mnemonic}'`, line.loc);
       }
@@ -1815,37 +1804,37 @@ export function assemble(source: string) {
   //     asm.pushSource(filename);
 
   let pass = 0;
-  //     do {
-  asm.startPass(pass);
-  //         asm.registerPlugins();
-  asm.assemble(source);
+  do {
+    asm.startPass(pass);
+    //         asm.registerPlugins();
+    asm.assemble(source);
 
-  //         if (pass > 0 && asm.anyErrors()) {
-  //             return {
-  //                 prg: Buffer.from([]),
-  //                 labels: [],
-  //                 segments: [],
-  //                 debugInfo: undefined,
-  //                 errors: asm.errors(),
-  //                 warnings: asm.warnings()
-  //             }
-  //         }
+    if (pass > 0 && asm.anyErrors()) {
+      return {
+        prg: Buffer.from([]),
+        labels: [],
+        segments: [],
+        // debugInfo: undefined,
+        errors: asm.errors(),
+        warnings: asm.warnings()
+      }
+    }
 
-  //         const maxPass = 10;
-  //         if (pass > maxPass) {
-  //             console.error(`Exceeded max pass limit ${maxPass}`);
-  //             return;
-  //         }
-  //         pass += 1;
+    // const maxPass = 10;
+    // if (pass > maxPass) {
+    // console.error(`Exceeded max pass limit ${maxPass}`);
+    // return;
+    // }
+    pass += 1;
 
-  //         if (!asm.needPass && asm.outOfRangeBranches.length != 0) {
-  //             for (let bidx in asm.outOfRangeBranches) {
-  //                 const b = asm.outOfRangeBranches[bidx];
-  //                 asm.addError(`Branch target too far (must fit in signed 8-bit range, got ${b.offset})`, b.loc);
-  //             }
-  //             break;
-  //         }
-  //     } while(asm.needPass);
+    // if (!asm.needPass && asm.outOfRangeBranches.length != 0) {
+    //             for (let bidx in asm.outOfRangeBranches) {
+    //                 const b = asm.outOfRangeBranches[bidx];
+    //                 asm.addError(`Branch target too far (must fit in signed 8-bit range, got ${b.offset})`, b.loc);
+    //             }
+    //             break;
+    //         }
+  } while (asm.needPass);
 
   //     asm.popSource();
 

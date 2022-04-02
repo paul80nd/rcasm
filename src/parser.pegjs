@@ -41,11 +41,14 @@ Instruction
   / m:MNEMONIC                                    { return ast.mkInsn(m,null,null,loc()); }
 
 Operand
-  = (LITERAL / IDENTIFIER)
+  = (LITERAL / SQIDENTIFIER)
 
 // ----- G.2 Lexical Scanner -----
 
 // Macros
+
+alpha = [a-zA-Z_]
+alphanum = [a-zA-Z_0-9]
 
 hexadecimal = [0-9a-f]i+
 binary      = [0-1]+
@@ -67,6 +70,8 @@ BIN = v:$binary B       { return parseInt(v,2); }
 HEX = v:$hexadecimal H  { return parseInt(v,16); }
 DEC = v:$decimal D?     { return parseInt(v); } 
 
+identNoWS = (alpha+ alphanum*) { return text(); }
+
 // Tokens
 
 __ = WSS
@@ -84,10 +89,13 @@ COMMENT    "comment"     = (SEM (!EOL .)*)
 
 LABEL      "label"       = s:$ident COL     { return ast.mkLabel(s,loc()); }
 ORG        "ORG"         = O R G __ v:HEX   { return ast.mkOrg(v, loc()); }
-IDENTIFIER "identifier"  = s:$ident         { return ast.mkIdent(s, loc()); }
 MNEMONIC   "mnemonic"    = [a-z]i+          { return text(); }
 
 LITERAL "literal"
   = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }
   / v:HEX  { return ast.mkLiteral(v, 'h', loc()); }
   / v:DEC  { return ast.mkLiteral(v, 'd', loc()); }
+
+SQIDENTIFIER "identifier" 
+  = head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
+  / '::' head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }

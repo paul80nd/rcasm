@@ -19,26 +19,35 @@ export interface Label extends Node {
 }
 
 export interface Literal extends Node {
-   type: 'literal',
-   value: number,
-   ot: string
- }
+  type: 'literal',
+  value: number,
+  ot: string
+}
 
 export interface Ident extends Node {
   type: 'ident';
   name: string;
 }
 
+export interface ScopeQualifiedIdent extends Node {
+  type: 'qualified-ident';
+  path: string[];
+  absolute: boolean;
+}
+
 export function mkLiteral(value: number, ot: string, loc: SourceLoc): Literal {
   return { type: 'literal', value, ot, loc };
- }
+}
 
-export function mkIdent(name: string, loc: SourceLoc): Ident {
-  return { type: 'ident', name, loc };
+export function mkScopeQualifiedIdent(path: string[], absolute: boolean, loc: SourceLoc): ScopeQualifiedIdent {
+  return { type: 'qualified-ident', path, absolute, loc };
 }
 
 export type Operand =
-  Ident | Literal
+  Ident | Literal | ScopeQualifiedIdent
+
+export type Expr =
+  Ident | ScopeQualifiedIdent
 
 export type Stmt =
   StmtInsn
