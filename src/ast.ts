@@ -46,8 +46,8 @@ export type Stmt =
 export interface StmtInsn extends Node {
   type: 'insn';
   mnemonic: string;
-  op1: Operand | null;
-  op2: Operand | null;
+  p1: Operand | null;
+  p2: Operand | null;
 }
 
 export interface AsmLine extends Node {
@@ -59,8 +59,8 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
   return { name, loc };
 }
 
-export function mkInsn(mnemonic: string, op1: Operand | null, op2: Operand | null, loc: SourceLoc): StmtInsn {
-  return { type: 'insn', mnemonic, op1, op2, loc }
+export function mkInsn(mnemonic: string, p1: Operand | null, p2: Operand | null, loc: SourceLoc): StmtInsn {
+  return { type: 'insn', mnemonic, p1, p2, loc }
 }
 
 export function mkAsmLine(label: Label | null, stmt: Stmt | null, loc: SourceLoc): AsmLine {

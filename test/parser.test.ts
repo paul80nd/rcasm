@@ -29,12 +29,12 @@ export function assertInstruction(code: string, mnemonic: string, op1: number | 
   assert.equal(result.length, 1);
   assert.equal(result[0].stmt?.mnemonic, mnemonic);
   if (op1 !== null) {
-    let op = result[0].stmt?.op1;
+    let op = result[0].stmt?.p1;
     if (op?.type === 'ident') assert.equal(op.name, op1);
     if (op?.type === 'literal') assert.equal(op.value, op1);
   }
   if (op2 !== null) {
-    let op = result[0].stmt?.op2;
+    let op = result[0].stmt?.p2;
     if (op?.type === 'ident') assert.equal(op.name, op2);
     if (op?.type === 'literal') assert.equal(op.value, op2);
   }
