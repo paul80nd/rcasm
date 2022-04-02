@@ -90,6 +90,23 @@ suite('rcasm - Compiler', () => {
     assertProgram('opc 11111111b \n opc 10101100b \n opc 01010010b', [0, 0, 0xFF, 0xAC, 0x52]);
   });
 
+  test('ldi mis-ops', function () {
+    assertHasError('ldi', '1:1: error: Two parameters required');
+    assertHasError('ldi 56,0', '1:5: error: Register required');
+    assertHasError('ldi a,g', '1:7: error: Literal required');
+    assertHasError('ldi g,3', '1:5: error: Invalid register (must be one of [a,b,m,j])');
+    assertHasError('ldi a,16', '1:7: error: Literal out of range (must be between -16 and 15)');
+    assertHasError('ldi a,-17', '1:7: error: Literal out of range (must be between -16 and 15)');
+  });
+
+  test('ldi ops', function () {
+    assertProgram('ldi a,0 \n ldi a,5 \n ldi a,10 \n ldi a,15', [0, 0, 0x40, 0x45, 0x4A, 0x4F]);
+    assertProgram('ldi b,0 \n ldi b,5 \n ldi b,10 \n ldi b,15', [0, 0, 0x60, 0x65, 0x6A, 0x6F]);
+    // TODO: Test negative
+    // TODO: Test 16-bit ldi
+  });
+
+
   test('full program', function () {
     const source = [
       ';*****************************************************',
@@ -105,6 +122,10 @@ suite('rcasm - Compiler', () => {
       'loop:   mov c,b     ; Calculate C = B, B = A then add',
       '        mov b,a',
       '        add',
+      '',
+      'done:   bcs done    ; infinite loop if overflowed',
+      '',
+      '        jmp loop    ; otherwise have another go'
     ].join('\n');
 
     let result = asm.assemble(source);

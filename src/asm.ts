@@ -1128,6 +1128,34 @@ class Assembler {
     this.emit(opcode);
   }
 
+  assembleSetInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
+    // Form: xxx dest,val OR xxx dest,label
+    if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
+      this.addError(`Two parameters required`, stmt.loc);
+      return;
+    }
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // First paramter
+    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    if (tgt == undefined) return;
+    opcode |= opc.p1.op(tgt);
+
+    // Second parameter
+    if (tgt <= 0x10) {
+      // 8 bit ldi
+      let val = this.checkLiteral(stmt.p2, -16, 15);
+      if (val == undefined) return;
+      opcode |= opc.p2.op(val);
+    } else {
+      // 16 bit ldi
+    }
+
+    this.emit(opcode);
+  }
+
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
     if (given.type != 'ident') {
       this.addError(`Register required`, given.loc);
@@ -1685,6 +1713,9 @@ class Assembler {
           break;
         case opc.ParamForm.LitOpc:
           this.assembleLitOpc(op, stmt);
+          break;
+        case opc.ParamForm.SetTgtVal:
+          this.assembleSetInstr(op, stmt);
           break;
         //                 if (this.checkBranch(insn.abs, op[11])) {
         //                     return;
