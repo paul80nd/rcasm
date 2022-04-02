@@ -366,17 +366,17 @@ class Scopes {
 //     };
 // }
 
-// // Format "typeof foo" for error messages.  Want 'object' type
-// // to return 'array' if it's an Array instance.
-// function formatTypename(v: any): string {
-//     const typeName = typeof v;
-//     if (typeName === 'object') {
-//         if (v instanceof Array) {
-//             return 'array';
-//         }
-//     }
-//     return typeName;
-// }
+// Format "typeof foo" for error messages.  Want 'object' type
+// to return 'array' if it's an Array instance.
+function formatTypename(v: any): string {
+  const typeName = typeof v;
+  if (typeName === 'object') {
+    if (v instanceof Array) {
+      return 'array';
+    }
+  }
+  return typeName;
+}
 
 function formatSymbolPath(p: ast.ScopeQualifiedIdent): string {
   return `${p.absolute ? '::' : ''}${p.path.join('::')}`;
@@ -1198,27 +1198,24 @@ class Assembler {
     }
 
     const ev = this.evalExpr(stmt.p1);
+    if (anyErrors(ev)) {
+      return;
+    }
+    if (typeof ev.value !== 'number') {
+      this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, stmt.p1.loc)
+      return;
+    }
+    const { value: addr } = ev;
+    //         const addrDelta = addr - this.getPC() - 2;
+    this.emit(opc.op);
+    //         if (addrDelta > 0x7f || addrDelta < -128) {
+    //             // Defer reporting out of 8-bit range branch targets to the end of the
+    //             // current pass (or report nothing if we need another pass.)
+    //             this.outOfRangeBranches.push({ loc: param.loc, offset: addrDelta });
+    //         }
+    this.emit(addr & 0xff);
+    //         return true;
   }
-
-  //         const ev = this.evalExpr(param);
-  //         if (anyErrors(ev)) {
-  //             return true;
-  //         }
-  //         if (typeof ev.value !== 'number') {
-  //             this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, param.loc)
-  //             return true;
-  //         }
-  //         const { value: addr } = ev;
-  //         const addrDelta = addr - this.getPC() - 2;
-  //         this.emit(opcode);
-  //         if (addrDelta > 0x7f || addrDelta < -128) {
-  //             // Defer reporting out of 8-bit range branch targets to the end of the
-  //             // current pass (or report nothing if we need another pass.)
-  //             this.outOfRangeBranches.push({ loc: param.loc, offset: addrDelta });
-  //         }
-  //         this.emit(addrDelta & 0xff);
-  //         return true;
-  //     }
 
   //     handleSetPC (valueExpr: ast.Expr): void {
   //         const ev  = this.evalExprToInt(valueExpr, 'pc');
