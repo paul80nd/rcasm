@@ -48,24 +48,24 @@ export interface Diagnostic extends Error {
   formatted: string;
 };
 
-// interface LabelAddr {
-//     addr: number,
-//     loc: SourceLoc
-// }
+interface LabelAddr {
+  addr: number,
+  loc: SourceLoc
+}
 
-// interface EvalValue<T> {
-//     value: T;
-//     errors: boolean;
-//     completeFirstPass: boolean; // fully evaluated in first pass?
-// }
+interface EvalValue<T> {
+  value: T;
+  errors: boolean;
+  completeFirstPass: boolean; // fully evaluated in first pass?
+}
 
 // function mkErrorValue<T>(v: T): EvalValue<T> {
 //     return { value: v, errors: true, completeFirstPass: false };
 // }
 
-// function mkEvalValue<T>(v: T, complete: boolean): EvalValue<T> {
-//     return { value: v, errors: false, completeFirstPass: complete };
-// }
+function mkEvalValue<T>(v: T, complete: boolean): EvalValue<T> {
+  return { value: v, errors: false, completeFirstPass: complete };
+}
 
 // function anyErrors(...args: (EvalValue<any> | undefined)[]) {
 //     return args.some(e => e !== undefined && e.errors);
@@ -78,86 +78,86 @@ export interface Diagnostic extends Error {
 //     return args.every(e => e !== undefined && e.completeFirstPass);
 // }
 
-// class NamedScope<T> {
-//     syms: Map<string, T & {seen: number}> = new Map();
-//     readonly parent: NamedScope<T> | null = null;
-//     readonly name: string;
-//     children: Map<string, NamedScope<T>> = new Map();
+class NamedScope<T> {
+  syms: Map<string, T & { seen: number }> = new Map();
+  readonly parent: NamedScope<T> | null = null;
+  readonly name: string;
+  children: Map<string, NamedScope<T>> = new Map();
 
-//     constructor (parent: NamedScope<T> | null, name: string) {
-//         this.parent = parent;
-//         this.name = name;
-//     }
+  constructor(parent: NamedScope<T> | null, name: string) {
+    this.parent = parent;
+    this.name = name;
+  }
 
-//     newScope(name: string, parent: NamedScope<T>): NamedScope<T> {
-//         const s = this.children.get(name);
-//         if (s !== undefined) {
-//             return s;
-//         }
-//         const newScope = new NamedScope<T>(parent, name);
-//         this.children.set(name, newScope);
-//         return newScope;
-//     }
+  //     newScope(name: string, parent: NamedScope<T>): NamedScope<T> {
+  //         const s = this.children.get(name);
+  //         if (s !== undefined) {
+  //             return s;
+  //         }
+  //         const newScope = new NamedScope<T>(parent, name);
+  //         this.children.set(name, newScope);
+  //         return newScope;
+  //     }
 
-//     // Find symbol from current and all parent scopes
-//     findSymbol(name: string): T & {seen: number} | undefined {
-//         for (let cur: NamedScope<T>|null = this; cur !== null; cur = cur.parent) {
-//             const n = cur.syms.get(name);
-//             if (n !== undefined) {
-//                 return n;
-//             }
-//         }
-//         return undefined;
-//     }
+  //     // Find symbol from current and all parent scopes
+  //     findSymbol(name: string): T & {seen: number} | undefined {
+  //         for (let cur: NamedScope<T>|null = this; cur !== null; cur = cur.parent) {
+  //             const n = cur.syms.get(name);
+  //             if (n !== undefined) {
+  //                 return n;
+  //             }
+  //         }
+  //         return undefined;
+  //     }
 
-//     // Find relative label::path::sym style references from the symbol table
-//     findSymbolPath(path: string[]): T & {seen: number} | undefined {
-//         if (path.length == 1) {
-//             return this.findSymbol(path[0]);
-//         }
+  //     // Find relative label::path::sym style references from the symbol table
+  //     findSymbolPath(path: string[]): T & {seen: number} | undefined {
+  //         if (path.length == 1) {
+  //             return this.findSymbol(path[0]);
+  //         }
 
-//         // Go up the scope tree until we find the start of
-//         // the relative path.
-//         let tab: NamedScope<T> | null | undefined = this;
-//         while (tab.children.get(path[0]) == undefined) {
-//             tab = tab.parent;
-//             if (tab == null) {
-//                 return undefined;
-//             }
-//         }
+  //         // Go up the scope tree until we find the start of
+  //         // the relative path.
+  //         let tab: NamedScope<T> | null | undefined = this;
+  //         while (tab.children.get(path[0]) == undefined) {
+  //             tab = tab.parent;
+  //             if (tab == null) {
+  //                 return undefined;
+  //             }
+  //         }
 
-//         // Go down the tree to match the path to a symbol
-//         for (let i = 0; i < path.length-1; i++) {
-//             tab = tab.children.get(path[i]);
-//             if (tab == undefined) {
-//                 return undefined;
-//             }
-//         }
-//         return tab.syms.get(path[path.length-1]);
-//     }
+  //         // Go down the tree to match the path to a symbol
+  //         for (let i = 0; i < path.length-1; i++) {
+  //             tab = tab.children.get(path[i]);
+  //             if (tab == undefined) {
+  //                 return undefined;
+  //             }
+  //         }
+  //         return tab.syms.get(path[path.length-1]);
+  //     }
 
-//     addSymbol(name: string, val: T, pass: number): void {
-//         this.syms.set(name, { ...val, seen: pass });
-//     }
+  addSymbol(name: string, val: T, pass: number): void {
+    this.syms.set(name, { ...val, seen: pass });
+  }
 
-//     updateSymbol(name: string, val: T, pass: number) {
-//         for (let cur: NamedScope<T>|null = this; cur !== null; cur = cur.parent) {
-//             const v = cur.syms.get(name);
-//             if (v !== undefined) {
-//                 cur.syms.set(name, { ...val, seen: pass });
-//                 return;
-//             }
-//         }
-//     }
-// }
+  updateSymbol(name: string, val: T, pass: number) {
+    for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
+      const v = cur.syms.get(name);
+      if (v !== undefined) {
+        cur.syms.set(name, { ...val, seen: pass });
+        return;
+      }
+    }
+  }
+}
 
-// type SymEntry  = SymLabel | SymVar | SymMacro | SymSegment;
+type SymEntry = SymLabel /*| SymVar | SymMacro | SymSegment*/;
 
-// interface SymLabel {
-//     type: 'label';
-//     segment: Segment;
-//     data: EvalValue<LabelAddr>;
-// }
+interface SymLabel {
+  type: 'label';
+  segment: Segment;
+  data: EvalValue<LabelAddr>;
+}
 
 // interface SymVar {
 //     type: 'var';
@@ -175,182 +175,182 @@ interface SymSegment {
 //     declaredIn: NamedScope<SymEntry>;
 // }
 
-// class Scopes {
-//     passCount: number = 0;
-//     root: NamedScope<SymEntry> = new NamedScope<SymEntry>(null, '');
-//     curSymtab = this.root;
-//     private anonScopeCount = 0;
+class Scopes {
+  passCount: number = 0;
+  root: NamedScope<SymEntry> = new NamedScope<SymEntry>(null, '');
+  curSymtab = this.root;
+  //     private anonScopeCount = 0;
 
-//     startPass(pass: number): void {
-//         this.curSymtab = this.root;
-//         this.anonScopeCount = 0;
-//         this.passCount = pass;
-//     }
+  //     startPass(pass: number): void {
+  //         this.curSymtab = this.root;
+  //         this.anonScopeCount = 0;
+  //         this.passCount = pass;
+  //     }
 
-//     withAnonScope(body: () => void, parent?: NamedScope<SymEntry>) {
-//         const anonLabel = `__anon_scope_${this.anonScopeCount}`;
-//         this.anonScopeCount++;
-//         this.withLabelScope(anonLabel, body, parent);
-//     }
+  //     withAnonScope(body: () => void, parent?: NamedScope<SymEntry>) {
+  //         const anonLabel = `__anon_scope_${this.anonScopeCount}`;
+  //         this.anonScopeCount++;
+  //         this.withLabelScope(anonLabel, body, parent);
+  //     }
 
-//     withLabelScope(name: string, body: () => void, parent?: NamedScope<SymEntry>) {
-//         const curSym = this.curSymtab;
-//         this.curSymtab = this.curSymtab.newScope(name, parent || curSym);
-//         body();
-//         this.curSymtab = curSym;
-//     }
+  //     withLabelScope(name: string, body: () => void, parent?: NamedScope<SymEntry>) {
+  //         const curSym = this.curSymtab;
+  //         this.curSymtab = this.curSymtab.newScope(name, parent || curSym);
+  //         body();
+  //         this.curSymtab = curSym;
+  //     }
 
-//     findPath(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
-//         if (absolute) {
-//             return this.root.findSymbolPath(path);
-//         }
-//         return this.curSymtab.findSymbolPath(path);
-//     }
+  //     findPath(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
+  //         if (absolute) {
+  //             return this.root.findSymbolPath(path);
+  //         }
+  //         return this.curSymtab.findSymbolPath(path);
+  //     }
 
-//     findQualifiedSym(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
-//         return this.findPath(path, absolute);
-//     }
+  //     findQualifiedSym(path: string[], absolute: boolean): SymEntry & {seen: number} | undefined {
+  //         return this.findPath(path, absolute);
+  //     }
 
-//     symbolSeen(name: string): boolean {
-//         const n = this.curSymtab.syms.get(name);
-//         if (n !== undefined) {
-//             return n.seen == this.passCount;
-//         }
-//         return false;
-//     }
+  symbolSeen(name: string): boolean {
+    const n = this.curSymtab.syms.get(name);
+    if (n !== undefined) {
+      return n.seen == this.passCount;
+    }
+    return false;
+  }
 
-//     declareLabelSymbol(symbol: ast.Label, codePC: number, segment: Segment): boolean {
-//         const { name, loc } = symbol;
+  declareLabelSymbol(symbol: ast.Label, codePC: number, segment: Segment): boolean {
+    const { name, loc } = symbol;
 
-//         // As we allow name shadowing, we must look up the name
-//         // only from the current scope.  If we lookup parent
-//         // scopes for label declarations, we end up
-//         // mutating some unrelated, but same-named label names.
-//         const prevLabel = this.curSymtab.syms.get(name);
-//         if (prevLabel === undefined) {
-//             const lblsym: SymLabel = {
-//                 type: 'label',
-//                 segment,
-//                 data: mkEvalValue({ addr: codePC, loc }, false)
-//             };
-//             this.curSymtab.addSymbol(name, lblsym, this.passCount);
-//             return false;
-//         }
-//         if (prevLabel.type !== 'label') {
-//             throw new Error('ICE: declareLabelSymbol should be called only on labels');
-//         }
-//         const lbl = prevLabel;
-//         // If label address has changed change, need one more pass
-//         if (lbl.data.value.addr !== codePC) {
-//             const newSymValue: SymLabel = {
-//                 type: 'label',
-//                 segment,
-//                 data: {
-//                     ...prevLabel.data,
-//                     value: {
-//                         ...prevLabel.data.value,
-//                         addr: codePC
-//                     }
-//                 }
-//             }
-//             this.curSymtab.updateSymbol(name, newSymValue, this.passCount);
-//             return true;
-//         }
-//         // Update to mark the label as "seen" in this pass
-//         this.curSymtab.updateSymbol(name, prevLabel, this.passCount);
-//         return false;
-//     }
+    // As we allow name shadowing, we must look up the name
+    // only from the current scope.  If we lookup parent
+    // scopes for label declarations, we end up
+    // mutating some unrelated, but same-named label names.
+    const prevLabel = this.curSymtab.syms.get(name);
+    if (prevLabel === undefined) {
+      const lblsym: SymLabel = {
+        type: 'label',
+        segment,
+        data: mkEvalValue({ addr: codePC, loc }, false)
+      };
+      this.curSymtab.addSymbol(name, lblsym, this.passCount);
+      return false;
+    }
+    if (prevLabel.type !== 'label') {
+      throw new Error('ICE: declareLabelSymbol should be called only on labels');
+    }
+    const lbl = prevLabel;
+    // If label address has changed change, need one more pass
+    if (lbl.data.value.addr !== codePC) {
+      const newSymValue: SymLabel = {
+        type: 'label',
+        segment,
+        data: {
+          ...prevLabel.data,
+          value: {
+            ...prevLabel.data.value,
+            addr: codePC
+          }
+        }
+      }
+      this.curSymtab.updateSymbol(name, newSymValue, this.passCount);
+      return true;
+    }
+    // Update to mark the label as "seen" in this pass
+    this.curSymtab.updateSymbol(name, prevLabel, this.passCount);
+    return false;
+  }
 
-//     declareVar(name: string, value: EvalValue<any>): void {
-//         this.curSymtab.addSymbol(name, {
-//             type: 'var',
-//             data: value
-//         }, this.passCount)
-//     }
+  //     declareVar(name: string, value: EvalValue<any>): void {
+  //         this.curSymtab.addSymbol(name, {
+  //             type: 'var',
+  //             data: value
+  //         }, this.passCount)
+  //     }
 
-//     updateVar(symbolName: string, val: EvalValue<any>) {
-//         const newVar: SymVar = {
-//             type: 'var',
-//             data: val
-//         };
-//         this.curSymtab.updateSymbol(symbolName, newVar, this.passCount);
-//     }
+  //     updateVar(symbolName: string, val: EvalValue<any>) {
+  //         const newVar: SymVar = {
+  //             type: 'var',
+  //             data: val
+  //         };
+  //         this.curSymtab.updateSymbol(symbolName, newVar, this.passCount);
+  //     }
 
-//     declareSegment(name: string, seg: Segment): void {
-//         this.curSymtab.addSymbol(name, {
-//             type: 'segment',
-//             data: seg
-//         }, this.passCount)
-//     }
+  //     declareSegment(name: string, seg: Segment): void {
+  //         this.curSymtab.addSymbol(name, {
+  //             type: 'segment',
+  //             data: seg
+  //         }, this.passCount)
+  //     }
 
-//     findMacro(path: string[], absolute: boolean): SymMacro & { seen: number } | undefined {
-//         const sym = this.findPath(path, absolute);
-//         if (sym !== undefined && sym.type == 'macro') {
-//             return sym;
-//         }
-//         return undefined;
-//     }
+  //     findMacro(path: string[], absolute: boolean): SymMacro & { seen: number } | undefined {
+  //         const sym = this.findPath(path, absolute);
+  //         if (sym !== undefined && sym.type == 'macro') {
+  //             return sym;
+  //         }
+  //         return undefined;
+  //     }
 
-//     declareMacro(name: string, value: ast.StmtMacro): void {
-//         this.curSymtab.addSymbol(name, {
-//             type: 'macro',
-//             macro: value,
-//             declaredIn: this.curSymtab
-//         }, this.passCount)
-//     }
+  //     declareMacro(name: string, value: ast.StmtMacro): void {
+  //         this.curSymtab.addSymbol(name, {
+  //             type: 'macro',
+  //             macro: value,
+  //             declaredIn: this.curSymtab
+  //         }, this.passCount)
+  //     }
 
-//     dumpLabels(codePC: number, segments: [string, Segment][]): {name: string, addr: number, size: number, segmentName: string}[] {
-//         const segmentToName: { [k: number]: string } = {};
-//         for (const [n,s] of segments) {
-//             segmentToName[s.id] = n;
-//         }
-//         type StackEntry = {path: string[], sym: NamedScope<SymEntry>};
-//         const stack: StackEntry[] = [];
-//         const pushScope = (path: string[]|undefined, sym: NamedScope<SymEntry>) => {
-//             if (path !== undefined) {
-//                 const newPath = [...path, sym.name];
-//                 stack.push({ path: newPath, sym });
-//             } else {
-//                 stack.push({ path: [], sym });
-//             }
-//         }
-//         pushScope(undefined, this.root);
+  dumpLabels(codePC: number, segments: [string, Segment][]): { name: string, addr: number, size: number, segmentName: string }[] {
+    const segmentToName: { [k: number]: string } = {};
+    for (const [n, s] of segments) {
+      segmentToName[s.id] = n;
+    }
+    type StackEntry = { path: string[], sym: NamedScope<SymEntry> };
+    const stack: StackEntry[] = [];
+    const pushScope = (path: string[] | undefined, sym: NamedScope<SymEntry>) => {
+      if (path !== undefined) {
+        const newPath = [...path, sym.name];
+        stack.push({ path: newPath, sym });
+      } else {
+        stack.push({ path: [], sym });
+      }
+    }
+    pushScope(undefined, this.root);
 
-//         const labels = [];
-//         while (stack.length > 0) {
-//             const s = stack.pop()!;
-//             for (let [k,lbl] of s.sym.syms) {
-//                 if (lbl.type == 'label') {
-//                     labels.push({
-//                         path: [...s.path, k],
-//                         addr: lbl.data.value.addr,
-//                         size: 0,
-//                         segmentName: segmentToName[lbl.segment.id]
-//                     });
-//                 }
-//             }
-//             for (let [k, sym] of s.sym.children) {
-//                 pushScope(s.path, sym);
-//             }
-//         }
+    const labels = [];
+    while (stack.length > 0) {
+      const s = stack.pop()!;
+      for (let [k, lbl] of s.sym.syms) {
+        if (lbl.type == 'label') {
+          labels.push({
+            path: [...s.path, k],
+            addr: lbl.data.value.addr,
+            size: 0,
+            segmentName: segmentToName[lbl.segment.id]
+          });
+        }
+      }
+      for (let [k, sym] of s.sym.children) {
+        pushScope(s.path, sym);
+      }
+    }
 
-//         const sortedLabels = labels.sort((a, b) => {
-//             return a.addr - b.addr;
-//         })
+    const sortedLabels = labels.sort((a, b) => {
+      return a.addr - b.addr;
+    })
 
-//         const numLabels = sortedLabels.length;
-//         if (numLabels > 0) {
-//             for (let i = 1; i < numLabels; i++) {
-//                 sortedLabels[i-1].size = sortedLabels[i].addr - sortedLabels[i-1].addr;
-//             }
-//             const last = sortedLabels[numLabels-1];
-//             last.size = codePC - last.addr;
-//         }
-//         return sortedLabels.map(({ path, addr, size, segmentName }) => {
-//             return { name: path.join('::'), addr, size, segmentName };
-//         });
-//     }
-// }
+    const numLabels = sortedLabels.length;
+    if (numLabels > 0) {
+      for (let i = 1; i < numLabels; i++) {
+        sortedLabels[i - 1].size = sortedLabels[i].addr - sortedLabels[i - 1].addr;
+      }
+      const last = sortedLabels[numLabels - 1];
+      last.size = codePC - last.addr;
+    }
+    return sortedLabels.map(({ path, addr, size, segmentName }) => {
+      return { name: path.join('::'), addr, size, segmentName };
+    });
+  }
+}
 
 // function isTrueVal(cond: number | boolean): boolean {
 //     return (cond === true || cond != 0);
@@ -430,7 +430,7 @@ class Assembler {
   private curSegment: Segment = new Segment(0, 0, false, 0); // invalid, setup at start of pass
   //     private pass = 0;
   //     needPass = false;
-  //     private scopes = new Scopes();
+  private scopes = new Scopes();
   private segments: [string, Segment][] = [];
   private errorList: Error[] = [];
   private warningList: Error[] = [];
@@ -630,9 +630,9 @@ class Assembler {
     return segment;
   }
 
-  //     getPC(): number {
-  //         return this.curSegment.currentPC();
-  //     }
+  getPC(): number {
+    return this.curSegment.currentPC();
+  }
 
   //     emitBasicHeader () {
   //         this.emit(0x0c);
@@ -1637,16 +1637,16 @@ class Assembler {
     return assemble(lst);
   }
 
-  //     checkAndDeclareLabel(label: ast.Label) {
-  //         if (this.scopes.symbolSeen(label.name)) {
-  //             this.addError(`Symbol '${label.name}' already defined`, label.loc);
-  //         } else {
-  //             const labelChanged = this.scopes.declareLabelSymbol(label, this.getPC(), this.curSegment);
-  //             if (labelChanged) {
-  //                 this.needPass = true;
-  //             }
-  //         }
-  //     }
+  checkAndDeclareLabel(label: ast.Label) {
+    if (this.scopes.symbolSeen(label.name)) {
+      this.addError(`Symbol '${label.name}' already defined`, label.loc);
+    } else {
+      const labelChanged = this.scopes.declareLabelSymbol(label, this.getPC(), this.curSegment);
+      // if (labelChanged) {
+      // this.needPass = true;
+      // }
+    }
+  }
 
   assembleLine(line: ast.AsmLine): void {
     this.lineLoc = line.loc;
@@ -1655,20 +1655,9 @@ class Assembler {
       return;
     }
 
-    //         if (line.label !== null) {
-    //             this.checkAndDeclareLabel(line.label);
-    //         }
-
-    //         const scopedStmts = line.scopedStmts;
-    //         if (scopedStmts != null) {
-    //             if (!line.label) {
-    //                 throw new Error('ICE: line.label cannot be undefined');
-    //             }
-    //             this.withLabelScope(line.label.name, () => {
-    //                 this.assembleLines(scopedStmts);
-    //             });
-    //             return;
-    //         }
+    if (line.label !== null) {
+      this.checkAndDeclareLabel(line.label);
+    }
 
     if (line.stmt === null) {
       return;
@@ -1812,9 +1801,9 @@ class Assembler {
   //         addPlugin('Math', math);
   //     }
 
-  //     dumpLabels() {
-  //         return this.scopes.dumpLabels(this.getPC(), this.segments);
-  //     }
+  dumpLabels() {
+    return this.scopes.dumpLabels(this.getPC(), this.segments);
+  }
 
   collectSegmentInfo() {
     return collectSegmentInfo(this.segments);
@@ -1864,7 +1853,7 @@ export function assemble(source: string) {
     prg: asm.prg(),
     errors: asm.errors(),
     warnings: asm.warnings(),
-    //         labels: asm.dumpLabels(),
+    labels: asm.dumpLabels(),
     segments: asm.collectSegmentInfo(),
     //         debugInfo: asm.debugInfo
   }
