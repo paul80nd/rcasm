@@ -76,6 +76,14 @@ suite('rcasm - Compiler', () => {
     assertProgram('mov d,a \n mov d,b \n mov d,c \n mov d,d', [0, 0, 0x18, 0x19, 0x1A, 0x1B]);
   });
 
+  test('opc mis-ops', function () {
+    assertHasError('opc', '1:1: error: Parameter required');
+    assertHasError('opc a', '1:5: error: Literal required');
+    assertHasError('opc 111111111b', '1:5: error: Literal out of range (must be between 0 and 11111111)');
+    assertHasError('opc 1FFh', '1:5: error: Literal out of range (must be between 0 and ff)');
+    assertHasError('opc 256', '1:5: error: Literal out of range (must be between 0 and 255)');
+  });
+
   test('full program', function () {
     const source = [
       ';*****************************************************',

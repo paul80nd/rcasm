@@ -1109,6 +1109,23 @@ class Assembler {
     this.emit(opcode);
   }
 
+  assembleLitOpc(opc: opc.OpCode, stmt: ast.StmtInsn) {
+    // Form: xxx opcode
+    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // First paramter
+    if (!stmt.p1 || !opc.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
+    let val = this.checkLiteral(stmt.p1, 0x00, 0xFF);
+    if (val == undefined) return;
+    opcode |= opc.p1.op(val);
+  }
+
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
     if (given.type != 'ident') {
       this.addError(`Register required`, given.loc);
@@ -1118,6 +1135,22 @@ class Assembler {
         this.addError(`Invalid register (must be one of [${Object.keys(available.cs!).join(',')}])`, given.loc);
       }
       return reg;
+    }
+    return undefined;
+  }
+
+  checkLiteral(given: ast.Operand, min: number, max: number): number | undefined {
+    if (given.type != 'literal') {
+      this.addError('Literal required', given.loc);
+    } else {
+      let val = given.value;
+      if (val < min || val > max) {
+        let dmin = (given.ot === 'b') ? min.toString(2) : (given.ot === 'h') ? min.toString(16) : min.toString();
+        let dmax = (given.ot === 'b') ? max.toString(2) : (given.ot === 'h') ? max.toString(16) : max.toString();
+        this.addError(`Literal out of range (must be between ${dmin} and ${dmax})`, given.loc);
+      } else {
+        return val;
+      }
     }
     return undefined;
   }
@@ -1647,6 +1680,9 @@ class Assembler {
           break;
         case opc.ParamForm.MovDstSrc:
           this.assembleMovInstr(op, stmt);
+          break;
+        case opc.ParamForm.LitOpc:
+          this.assembleLitOpc(op, stmt);
           break;
         //                 if (this.checkBranch(insn.abs, op[11])) {
         //                     return;
