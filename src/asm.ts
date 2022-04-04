@@ -1213,7 +1213,8 @@ class Assembler {
     //             // current pass (or report nothing if we need another pass.)
     //             this.outOfRangeBranches.push({ loc: param.loc, offset: addrDelta });
     //         }
-    this.emit(addr & 0xff);
+    this.emit((addr & 0xff00) >> 8);
+    this.emit(addr & 0x00ff);
     //         return true;
   }
 
