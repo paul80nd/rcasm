@@ -419,7 +419,7 @@ class Assembler {
 
   assembleAluInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx [dest]
-    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
     let opcode = opc.op;
@@ -427,7 +427,7 @@ class Assembler {
     // Optional first parameter
     if (stmt.p1 && opc.p1) {
       let tgt = this.checkRegister(stmt.p1, opc.p1);
-      if (tgt === undefined) return;
+      if (tgt === undefined) { return; }
       opcode |= opc.p1.op(tgt);
     }
 
@@ -436,7 +436,7 @@ class Assembler {
 
   assembleClrInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx dest
-    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
     let opcode = opc.op;
@@ -447,7 +447,7 @@ class Assembler {
       return;
     }
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) return;
+    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     this.emit(opcode);
@@ -466,12 +466,12 @@ class Assembler {
 
     // First paramter
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) return;
+    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
     let src = this.checkRegister(stmt.p2, opc.p2);
-    if (src === undefined) return;
+    if (src === undefined) { return; }
     opcode |= opc.p2.op(src);
 
     this.emit(opcode);
@@ -479,7 +479,7 @@ class Assembler {
 
   assembleLitOpc(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx opcode
-    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
     let opcode = opc.op;
@@ -490,7 +490,7 @@ class Assembler {
       return;
     }
     let val = this.checkLiteral(stmt.p1, 0x00, 0xFF);
-    if (val === undefined) return;
+    if (val === undefined) { return; }
     opcode |= opc.p1.op(val);
 
     this.emit(opcode);
@@ -508,14 +508,14 @@ class Assembler {
 
     // First paramter
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) return;
+    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
     if (tgt <= 0x10) {
       // 8 bit ldi
       let val = this.checkLiteral(stmt.p2, -16, 15);
-      if (val === undefined) return;
+      if (val === undefined) { return; }
       opcode |= opc.p2.op(val);
     } else {
       // 16 bit ldi
@@ -555,7 +555,7 @@ class Assembler {
 
   assembleBranch(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx label
-    if (stmt.p2) this.addWarning(`Parameter not required`, stmt.p2.loc);
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
     if (!stmt.p1) {
       this.addError(`Parameter required`, stmt.loc);
       return;
