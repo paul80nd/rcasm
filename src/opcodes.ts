@@ -75,3 +75,38 @@ export const opcodes: { [index: string]: OpCode } = {
   // Literal OpCode
   'opc': { op: 0x00 | 0x00, pf: ParamForm.LitOpc, p1: { cs: null, op: p => p }, p2: null }
 };
+
+export const opcodes_reverse_map: (string | null)[][] = [
+  // Hi/Lo 0 1 2 3 4 5 6 7 8 9 A B C D E F
+  /* 0 */ ['clr a',     'mov a,b',   'mov a,c',   'mov a,d',    null,        null,        null,        null,      'mov b,a',  'clr b',    'mov b,c',  'mov b,d',   null,       null,       null,       null],
+  /* 1 */ ['mov c,a',   'mov c,b',   'clr c',     'mov c,d',    null,        null,        null,        null,      'mov d,a',  'mov d,b',  'mov d,c',  'clr d',     null,       null,       null,       null],
+  /* 2 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* 3 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* 4 */ ['ldi a,0',   'ldi a,1',   'ldi a,2',   'ldi a,3',   'ldi a,4',   'ldi a,5',   'ldi a,6',   'ldi a,7',  'ldi a,8',  'ldi a,9',  'ldi a,10', 'ldi a,11', 'ldi a,12', 'ldi a,13', 'ldi a,14', 'ldi a,15'],
+  /* 5 */ ['ldi a,-16', 'ldi a,-15', 'ldi a,-14', 'ldi a,-13', 'ldi a,-12', 'ldi a,-11', 'ldi a,-10', 'ldi a,-9', 'ldi a,-8', 'ldi a,-7', 'ldi a,-6', 'ldi a,-5', 'ldi a,-4', 'ldi a,-3', 'ldi a,-2', 'ldi a,-1'],
+  /* 6 */ ['ldi b,0',   'ldi b,1',   'ldi b,2',   'ldi b,3',   'ldi b,4',   'ldi b,5',   'ldi b,6',   'ldi b,7',  'ldi b,8',  'ldi b,9',  'ldi b,10', 'ldi b,11', 'ldi b,12', 'ldi b,13', 'ldi b,14', 'ldi b,15'],
+  /* 7 */ ['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4', 'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
+  /* 8 */ ['clr a',     'add',       'inc',       'and',       'orr',       'eor',       'not',       'rol',      'clr d',    'add d',    'inc d',    'and d',    'orr d',    'eor d',    'not d',    'rol d'],
+  /* 9 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* A */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* B */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* C */ ['ldi m,',     null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* D */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
+  /* E */ ['ldi j,',     null,       'bne',        null,       'beq',        null,       'jmp',       'jsr',      'bcs',       null,       null,       null,       null,       null,       null,       null],
+  /* F */ ['blt',       'jlt',        null,        null,       'ble',        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null]
+]
+
+export const opcodes_reverse_class = (opcode: number): { class: string, cycles: number } => {
+  switch (true) {
+    case (opcode & 0xC0) == 0x00: // MOV8 00dddsss
+      return { class: "MOV8", cycles: 1 };
+    case (opcode & 0xC0) == 0x04: // SETAB 01rvvvvv
+      return { class: "SETAB", cycles: 1 };
+    case (opcode & 0xF0) == 0x80: // ALU 1000rfff
+      return { class: "ALU", cycles: 1 };
+    case (opcode & 0xC0) == 0xC0: // GOTO 11dscznx
+      return { class: "GOTO", cycles: 3 };
+    default:
+      return { class: "MISC", cycles: 1 };
+  }
+}
