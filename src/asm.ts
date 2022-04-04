@@ -1,13 +1,13 @@
 // Heavily customised variant of https://github.com/nurpax/c64jasm/blob/master/src/asm.ts
 
-import * as opc from './opcodes'
+import * as opc from './opcodes';
 
-import { toHex16 } from './util'
-import * as ast from './ast'
-import { SourceLoc } from './ast'
+import { toHex16 } from './util';
+import * as ast from './ast';
+import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 
-var parser = require('./g_parser')
+var parser = require('./g_parser');
 
 interface Error {
   loc: SourceLoc,
@@ -181,7 +181,7 @@ class Scopes {
             addr: codePC
           }
         }
-      }
+      };
       this.curSymtab.updateSymbol(name, newSymValue, this.passCount);
       return true;
     }
@@ -204,7 +204,7 @@ class Scopes {
       } else {
         stack.push({ path: [], sym });
       }
-    }
+    };
     pushScope(undefined, this.root);
 
     const labels = [];
@@ -227,7 +227,7 @@ class Scopes {
 
     const sortedLabels = labels.sort((a, b) => {
       return a.addr - b.addr;
-    })
+    });
 
     const numLabels = sortedLabels.length;
     if (numLabels > 0) {
@@ -286,25 +286,25 @@ class Assembler {
     const set = new Set(diags.map(v => JSON.stringify(v)));
     return [...set].map((errJson) => {
       const { loc, msg } = JSON.parse(errJson) as Error;
-      let formatted = `<unknown>:1:1: ${errType}: ${msg}`
+      let formatted = `<unknown>:1:1: ${errType}: ${msg}`;
       if (loc) {
-        formatted = `${loc.start.line}:${loc.start.column}: ${errType}: ${msg}`
+        formatted = `${loc.start.line}:${loc.start.column}: ${errType}: ${msg}`;
       }
       return {
         loc,
         msg,
         formatted
-      }
-    })
+      };
+    });
   }
 
   errors = () => {
     return this.formatErrors(this.errorList, 'error');
-  }
+  };
 
   warnings = () => {
     return this.formatErrors(this.warningList, 'warning');
-  }
+  };
 
   addError(msg: string, loc: SourceLoc): void {
     this.errorList.push({ msg, loc });
@@ -352,7 +352,7 @@ class Assembler {
         errors: true,
         completeFirstPass,
         value
-      }
+      };
     }
     return res;
   }
@@ -368,14 +368,14 @@ class Assembler {
         return mkEvalValue(node.value, true);
       }
       case 'ident': {
-        throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser')
+        throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
       }
       case 'qualified-ident': {
         // Namespace qualified ident, like foo::bar::baz
         const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
         if (sym == undefined) {
           if (this.pass >= 1) {
-            this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc)
+            this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
             return mkErrorValue(0);
           }
           // Return a placeholder that should be resolved in the next pass
@@ -390,7 +390,7 @@ class Assembler {
               errors: sym.data.errors,
               value: sym.data.value.addr,
               completeFirstPass: sym.seen == this.pass
-            }
+            };
           //                     case 'var':
           //                         if (sym.seen < this.pass) {
           //                             this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
@@ -570,7 +570,7 @@ class Assembler {
       return;
     }
     if (typeof ev.value !== 'number') {
-      this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, stmt.p1.loc)
+      this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, stmt.p1.loc);
       return;
     }
     const { value: addr } = ev;
@@ -621,7 +621,7 @@ class Assembler {
       for (let i = 0; i < lines.length; i++) {
         this.assembleLine(lines[i]);
       }
-    }
+    };
 
     // Scan for the first real instruction line to skip
     // comments and empty lines at the start of a file.
@@ -713,7 +713,7 @@ class Assembler {
       if ('name' in err && err.name == 'SyntaxError') {
         this.addError(`Syntax error: ${err.message}`, {
           ...err.location
-        })
+        });
       } else if ('name' in err && err.name == 'semantic') {
         return;
       } else {
@@ -746,7 +746,7 @@ export function assemble(source: string) {
         segments: [],
         errors: asm.errors(),
         warnings: asm.warnings()
-      }
+      };
     }
 
     pass += 1;
@@ -758,5 +758,5 @@ export function assemble(source: string) {
     warnings: asm.warnings(),
     labels: asm.dumpLabels(),
     segments: asm.collectSegmentInfo()
-  }
+  };
 }

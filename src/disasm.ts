@@ -1,11 +1,11 @@
-import { opcodes_reverse_map, opcodes_reverse_class } from './opcodes'
+import { opcodes_reverse_map, opcodes_reverse_class } from './opcodes';
 
 function toHex8(v: number): string {
-  return `${v.toString(16).toUpperCase().padStart(2, '0')}`
+  return `${v.toString(16).toUpperCase().padStart(2, '0')}`;
 }
 
 function toHex16(v: number): string {
-  return `${v.toString(16).toUpperCase().padStart(4, '0')}`
+  return `${v.toString(16).toUpperCase().padStart(4, '0')}`;
 }
 
 /**
@@ -49,8 +49,8 @@ class Disassembler {
   byte = () => {
     const b = this.buf.readUInt8(this.curOffs);
     this.curOffs++;
-    return b
-  }
+    return b;
+  };
 
   flushBytes() {
     const chunks = chunkArray(this.bytes.bytes, this.outputBytesPerLine);
@@ -69,9 +69,9 @@ class Disassembler {
     const b0 = toHex8(bytes[0]);
     const b1 = bytes.length >= 2 ? toHex8(bytes[1]) : '  ';
     const b2 = bytes.length >= 3 ? toHex8(bytes[2]) : '  ';
-    const line = `${toHex16(addr)}: ${b0} ${b1} ${b2}${this.outputPadChars}${decoded}`
+    const line = `${toHex16(addr)}: ${b0} ${b1} ${b2}${this.outputPadChars}${decoded}`;
     this.output.push(line);
-  }
+  };
 
   disSingle(decl: string, op: number, cls: { class: string; cycles: number; }) {
     const addr = this.curAddr;
@@ -100,12 +100,12 @@ class Disassembler {
     const len = this.buf.byteLength;
     let isInsn = (addr: number) => true;
 
-    let oldOffs = this.curOffs
+    let oldOffs = this.curOffs;
     while (this.curOffs < len) {
       this.curAddr += this.curOffs - oldOffs;
       oldOffs = this.curOffs;
 
-      const op = this.byte()
+      const op = this.byte();
       const decl = opcodes_reverse_map[(op & 0xF0) >> 4][(op & 0x0F)];
 
       if (decl !== null) {

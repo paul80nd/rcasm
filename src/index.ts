@@ -1,3 +1,3 @@
-export { Loc, SourceLoc } from './ast'
-export { assemble } from './asm'
-export { disassemble } from './disasm'
+export { Loc, SourceLoc } from './ast';
+export { assemble } from './asm';
+export { disassemble } from './disasm';

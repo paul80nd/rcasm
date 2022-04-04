@@ -1,7 +1,6 @@
-
 // Direct copy of https://github.com/nurpax/c64jasm/blob/master/src/segment.ts
 
-import { toHex16 } from './util'
+import { toHex16 } from './util';
 
 export type SegmentInfo = {
      name: string;
@@ -130,7 +129,7 @@ function mergeSegments(segments_: [string, Segment][]): {
         return {
             startPC: 0,
             binary: Buffer.from([])
-        }
+        };
     }
 
     const [_, s0] = segments[0];
@@ -157,7 +156,7 @@ function mergeSegments(segments_: [string, Segment][]): {
     return {
         startPC: minAddr,
         binary: buf.slice(minAddr)
-    }
+    };
 }
 
 function collectSegmentInfo(segments_: [string, Segment][]): SegmentInfo[] {

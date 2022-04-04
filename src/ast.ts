@@ -44,14 +44,14 @@ export function mkScopeQualifiedIdent(path: string[], absolute: boolean, loc: So
 }
 
 export type Operand =
-  Ident | Literal | ScopeQualifiedIdent
+  Ident | Literal | ScopeQualifiedIdent;
 
 export type Expr =
-  Ident | Literal | ScopeQualifiedIdent
+  Ident | Literal | ScopeQualifiedIdent;
 
 export type Stmt =
   StmtInsn
-  | StmtSetPC
+  | StmtSetPC;
 
 export interface StmtInsn extends Node {
   type: 'insn';
@@ -75,7 +75,7 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
 }
 
 export function mkInsn(mnemonic: string, p1: Operand | null, p2: Operand | null, loc: SourceLoc): StmtInsn {
-  return { type: 'insn', mnemonic, p1, p2, loc }
+  return { type: 'insn', mnemonic, p1, p2, loc };
 }
 
 export function mkSetPC(pc: Expr, loc: SourceLoc): StmtSetPC {
@@ -83,7 +83,7 @@ export function mkSetPC(pc: Expr, loc: SourceLoc): StmtSetPC {
     type: 'setpc',
     pc,
     loc
-  }
+  };
 }
 
 export function mkAsmLine(label: Label | null, stmt: Stmt | null, loc: SourceLoc): AsmLine {

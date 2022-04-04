@@ -2,21 +2,21 @@
 const aluDests: { [index: string]: number } = {
   'a': 0x0,
   'd': 0x1
-}
+};
 
 const setDests: { [index: string]: number } = {
   'a': 0x0,
   'b': 0x1,
   'm': 0x2,
   'j': 0x3
-}
+};
 
 const movTargets: { [index: string]: number } = {
   'a': 0x0,
   'b': 0x1,
   'c': 0x2,
   'd': 0x3
-}
+};
 
 export enum ParamForm {
   AluDst,
@@ -94,7 +94,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* D */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
   /* E */ ['ldi j,',     null,       'bne',        null,       'beq',        null,       'jmp',       'jsr',      'bcs',       null,       null,       null,       null,       null,       null,       null],
   /* F */ ['blt',       'jlt',        null,        null,       'ble',        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null]
-]
+];
 
 export const opcodes_reverse_class = (opcode: number): { class: string, cycles: number } => {
   switch (true) {
@@ -109,4 +109,4 @@ export const opcodes_reverse_class = (opcode: number): { class: string, cycles: 
     default:
       return { class: "MISC", cycles: 1 };
   }
-}
+};
