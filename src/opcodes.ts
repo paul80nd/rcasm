@@ -58,7 +58,7 @@ export const opcodes: { [index: string]: OpCode } = {
   // SETAB 01rvvvvv / GOTO 11d00000
   'ldi': {
     op: 0x00 | 0x00, pf: ParamForm.SetTgtVal,
-    p1: { cs: setDests, op: p => (((p & 0x2) == 0x2) ? 0xC0 : 0x40) | (p << 5) },
+    p1: { cs: setDests, op: p => (((p & 0x2) === 0x2) ? 0xC0 : 0x40) | (p << 5) },
     p2: { cs: null, op: p => p }
   },
 
@@ -98,13 +98,13 @@ export const opcodes_reverse_map: (string | null)[][] = [
 
 export const opcodes_reverse_class = (opcode: number): { class: string, cycles: number } => {
   switch (true) {
-    case (opcode & 0xC0) == 0x00: // MOV8 00dddsss
+    case (opcode & 0xC0) === 0x00: // MOV8 00dddsss
       return { class: "MOV8", cycles: 1 };
-    case (opcode & 0xC0) == 0x04: // SETAB 01rvvvvv
+    case (opcode & 0xC0) === 0x04: // SETAB 01rvvvvv
       return { class: "SETAB", cycles: 1 };
-    case (opcode & 0xF0) == 0x80: // ALU 1000rfff
+    case (opcode & 0xF0) === 0x80: // ALU 1000rfff
       return { class: "ALU", cycles: 1 };
-    case (opcode & 0xC0) == 0xC0: // GOTO 11dscznx
+    case (opcode & 0xC0) === 0xC0: // GOTO 11dscznx
       return { class: "GOTO", cycles: 3 };
     default:
       return { class: "MISC", cycles: 1 };

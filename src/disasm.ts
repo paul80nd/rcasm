@@ -110,7 +110,7 @@ class Disassembler {
 
       if (decl !== null) {
         const cls = opcodes_reverse_class(op);
-        if (cls.cycles == 3) {
+        if (cls.cycles === 3) {
           this.disTriple(decl, op, cls);
           continue;
         } else {

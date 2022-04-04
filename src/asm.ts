@@ -65,16 +65,16 @@ class NamedScope<T> {
 
   // Find relative label::path::sym style references from the symbol table
   findSymbolPath(path: string[]): T & { seen: number } | undefined {
-    if (path.length == 1) {
+    if (path.length === 1) {
       return this.findSymbol(path[0]);
     }
 
     // Go up the scope tree until we find the start of
     // the relative path.
     let tab: NamedScope<T> | null | undefined = this;
-    while (tab.children.get(path[0]) == undefined) {
+    while (tab.children.get(path[0]) === undefined) {
       tab = tab.parent;
-      if (tab == null) {
+      if (tab === null) {
         return undefined;
       }
     }
@@ -82,7 +82,7 @@ class NamedScope<T> {
     // Go down the tree to match the path to a symbol
     for (let i = 0; i < path.length - 1; i++) {
       tab = tab.children.get(path[i]);
-      if (tab == undefined) {
+      if (tab === undefined) {
         return undefined;
       }
     }
@@ -143,7 +143,7 @@ class Scopes {
   symbolSeen(name: string): boolean {
     const n = this.curSymtab.syms.get(name);
     if (n !== undefined) {
-      return n.seen == this.passCount;
+      return n.seen === this.passCount;
     }
     return false;
   }
@@ -211,7 +211,7 @@ class Scopes {
     while (stack.length > 0) {
       const s = stack.pop()!;
       for (let [k, lbl] of s.sym.syms) {
-        if (lbl.type == 'label') {
+        if (lbl.type === 'label') {
           labels.push({
             path: [...s.path, k],
             addr: lbl.data.value.addr,
@@ -373,7 +373,7 @@ class Assembler {
       case 'qualified-ident': {
         // Namespace qualified ident, like foo::bar::baz
         const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
-        if (sym == undefined) {
+        if (sym === undefined) {
           if (this.pass >= 1) {
             this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
             return mkErrorValue(0);
@@ -389,7 +389,7 @@ class Assembler {
             return {
               errors: sym.data.errors,
               value: sym.data.value.addr,
-              completeFirstPass: sym.seen == this.pass
+              completeFirstPass: sym.seen === this.pass
             };
           //                     case 'var':
           //                         if (sym.seen < this.pass) {
@@ -427,7 +427,7 @@ class Assembler {
     // Optional first parameter
     if (stmt.p1 && opc.p1) {
       let tgt = this.checkRegister(stmt.p1, opc.p1);
-      if (tgt == undefined) return;
+      if (tgt === undefined) return;
       opcode |= opc.p1.op(tgt);
     }
 
@@ -447,7 +447,7 @@ class Assembler {
       return;
     }
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt == undefined) return;
+    if (tgt === undefined) return;
     opcode |= opc.p1.op(tgt);
 
     this.emit(opcode);
@@ -466,12 +466,12 @@ class Assembler {
 
     // First paramter
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt == undefined) return;
+    if (tgt === undefined) return;
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
     let src = this.checkRegister(stmt.p2, opc.p2);
-    if (src == undefined) return;
+    if (src === undefined) return;
     opcode |= opc.p2.op(src);
 
     this.emit(opcode);
@@ -490,7 +490,7 @@ class Assembler {
       return;
     }
     let val = this.checkLiteral(stmt.p1, 0x00, 0xFF);
-    if (val == undefined) return;
+    if (val === undefined) return;
     opcode |= opc.p1.op(val);
 
     this.emit(opcode);
@@ -508,14 +508,14 @@ class Assembler {
 
     // First paramter
     let tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt == undefined) return;
+    if (tgt === undefined) return;
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
     if (tgt <= 0x10) {
       // 8 bit ldi
       let val = this.checkLiteral(stmt.p2, -16, 15);
-      if (val == undefined) return;
+      if (val === undefined) return;
       opcode |= opc.p2.op(val);
     } else {
       // 16 bit ldi
@@ -525,7 +525,7 @@ class Assembler {
   }
 
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
-    if (given.type != 'qualified-ident') {
+    if (given.type !== 'qualified-ident') {
       this.addError(`Register required`, given.loc);
     } else {
       let reg = available.cs![given.path[0]];
@@ -538,7 +538,7 @@ class Assembler {
   }
 
   checkLiteral(given: ast.Operand, min: number, max: number): number | undefined {
-    if (given.type != 'literal') {
+    if (given.type !== 'literal') {
       this.addError('Literal required', given.loc);
     } else {
       let val = given.value;
@@ -560,7 +560,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    if (stmt.p1.type != 'qualified-ident') {
+    if (stmt.p1.type !== 'qualified-ident') {
       this.addError(`Identifier required`, stmt.p1.loc);
       return;
     }
@@ -610,10 +610,10 @@ class Assembler {
   }
 
   assembleLines(lst: ast.AsmLine[]): void {
-    if (lst === null || lst.length == 0) {
+    if (lst === null || lst.length === 0) {
       return;
     }
-    if (lst.length == 0) {
+    if (lst.length === 0) {
       return;
     }
 
@@ -628,7 +628,7 @@ class Assembler {
     let firstLine = 0;
     while (firstLine < lst.length) {
       const { label, stmt } = lst[firstLine];
-      if (label == null && stmt == null) {
+      if (label === null && stmt === null) {
         firstLine++;
       } else {
         break;
@@ -655,7 +655,7 @@ class Assembler {
   assembleLine(line: ast.AsmLine): void {
     this.lineLoc = line.loc;
     // Empty lines are no-ops
-    if (line.label == null && line.stmt == null) {
+    if (line.label === null && line.stmt === null) {
       return;
     }
 
@@ -668,7 +668,7 @@ class Assembler {
     }
 
     if (line.stmt.type !== 'insn') {
-      this.checkDirectives(line.stmt, line.label == null ? null : line.label.name);
+      this.checkDirectives(line.stmt, line.label === null ? null : line.label.name);
       return;
     }
 
@@ -710,11 +710,11 @@ class Assembler {
         this.assembleLines(astLines);
       }
     } catch (err) {
-      if ('name' in err && err.name == 'SyntaxError') {
+      if ('name' in err && err.name === 'SyntaxError') {
         this.addError(`Syntax error: ${err.message}`, {
           ...err.location
         });
-      } else if ('name' in err && err.name == 'semantic') {
+      } else if ('name' in err && err.name === 'semantic') {
         return;
       } else {
         throw err;
