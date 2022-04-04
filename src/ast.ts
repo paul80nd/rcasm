@@ -47,16 +47,22 @@ export type Operand =
   Ident | Literal | ScopeQualifiedIdent
 
 export type Expr =
-  Ident | ScopeQualifiedIdent
+  Ident | Literal | ScopeQualifiedIdent
 
 export type Stmt =
   StmtInsn
+  | StmtSetPC
 
 export interface StmtInsn extends Node {
   type: 'insn';
   mnemonic: string;
   p1: Operand | null;
   p2: Operand | null;
+}
+
+export interface StmtSetPC extends Node {
+  type: 'setpc';
+  pc: Expr;
 }
 
 export interface AsmLine extends Node {
@@ -70,6 +76,14 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
 
 export function mkInsn(mnemonic: string, p1: Operand | null, p2: Operand | null, loc: SourceLoc): StmtInsn {
   return { type: 'insn', mnemonic, p1, p2, loc }
+}
+
+export function mkSetPC(pc: Expr, loc: SourceLoc): StmtSetPC {
+  return {
+    type: 'setpc',
+    pc,
+    loc
+  }
 }
 
 export function mkAsmLine(label: Label | null, stmt: Stmt | null, loc: SourceLoc): AsmLine {

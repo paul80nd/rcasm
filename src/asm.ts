@@ -5,7 +5,7 @@ import * as opc from './opcodes'
 // const importFresh = require('import-fresh');
 
 // import * as fs from 'fs'
-// import { toHex16 } from './util'
+import { toHex16 } from './util'
 import * as ast from './ast'
 import { SourceLoc } from './ast'
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
@@ -689,20 +689,20 @@ class Assembler {
   //         }
   //     }
 
-  //     // Type-error checking variant of evalExpr
-  //     evalExprType<T>(node: ast.Expr, ty: 'number'|'string'|'object', msg: string): EvalValue<T> {
-  //         const res = this.evalExpr(node);
-  //         const { errors, value, completeFirstPass } = res;
-  //         if (!errors && typeof value !== ty) {
-  //             this.addError(`Expecting ${msg} to be '${ty}' type, got '${formatTypename(value)}'`, node.loc);
-  //             return {
-  //                 errors: true,
-  //                 completeFirstPass,
-  //                 value
-  //             }
-  //         }
-  //         return res;
-  //     }
+  // Type-error checking variant of evalExpr
+  evalExprType<T>(node: ast.Expr, ty: 'number' | 'string' | 'object', msg: string): EvalValue<T> {
+    const res = this.evalExpr(node);
+    const { errors, value, completeFirstPass } = res;
+    if (!errors && typeof value !== ty) {
+      this.addError(`Expecting ${msg} to be '${ty}' type, got '${formatTypename(value)}'`, node.loc);
+      return {
+        errors: true,
+        completeFirstPass,
+        value
+      }
+    }
+    return res;
+  }
 
   //     evalKwargType<T>(kwargs: ast.Kwarg[], argName: string, ty: 'number'|'string'|'object', loc: SourceLoc): [EvalValue<T>, SourceLoc] {
   //         for (const a of kwargs) {
@@ -751,10 +751,10 @@ class Assembler {
   //         return ok;
   //     }
 
-  //     // Type-error checking variant of evalExpr
-  //     evalExprToInt(node: ast.Expr, msg: string): EvalValue<number> {
-  //         return this.evalExprType(node, 'number', msg);
-  //     }
+  // Type-error checking variant of evalExpr
+  evalExprToInt(node: ast.Expr, msg: string): EvalValue<number> {
+    return this.evalExprType(node, 'number', msg);
+  }
 
   //     evalExprToString(node: ast.Expr, msg: string): EvalValue<string> {
   //         return this.evalExprType(node, 'string', msg);
@@ -832,9 +832,9 @@ class Assembler {
       //                         throw new Error(`Unhandled unary operator ${node.op}`);
       //                 }
       //             }
-      //             case 'literal': {
-      //                 return mkEvalValue(node.lit, true);
-      //             }
+      case 'literal': {
+        return mkEvalValue(node.value, true);
+      }
       //             case 'array': {
       //                 const evals = node.list.map(v => this.evalExpr(v));
       //                 return {
@@ -1008,7 +1008,7 @@ class Assembler {
       default:
         break;
     }
-    throw new Error('should be unreachable?');
+    throw new Error(`should be unreachable`);
     return mkErrorValue(0); // TODO is this even reachable?
   }
 
@@ -1218,23 +1218,23 @@ class Assembler {
     //         return true;
   }
 
-  //     handleSetPC (valueExpr: ast.Expr): void {
-  //         const ev  = this.evalExprToInt(valueExpr, 'pc');
-  //         if (!anyErrors(ev)) {
-  //             const { value: v, completeFirstPass } = ev;
-  //             if (!completeFirstPass) {
-  //                 this.addError('Value for new program counter must evaluate to a value in the first pass', valueExpr.loc);
-  //                 return;
-  //             }
-  //             if (!this.curSegment.empty() && this.curSegment.currentPC() > v) {
-  //                 this.addError(`Cannot set program counter to a smaller value than current (current: $${toHex16(this.curSegment.currentPC())}, trying to set $${toHex16(v)})`, valueExpr.loc);
-  //             }
-  //             const err = this.curSegment.setCurrentPC(v);
-  //             if (err !== undefined) {
-  //                 this.addError(err, valueExpr.loc);
-  //             }
-  //         }
-  //     }
+  handleSetPC(valueExpr: ast.Expr): void {
+    const ev = this.evalExprToInt(valueExpr, 'pc');
+    if (!anyErrors(ev)) {
+      const { value: v, completeFirstPass } = ev;
+      if (!completeFirstPass) {
+        this.addError('Value for new program counter must evaluate to a value in the first pass', valueExpr.loc);
+        return;
+      }
+      if (!this.curSegment.empty() && this.curSegment.currentPC() > v) {
+        this.addError(`Cannot set program counter to a smaller value than current (current: $${toHex16(this.curSegment.currentPC())}, trying to set $${toHex16(v)})`, valueExpr.loc);
+      }
+      const err = this.curSegment.setCurrentPC(v);
+      if (err !== undefined) {
+        this.addError(err, valueExpr.loc);
+      }
+    }
+  }
 
   //     guardedReadFileSync(fname: string, loc: SourceLoc): Buffer|undefined {
   //         try {
@@ -1393,192 +1393,192 @@ class Assembler {
   //         }
   //     }
 
-  //     checkDirectives (node: ast.Stmt, localScopeName: string | null): void {
-  //         switch (node.type) {
-  //             case 'data': {
-  //                 this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);
-  //                 break;
-  //             }
-  //             case 'fill': {
-  //                 this.fillBytes(node);
-  //                 break;
-  //             }
-  //             case 'align': {
-  //                 this.alignBytes(node);
-  //                 break;
-  //             }
-  //             case 'setpc': {
-  //                 this.handleSetPC(node.pc);
-  //                 break;
-  //             }
-  //             case 'binary': {
-  //                 this.emitBinary(node);
-  //                 break;
-  //             }
-  //             case 'include': {
-  //                 this.fileInclude(node);
-  //                 break;
-  //             }
-  //             case 'error': {
-  //                 const msg = this.evalExprToString(node.error, 'error message');
-  //                 if (!anyErrors(msg)) {
-  //                     this.addError(msg.value, node.loc);
-  //                     return;
-  //                 }
-  //                 break;
-  //             }
-  //             case 'if': {
-  //                 const { cases, elseBranch } = node
-  //                 for (let ci in cases) {
-  //                     const [condExpr, body] = cases[ci];
-  //                     const condition = this.evalExpr(condExpr);
-  //                     // TODO condition.value type must be numeric/boolean
-  //                     if (!anyErrors(condition) && isTrueVal(condition.value)) {
-  //                         return this.withAnonScope(localScopeName, () => {
-  //                             this.assembleLines(body);
-  //                         });
-  //                     }
-  //                 }
-  //                 return this.withAnonScope(localScopeName, () => {
-  //                     this.assembleLines(elseBranch);
-  //                 })
-  //                 break;
-  //             }
-  //             case 'for': {
-  //                 const { index, list, body, loc } = node
-  //                 const lstVal = this.evalExpr(list);
-  //                 if (anyErrors(lstVal)) {
-  //                     return;
-  //                 }
-  //                 const { value: lst } = lstVal;
-  //                 if (!(lst instanceof Array)) {
-  //                     this.addError(`for-loop range must be an array expression (e.g., a range() or an array)`, list.loc);
-  //                     return;
-  //                 }
-  //                 for (let i = 0; i < lst.length; i++) {
-  //                     let scopeName = null;
-  //                     if (localScopeName !== null) {
-  //                         scopeName = `${localScopeName}__${i}`
-  //                     }
-  //                     this.withAnonScope(scopeName, () => {
-  //                         this.scopes.declareVar(index.name, mkEvalValue(lst[i], lstVal.completeFirstPass));
-  //                         return this.assembleLines(body);
-  //                     });
-  //                 }
-  //                 break;
-  //             }
-  //             case 'macro': {
-  //                 const { name, args, body } = node;
-  //                 // TODO check for duplicate arg names!
-  //                 const prevSym = this.scopes.findQualifiedSym([name.name], false);
-  //                 if (prevSym !== undefined && this.scopes.symbolSeen(name.name)) {
-  //                     // TODO previous declaration from prevMacro
-  //                     this.addError(`Symbol '${name.name}' already defined`, name.loc);
-  //                     return;
-  //                 }
-  //                 this.scopes.declareMacro(name.name, node);
-  //                 break;
-  //             }
-  //             case 'callmacro': {
-  //                 const { name, args } = node;
-  //                 const macroSym = this.scopes.findMacro(name.path, name.absolute);
-  //                 const argValues = args.map(e => this.evalExpr(e));
+  checkDirectives(node: ast.Stmt, localScopeName: string | null): void {
+    switch (node.type) {
+      //             case 'data': {
+      //                 this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);
+      //                 break;
+      //             }
+      //             case 'fill': {
+      //                 this.fillBytes(node);
+      //                 break;
+      //             }
+      //             case 'align': {
+      //                 this.alignBytes(node);
+      //                 break;
+      //             }
+      case 'setpc': {
+        this.handleSetPC(node.pc);
+        break;
+      }
+      //             case 'binary': {
+      //                 this.emitBinary(node);
+      //                 break;
+      //             }
+      //             case 'include': {
+      //                 this.fileInclude(node);
+      //                 break;
+      //             }
+      //             case 'error': {
+      //                 const msg = this.evalExprToString(node.error, 'error message');
+      //                 if (!anyErrors(msg)) {
+      //                     this.addError(msg.value, node.loc);
+      //                     return;
+      //                 }
+      //                 break;
+      //             }
+      //             case 'if': {
+      //                 const { cases, elseBranch } = node
+      //                 for (let ci in cases) {
+      //                     const [condExpr, body] = cases[ci];
+      //                     const condition = this.evalExpr(condExpr);
+      //                     // TODO condition.value type must be numeric/boolean
+      //                     if (!anyErrors(condition) && isTrueVal(condition.value)) {
+      //                         return this.withAnonScope(localScopeName, () => {
+      //                             this.assembleLines(body);
+      //                         });
+      //                     }
+      //                 }
+      //                 return this.withAnonScope(localScopeName, () => {
+      //                     this.assembleLines(elseBranch);
+      //                 })
+      //                 break;
+      //             }
+      //             case 'for': {
+      //                 const { index, list, body, loc } = node
+      //                 const lstVal = this.evalExpr(list);
+      //                 if (anyErrors(lstVal)) {
+      //                     return;
+      //                 }
+      //                 const { value: lst } = lstVal;
+      //                 if (!(lst instanceof Array)) {
+      //                     this.addError(`for-loop range must be an array expression (e.g., a range() or an array)`, list.loc);
+      //                     return;
+      //                 }
+      //                 for (let i = 0; i < lst.length; i++) {
+      //                     let scopeName = null;
+      //                     if (localScopeName !== null) {
+      //                         scopeName = `${localScopeName}__${i}`
+      //                     }
+      //                     this.withAnonScope(scopeName, () => {
+      //                         this.scopes.declareVar(index.name, mkEvalValue(lst[i], lstVal.completeFirstPass));
+      //                         return this.assembleLines(body);
+      //                     });
+      //                 }
+      //                 break;
+      //             }
+      //             case 'macro': {
+      //                 const { name, args, body } = node;
+      //                 // TODO check for duplicate arg names!
+      //                 const prevSym = this.scopes.findQualifiedSym([name.name], false);
+      //                 if (prevSym !== undefined && this.scopes.symbolSeen(name.name)) {
+      //                     // TODO previous declaration from prevMacro
+      //                     this.addError(`Symbol '${name.name}' already defined`, name.loc);
+      //                     return;
+      //                 }
+      //                 this.scopes.declareMacro(name.name, node);
+      //                 break;
+      //             }
+      //             case 'callmacro': {
+      //                 const { name, args } = node;
+      //                 const macroSym = this.scopes.findMacro(name.path, name.absolute);
+      //                 const argValues = args.map(e => this.evalExpr(e));
 
-  //                 if (macroSym == undefined || macroSym.seen < this.pass) {
-  //                     this.addError(`Undefined macro '${formatSymbolPath(name)}'`, name.loc);
-  //                     return;
-  //                 }
+      //                 if (macroSym == undefined || macroSym.seen < this.pass) {
+      //                     this.addError(`Undefined macro '${formatSymbolPath(name)}'`, name.loc);
+      //                     return;
+      //                 }
 
-  //                 const { macro, declaredIn } = macroSym;
+      //                 const { macro, declaredIn } = macroSym;
 
-  //                 if (macro.args.length !== args.length) {
-  //                     this.addError(`Macro '${formatSymbolPath(name)}' declared with ${macro.args.length} args but called here with ${args.length}`,
-  //                         name.loc);
-  //                     return;
-  //                 }
+      //                 if (macro.args.length !== args.length) {
+      //                     this.addError(`Macro '${formatSymbolPath(name)}' declared with ${macro.args.length} args but called here with ${args.length}`,
+      //                         name.loc);
+      //                     return;
+      //                 }
 
-  //                 this.withAnonScope(localScopeName, () => {
-  //                     for (let i = 0; i < argValues.length; i++) {
-  //                         const argName = macro.args[i].ident.name;
-  //                         this.scopes.declareVar(argName, argValues[i]);
-  //                     }
-  //                     this.assembleLines(macro.body);
-  //                 }, declaredIn);
-  //                 break;
-  //             }
-  //             case 'let': {
-  //                 const name = node.name;
-  //                 const sym = this.scopes.findQualifiedSym([name.name], false);
-  //                 const eres = this.evalExpr(node.value);
+      //                 this.withAnonScope(localScopeName, () => {
+      //                     for (let i = 0; i < argValues.length; i++) {
+      //                         const argName = macro.args[i].ident.name;
+      //                         this.scopes.declareVar(argName, argValues[i]);
+      //                     }
+      //                     this.assembleLines(macro.body);
+      //                 }, declaredIn);
+      //                 break;
+      //             }
+      //             case 'let': {
+      //                 const name = node.name;
+      //                 const sym = this.scopes.findQualifiedSym([name.name], false);
+      //                 const eres = this.evalExpr(node.value);
 
-  //                 if (sym !== undefined && this.scopes.symbolSeen(name.name)) {
-  //                     this.addError(`Variable '${name.name}' already defined`, node.loc);
-  //                     return;
-  //                 }
-  //                 this.scopes.declareVar(name.name, eres);
-  //                 break;
-  //             }
-  //             case 'assign': {
-  //                 const name = node.name;
-  //                 if (node.name.path.length !== 1 || node.name.absolute) {
-  //                     this.addError(`Only symbol names in the current (or owning) scopes are allowed for assignment`, node.loc);
-  //                     return;
-  //                 }
-  //                 const prevValue = this.scopes.findQualifiedSym(node.name.path, node.name.absolute);
-  //                 if (prevValue == undefined) {
-  //                     this.addError(`Assignment to undeclared variable '${formatSymbolPath(name)}'`, node.loc);
-  //                     return;
-  //                 }
-  //                 if (prevValue.type !== 'var') {
-  //                     this.addError(`Assignment to symbol '${formatSymbolPath(name)}' that is not a variable.  Its type is '${prevValue.type}'`, node.loc);
-  //                     return;
-  //                 }
-  //                 const evalValue = this.evalExpr(node.value);
-  //                 this.scopes.updateVar(name.path[0], evalValue);
-  //                 break;
-  //             }
-  //             case 'statement-expr': {
-  //                 // Eval expression only for its side-effects
-  //                 this.evalExpr(node.expr);
-  //                 break;
-  //             }
-  //             case 'load-plugin': {
-  //                 const fname = this.evalExprToString(node.filename, 'plugin filename');
-  //                 if (anyErrors(fname)) {
-  //                     return;
-  //                 }
-  //                 const module = this.requirePlugin(fname.value, node.loc);
-  //                 this.bindPlugin(node, module);
-  //                 break;
-  //             }
-  //             case 'filescope': {
-  //                 this.addError(`The !filescope directive is only allowed as the first directive in a source file`, node.loc);
-  //                 return;
-  //             }
-  //             case 'use-segment': {
-  //                 const { name, loc } = node
-  //                 const sym = this.scopes.findQualifiedSym(name.path, name.absolute);
-  //                 if (sym === undefined) {
-  //                     this.addError(`Use of undeclared segment '${formatSymbolPath(name)}'`, loc);
-  //                     return;
-  //                 }
-  //                 if (sym.type !== 'segment') {
-  //                     this.addError(`Use of segment '${formatSymbolPath(name)}' that is not a declared segment.  Its type is '${sym.type}'`, loc);
-  //                     return;
-  //                 }
-  //                 // TODO should record segment source location and name for later error reporting
-  //                 this.setCurrentSegment(sym, formatSymbolPath(name));
-  //                 break;
-  //             }
-  //             case 'break': {
-  //                 this.debugInfo.markBreak(this.getPC(), this.curSegmentName);
-  //                 break;
-  //             }
-  //             default:
-  //                 this.addError(`unknown directive ${node.type}`, node.loc);
-  //                 return;
-  //         }
-  //     }
+      //                 if (sym !== undefined && this.scopes.symbolSeen(name.name)) {
+      //                     this.addError(`Variable '${name.name}' already defined`, node.loc);
+      //                     return;
+      //                 }
+      //                 this.scopes.declareVar(name.name, eres);
+      //                 break;
+      //             }
+      //             case 'assign': {
+      //                 const name = node.name;
+      //                 if (node.name.path.length !== 1 || node.name.absolute) {
+      //                     this.addError(`Only symbol names in the current (or owning) scopes are allowed for assignment`, node.loc);
+      //                     return;
+      //                 }
+      //                 const prevValue = this.scopes.findQualifiedSym(node.name.path, node.name.absolute);
+      //                 if (prevValue == undefined) {
+      //                     this.addError(`Assignment to undeclared variable '${formatSymbolPath(name)}'`, node.loc);
+      //                     return;
+      //                 }
+      //                 if (prevValue.type !== 'var') {
+      //                     this.addError(`Assignment to symbol '${formatSymbolPath(name)}' that is not a variable.  Its type is '${prevValue.type}'`, node.loc);
+      //                     return;
+      //                 }
+      //                 const evalValue = this.evalExpr(node.value);
+      //                 this.scopes.updateVar(name.path[0], evalValue);
+      //                 break;
+      //             }
+      //             case 'statement-expr': {
+      //                 // Eval expression only for its side-effects
+      //                 this.evalExpr(node.expr);
+      //                 break;
+      //             }
+      //             case 'load-plugin': {
+      //                 const fname = this.evalExprToString(node.filename, 'plugin filename');
+      //                 if (anyErrors(fname)) {
+      //                     return;
+      //                 }
+      //                 const module = this.requirePlugin(fname.value, node.loc);
+      //                 this.bindPlugin(node, module);
+      //                 break;
+      //             }
+      //             case 'filescope': {
+      //                 this.addError(`The !filescope directive is only allowed as the first directive in a source file`, node.loc);
+      //                 return;
+      //             }
+      //             case 'use-segment': {
+      //                 const { name, loc } = node
+      //                 const sym = this.scopes.findQualifiedSym(name.path, name.absolute);
+      //                 if (sym === undefined) {
+      //                     this.addError(`Use of undeclared segment '${formatSymbolPath(name)}'`, loc);
+      //                     return;
+      //                 }
+      //                 if (sym.type !== 'segment') {
+      //                     this.addError(`Use of segment '${formatSymbolPath(name)}' that is not a declared segment.  Its type is '${sym.type}'`, loc);
+      //                     return;
+      //                 }
+      //                 // TODO should record segment source location and name for later error reporting
+      //                 this.setCurrentSegment(sym, formatSymbolPath(name));
+      //                 break;
+      //             }
+      //             case 'break': {
+      //                 this.debugInfo.markBreak(this.getPC(), this.curSegmentName);
+      //                 break;
+      //             }
+      default:
+        this.addError(`unknown directive ${node.type} `, node.loc);
+        return;
+    }
+  }
 
   assembleLines(lst: ast.AsmLine[]): void {
     if (lst === null || lst.length == 0) {
@@ -1650,10 +1650,10 @@ class Assembler {
       return;
     }
 
-    //         if (line.stmt.type !== 'insn') {
-    //             this.checkDirectives(line.stmt, line.label == null ? null : line.label.name);
-    //             return;
-    //         }
+    if (line.stmt.type !== 'insn') {
+      this.checkDirectives(line.stmt, line.label == null ? null : line.label.name);
+      return;
+    }
 
     const stmt = line.stmt;
     // const insn = stmt.insn;
@@ -1697,7 +1697,7 @@ class Assembler {
           this.assembleBranch(op, stmt);
           break;
         default:
-          this.addError(`Couldn't encode instruction '${stmt.mnemonic}'`, line.loc);
+          this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);
       }
 
       //             });

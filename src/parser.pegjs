@@ -87,9 +87,9 @@ WS  "whitespace"
 EOL        "end of line" = [\n\r]
 COMMENT    "comment"     = (SEM (!EOL .)*)
 
-LABEL      "label"       = s:$ident COL     { return ast.mkLabel(s,loc()); }
-ORG        "ORG"         = O R G __ v:HEX   { return ast.mkOrg(v, loc()); }
-MNEMONIC   "mnemonic"    = [a-z]i+          { return text(); }
+LABEL      "label"       = s:$ident COL       { return ast.mkLabel(s,loc()); }
+ORG        "ORG"         = O R G __ v:LITERAL { return ast.mkSetPC(v, loc()); }
+MNEMONIC   "mnemonic"    = [a-z]i+            { return text(); }
 
 LITERAL "literal"
   = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }

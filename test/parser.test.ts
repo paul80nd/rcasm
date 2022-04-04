@@ -27,6 +27,7 @@ export function assertInstruction(code: string, mnemonic: string, op1: number | 
   let result = parse(code);
   if (debug) console.log(JSON.stringify(result));
   assert.equal(result.length, 1);
+  if (result[0].stmt?.type != 'insn') assert.fail('expected instruction');
   assert.equal(result[0].stmt?.mnemonic, mnemonic);
   if (op1 !== null) {
     let op = result[0].stmt?.p1;
