@@ -106,30 +106,4 @@ suite('rcasm - Compiler', () => {
     // TODO: Test 16-bit ldi
   });
 
-
-  test('full program', function () {
-    const source = [
-      ';*****************************************************',
-      '; Demo program to calculate Fibonacci series',
-      '; Result is placed in A register on each loop',
-      '; until calculation overflows. Result is:',
-      '; 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233',
-      ';*****************************************************',
-      '',
-      'start:  ldi a,1     ; Inital setup A = B = 1',
-      '        mov b,a',
-      '',
-      'loop:   mov c,b     ; Calculate C = B, B = A then add',
-      '        mov b,a',
-      '        add',
-      '',
-      'done:   bcs done    ; infinite loop if overflowed',
-      '',
-      '        jmp loop    ; otherwise have another go'
-    ].join('\n');
-
-    let result = asm.assemble(source);
-    console.log(JSON.stringify(result));
-  });
-
 });
