@@ -1,7 +1,7 @@
 {
   "name": "@paul80nd/rcasm",
   "version": "1.0.0",
-  "description": "Relay Compuer Assembler",
+  "description": "Relay Computer Assembler",
   "license": "MIT",
   "repository": {
     "type": "git",
