@@ -4,6 +4,7 @@
 		"module": "umd",
 		"moduleResolution": "node",
     "removeComments": true,
+    "declaration": true,
     "preserveConstEnums": true,
     "outDir": "lib/umd",
     "sourceMap": true,
@@ -14,6 +15,7 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "noImplicitReturns": true,
+    "stripInternal": true,
     "downlevelIteration": true,
     "lib": [
 			"es5", "es2015.promise"
