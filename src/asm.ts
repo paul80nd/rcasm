@@ -270,11 +270,11 @@ class Assembler {
   private errorList: Error[] = [];
   private warningList: Error[] = [];
 
-  prg(): Buffer {
+  prg(): Uint8Array {
     const { startPC, binary } = mergeSegments(this.segments);
     const startLo = startPC & 255;
     const startHi = (startPC >> 8) & 255;
-    return Buffer.concat([Buffer.from([startLo, startHi]), binary]);
+    return Uint8Array.from([startLo, startHi, ...binary]);
   }
 
   anyErrors(): boolean {
@@ -741,7 +741,7 @@ export function assemble(source: string) {
 
     if (pass > 0 && asm.anyErrors()) {
       return {
-        prg: Buffer.from([]),
+        prg: Uint8Array.from([]),
         labels: [],
         segments: [],
         errors: asm.errors(),

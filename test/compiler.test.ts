@@ -6,7 +6,7 @@ import * as asm from '../src/asm'
 function assertProgram(code: string, data: number[], debug: boolean = false) {
   let result = asm.assemble(code);
   if (debug) console.log(JSON.stringify(result));
-  assert.equal(result.prg.compare(new Uint8Array(data)), 0);
+  assert.deepEqual(result.prg, Uint8Array.from(data));
 }
 
 function assertHasError(code: string, error: string, debug: boolean = false) {

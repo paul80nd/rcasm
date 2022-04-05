@@ -40,14 +40,14 @@ class Disassembler {
     bytes: number[]
   } = { startPC: 0, bytes: [] };
 
-  constructor(private buf: Buffer) {
+  constructor(private buf: Uint8Array) {
     this.output = [];
-    this.curAddr = buf.readUInt8(0) + (buf.readUInt8(1) << 8);
+    this.curAddr = buf[0] + (buf[1] << 8);
     this.curOffs = 2;
   }
 
   byte = () => {
-    const b = this.buf.readUInt8(this.curOffs);
+    const b = this.buf[this.curOffs];
     this.curOffs++;
     return b;
   };
@@ -127,7 +127,7 @@ class Disassembler {
 
 }
 
-export function disassemble(prg: Buffer) {
+export function disassemble(prg: Uint8Array) {
   let disasm = new Disassembler(prg);
   return disasm.disassemble();
 }
