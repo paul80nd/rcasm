@@ -1,10 +1,11 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "es2015",
+    "target": "es5",
+		"module": "umd",
+		"moduleResolution": "node",
     "removeComments": true,
     "preserveConstEnums": true,
-    "outDir": "build",
+    "outDir": "lib/umd",
     "sourceMap": true,
     "allowJs": true,
     "noImplicitAny": true,
@@ -13,9 +14,10 @@
     "noImplicitThis": true,
     "alwaysStrict": true,
     "noImplicitReturns": true,
+    "downlevelIteration": true,
     "lib": [
-      "es2017"
-    ]
+			"es5", "es2015.promise"
+		]
   },
   "include": [
     "src/**/*.ts",
