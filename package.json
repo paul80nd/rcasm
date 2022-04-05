@@ -2,15 +2,23 @@
   "name": "@paul80nd/rcasm",
   "version": "1.0.0",
   "description": "Relay Computer Assembler",
+  "main": "./lib/umd/src/index.js",
+  "typings": "./lib/umd/src/index",
+  "module": "./lib/esm/src/index.js",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/paul80nd/rcasm.git"
   },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
   "scripts": {
-    "compile": "tsc -p .",
-    "gen": "npx pegjs -o build/src/g_parser.js src/parser.pegjs",
-    "test": "npm run compile && mocha ./build/test/*.js",
+    "compile": "tsc -p . && npm run lint",
+    "compile-esm": "tsc -p ./tsconfig.esm.json",
+    "gen": "npx pegjs -o lib/umd/src/g_parser.js src/parser.pegjs",
+    "gen-esm": "npx pegjs -o lib/esm/src/g_parser.js src/parser.pegjs",
+    "test": "npm run compile && mocha ./lib/umd/test/*.js",
     "lint": "eslint src/**/*.ts",
     "watch": "tsc --watch -p ."
   },

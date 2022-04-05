@@ -1,0 +1,12 @@
+vscode/
+.github/
+lib/*/test/
+lib/**/*.js.map
+lib/*/*/*.d.ts
+src/
+coverage/
+test/
+.eslintrc.json
+.gitignore
+.editorconfig
+.mocharc.json
