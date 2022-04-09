@@ -97,5 +97,5 @@ LITERAL "literal"
   / v:DEC  { return ast.mkLiteral(v, 'd', loc()); }
 
 SQIDENTIFIER "identifier" 
-  = head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
-  / '::' head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
+  = head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
+  / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
