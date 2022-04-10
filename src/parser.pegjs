@@ -111,4 +111,4 @@ SQIDENTIFIER "identifier"
   / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
 
 REGISTER "register"
- = name:( A / B / C / D / M _2 / M _1 / M / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }
+ = name:$( A / B / C / D / M _2 / M _1 / M / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }

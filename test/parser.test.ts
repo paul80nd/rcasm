@@ -89,6 +89,7 @@ suite('rcasm - Parser', () => {
     assertInstruction('ldi a,12', 'ldi', 'a', 12);
     assertInstruction('mov a,d', 'mov', 'a', 'd');
     assertInstruction('mov a,d ; comment', 'mov', 'a', 'd');
+    assertInstruction('mov xy,m2 ; comment', 'mov', 'xy', 'm2');
     assertInstruction('loop: mov a,d', 'mov', 'a', 'd');
     assertInstruction('loop: mov a,d ; comment', 'mov', 'a', 'd');
     assertError('loop2: loop3:', 'Expected ",", comment, end of input, or end of line but ":" found.', 12);
