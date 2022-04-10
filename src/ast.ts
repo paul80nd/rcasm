@@ -24,6 +24,11 @@ export interface Literal extends Node {
   ot: string
 }
 
+export interface Register extends Node {
+  type: 'register',
+  value: string
+}
+
 export interface Ident extends Node {
   type: 'ident';
   name: string;
@@ -39,12 +44,16 @@ export function mkLiteral(value: number, ot: string, loc: SourceLoc): Literal {
   return { type: 'literal', value, ot, loc };
 }
 
+export function mkRegister(value: string, loc: SourceLoc): Register {
+  return { type: 'register', value, loc };
+}
+
 export function mkScopeQualifiedIdent(path: string[], absolute: boolean, loc: SourceLoc): ScopeQualifiedIdent {
   return { type: 'qualified-ident', path, absolute, loc };
 }
 
 export type Operand =
-  Ident | Literal | ScopeQualifiedIdent;
+  Ident | Literal | Register | ScopeQualifiedIdent;
 
 export type Expr =
   Ident | Literal | ScopeQualifiedIdent;

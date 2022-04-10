@@ -28,7 +28,7 @@ suite('rcasm - Compiler', () => {
   test('parse fails', function () {
     let result = asm.assemble('start: ldi a,');
     assert.equal(result.errors.length, 1);
-    assert.equal(result.errors[0].formatted, "1:14: error: Syntax error: Expected identifier or literal but end of input found.");
+    assert.equal(result.errors[0].formatted, "1:14: error: Syntax error: Expected identifier, literal, or register but end of input found.");
   });
 
   test('unknown mnemonic', function () {
@@ -45,7 +45,8 @@ suite('rcasm - Compiler', () => {
 
   test('alu mis-ops', function () {
     assertHasError('add 45', '1:5: error: Register required');
-    assertHasError('add g', '1:5: error: Invalid register (must be one of [a,d])');
+    assertHasError('add g', '1:5: error: Register required');
+    assertHasError('add x', '1:5: error: Invalid register - choose one of [a|d]');
     assertHasWarning('inc a,b', '1:7: warning: Parameter not required');
   });
 
@@ -56,7 +57,8 @@ suite('rcasm - Compiler', () => {
   test('clr mis-ops', function () {
     assertHasError('clr', '1:1: error: Parameter required');
     assertHasError('clr 45', '1:5: error: Register required');
-    assertHasError('clr g', '1:5: error: Invalid register (must be one of [a,b,c,d])');
+    assertHasError('clr g', '1:5: error: Register required');
+    assertHasError('clr x', '1:5: error: Invalid register - choose one of [a|b|c|d]');
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
   });
 
@@ -64,9 +66,11 @@ suite('rcasm - Compiler', () => {
     assertHasError('mov', '1:1: error: Two parameters required');
     assertHasError('mov a', '1:1: error: Two parameters required');
     assertHasError('mov 45,a', '1:5: error: Register required');
-    assertHasError('mov g,a', '1:5: error: Invalid register (must be one of [a,b,c,d])');
+    assertHasError('mov g,a', '1:5: error: Register required');
+    assertHasError('mov x,a', '1:5: error: Invalid register - choose one of [a|b|c|d]');
     assertHasError('mov a,45', '1:7: error: Register required');
-    assertHasError('mov a,g', '1:7: error: Invalid register (must be one of [a,b,c,d])');
+    assertHasError('mov a,g', '1:7: error: Register required');
+    assertHasError('mov a,x', '1:7: error: Invalid register - choose one of [a|b|c|d]');
   });
 
   test('mov ops', function () {
@@ -94,7 +98,8 @@ suite('rcasm - Compiler', () => {
     assertHasError('ldi', '1:1: error: Two parameters required');
     assertHasError('ldi 56,0', '1:5: error: Register required');
     assertHasError('ldi a,g', '1:7: error: Literal required');
-    assertHasError('ldi g,3', '1:5: error: Invalid register (must be one of [a,b,m,j])');
+    assertHasError('ldi g,3', '1:5: error: Register required');
+    assertHasError('ldi x,3', '1:5: error: Invalid register - choose one of [a|b|m|j]');
     assertHasError('ldi a,16', '1:7: error: Literal out of range (must be between -16 and 15)');
     assertHasError('ldi a,-17', '1:7: error: Literal out of range (must be between -16 and 15)');
   });

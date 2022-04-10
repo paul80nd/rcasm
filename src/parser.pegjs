@@ -41,7 +41,7 @@ Instruction
   / m:MNEMONIC                                    { return ast.mkInsn(m,null,null,loc()); }
 
 Operand
-  = (LITERAL / SQIDENTIFIER)
+  = (LITERAL / REGISTER / SQIDENTIFIER)
 
 // ----- G.2 Lexical Scanner -----
 
@@ -55,12 +55,21 @@ binary      = [0-1]+
 decimal     = [+-]? [0-9]+
 ident       = [a-z]i+ [0-9a-z_]i*
 
+A = 'a'i
 B = 'b'i
+C = 'c'i
 D = 'd'i
 G = 'g'i
 H = 'h'i
+J = 'j'i
+M = 'm'i
 O = 'o'i
 R = 'r'i
+X = 'x'i
+Y = 'y'i
+
+_1 = '1'
+_2 = '2'
 
 CMA = ','
 COL = ':'
@@ -99,3 +108,6 @@ LITERAL "literal"
 SQIDENTIFIER "identifier" 
   = head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
   / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
+
+REGISTER "register"
+ = name:( A / B / C / D / M _2 / M _1 / M / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }

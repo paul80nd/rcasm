@@ -525,12 +525,12 @@ class Assembler {
   }
 
   checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
-    if (given.type !== 'qualified-ident') {
+    if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.path[0].toLowerCase()];
+      let reg = available.cs![given.value.toLowerCase()];
       if (reg === undefined) {
-        this.addError(`Invalid register (must be one of [${Object.keys(available.cs!).join(',')}])`, given.loc);
+        this.addError(`Invalid register - choose one of [${Object.keys(available.cs!).join('|')}]`, given.loc);
       }
       return reg;
     }
