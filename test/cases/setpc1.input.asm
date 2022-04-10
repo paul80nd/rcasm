@@ -1,7 +1,7 @@
-ORG 801h
+ORG 0x0801
 
 ldi a,0
 
-ORG 810h
+ORG 0x0810
 
 ldi a,1

@@ -1,4 +1,4 @@
-    ORG FEDCh
+    ORG 0xFEDC
 
 ; Testing jump between refs in higher mem
 

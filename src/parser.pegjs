@@ -68,6 +68,7 @@ R = 'r'i
 X = 'x'i
 Y = 'y'i
 
+_0 = '0'
 _1 = '1'
 _2 = '2'
 
@@ -75,9 +76,9 @@ CMA = ','
 COL = ':'
 SEM = ';'
 
-BIN = v:$binary B       { return parseInt(v,2); }
-HEX = v:$hexadecimal H  { return parseInt(v,16); }
-DEC = v:$decimal D?     { return parseInt(v); } 
+BIN = v:$binary B         { return parseInt(v,2); }
+HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
+DEC = v:$decimal D?       { return parseInt(v); } 
 
 identNoWS = (alpha+ alphanum*) { return text(); }
 

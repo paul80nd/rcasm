@@ -83,13 +83,13 @@ suite('rcasm - Compiler', () => {
   test('opc mis-ops', function () {
     assertHasError('opc', '1:1: error: Parameter required');
     assertHasError('opc a', '1:5: error: Literal required');
-    assertHasError('opc 111111111b', '1:5: error: Literal out of range (must be between 0 and 11111111)');
-    assertHasError('opc 1FFh', '1:5: error: Literal out of range (must be between 0 and ff)');
+    assertHasError('opc 111111111b', '1:5: error: Literal out of range (must be between 00000000b and 11111111b)');
+    assertHasError('opc 0x1FF', '1:5: error: Literal out of range (must be between 0x00 and 0xFF)');
     assertHasError('opc 256', '1:5: error: Literal out of range (must be between 0 and 255)');
   });
 
   test('opc ops', function () {
-    assertProgram('opc FFh \n opc ACh \n opc 52h', [0, 0, 0xFF, 0xAC, 0x52]);
+    assertProgram('opc 0xFF \n opc 0xAC \n opc 0x52', [0, 0, 0xFF, 0xAC, 0x52]);
     assertProgram('opc 255 \n opc 172 \n opc 82', [0, 0, 0xFF, 0xAC, 0x52]);
     assertProgram('opc 11111111b \n opc 10101100b \n opc 01010010b', [0, 0, 0xFF, 0xAC, 0x52]);
   });

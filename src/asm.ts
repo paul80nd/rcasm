@@ -543,9 +543,22 @@ class Assembler {
     } else {
       let val = given.value;
       if (val < min || val > max) {
-        let dmin = (given.ot === 'b') ? min.toString(2) : (given.ot === 'h') ? min.toString(16) : min.toString();
-        let dmax = (given.ot === 'b') ? max.toString(2) : (given.ot === 'h') ? max.toString(16) : max.toString();
-        this.addError(`Literal out of range (must be between ${dmin} and ${dmax})`, given.loc);
+        let range = '';
+        switch (given.ot) {
+          case 'b':
+            const maxb = max.toString(2);
+            const minb = ('0'.repeat(maxb.length) + min.toString(2)).slice(-maxb.length);
+            range = `${minb}b and ${maxb}b`;
+            break;
+          case 'h':
+            const maxh = max.toString(16).toUpperCase();
+            const minh = ('0'.repeat(maxh.length) + min.toString(16).toUpperCase()).slice(-maxh.length);
+            range = `0x${minh} and 0x${maxh}`;
+            break;
+          default:
+            range = `${min} and ${max}`;
+        }
+        this.addError(`Literal out of range (must be between ${range})`, given.loc);
       } else {
         return val;
       }
