@@ -731,6 +731,14 @@ class Assembler {
   }
 }
 
+export function parseOnly(source: string): ast.AsmLine[] | undefined {
+  try {
+    return parser.parse(source.toString());
+  } catch {
+    return;
+  }
+}
+
 export function assemble(source: string) {
   const asm = new Assembler();
 
