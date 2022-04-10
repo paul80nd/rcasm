@@ -1,3 +1,3 @@
 export { Loc, SourceLoc } from './ast';
-export { assemble } from './asm';
+export { assemble, Diagnostic } from './asm';
 export { disassemble } from './disasm';
