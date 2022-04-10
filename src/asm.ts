@@ -528,7 +528,7 @@ class Assembler {
     if (given.type !== 'qualified-ident') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.path[0]];
+      let reg = available.cs![given.path[0].toLowerCase()];
       if (reg === undefined) {
         this.addError(`Invalid register (must be one of [${Object.keys(available.cs!).join(',')}])`, given.loc);
       }
@@ -699,7 +699,7 @@ class Assembler {
           this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);
       }
     } else {
-      this.addError(`Unknown mnemonic '${stmt.mnemonic}'`, line.loc);
+      this.addError(`Unknown mnemonic '${stmt.mnemonic}'`, stmt.loc);
     }
   }
 
