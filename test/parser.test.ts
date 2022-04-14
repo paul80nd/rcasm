@@ -5,19 +5,21 @@ import * as ast from '../src/ast'
 
 var parser = require('../src/g_parser')
 
-export function parse(source: string): ast.AsmLine[] {
-  return parser.parse(source);
+export function parse(source: string): ast.Line[] {
+  const program = <ast.Program>parser.parse(source);
+  if (!program || !program.lines) { assert.fail('no program or no lines'); }
+  return program.lines;
 }
 
-export function assertNoop(node: ast.AsmLine) {
+export function assertNoop(node: ast.Line) {
   assert.ok(node.stmt === null, 'node has statement');
 }
 
-export function assertNoLabel(node: ast.AsmLine) {
+export function assertNoLabel(node: ast.Line) {
   assert.ok(node.label === null, 'node has label');
 }
 
-export function assertLabel(node: ast.AsmLine, label: string, from: number, to: number) {
+export function assertLabel(node: ast.Line, label: string, from: number, to: number) {
   assert.equal(node.label?.name, label, 'label incorrect');
   assert.equal(node.label?.loc.start.column, from);
   assert.equal(node.label?.loc.end.column, to);
@@ -95,5 +97,14 @@ suite('rcasm - Parser', () => {
     assertError('loop2: loop3:', 'Expected ",", comment, end of input, or end of line but ":" found.', 12);
     assertError('loop2: 45', 'Expected comment, end of input, end of line, or mnemonic but "4" found.', 7);
   });
+
+  test('Program Loc', function () {
+    const program = <ast.Program>parser.parse('test: inc\n   and d \n mov a,d ;end');
+    if (!program || !program.lines) { assert.fail('no program or no lines'); }
+    assert.strictEqual(3, program.lines.length);
+    assert.strictEqual(3, program.loc.end.line);
+    assert.strictEqual(14, program.loc.end.column);
+    assert.strictEqual(33, program.loc.end.offset);
+  })
 
 });

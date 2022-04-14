@@ -18,7 +18,7 @@
 
 Lines 
   = head:LineWithComment tail:(EOL LineWithComment)* {
-      return buildList(head, tail, 1);
+      return ast.mkProgram(buildList(head, tail, 1), loc());
     }
 
 LineWithComment 

@@ -622,7 +622,7 @@ class Assembler {
     }
   }
 
-  assembleLines(lst: ast.AsmLine[]): void {
+  assembleLines(lst: ast.Line[]): void {
     if (lst === null || lst.length === 0) {
       return;
     }
@@ -630,7 +630,7 @@ class Assembler {
       return;
     }
 
-    const assemble = (lines: ast.AsmLine[]) => {
+    const assemble = (lines: ast.Line[]) => {
       for (let i = 0; i < lines.length; i++) {
         this.assembleLine(lines[i]);
       }
@@ -665,7 +665,7 @@ class Assembler {
     }
   }
 
-  assembleLine(line: ast.AsmLine): void {
+  assembleLine(line: ast.Line): void {
     this.lineLoc = line.loc;
     // Empty lines are no-ops
     if (line.label === null && line.stmt === null) {
@@ -718,9 +718,9 @@ class Assembler {
 
   assemble(source: string): void {
     try {
-      const astLines = parser.parse(source.toString());
-      if (astLines !== undefined) {
-        this.assembleLines(astLines);
+      const program = <ast.Program>parser.parse(source.toString());
+      if (program !== undefined && program.lines) {
+        this.assembleLines(program.lines);
       }
     } catch (err) {
       if ('name' in err && err.name === 'SyntaxError') {
@@ -744,9 +744,9 @@ class Assembler {
   }
 }
 
-export function parseOnly(source: string): ast.AsmLine[] | undefined {
+export function parseOnly(source: string): ast.Program | undefined {
   try {
-    return parser.parse(source.toString());
+    return <ast.Program>parser.parse(source.toString());
   } catch {
     return;
   }
