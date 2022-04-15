@@ -2,7 +2,6 @@ vscode/
 .github/
 lib/*/test/
 lib/**/*.js.map
-lib/*/*/*.d.ts
 src/
 coverage/
 test/
