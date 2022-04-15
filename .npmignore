@@ -10,3 +10,5 @@ test/
 .gitignore
 .editorconfig
 .mocharc.json
+tsconfig.esm.json
+tsconfig.json
