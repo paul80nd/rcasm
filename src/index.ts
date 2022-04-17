@@ -1,7 +1,7 @@
 export {
   Program, Line, Label,
   StmtInsn, StmtSetPC, Node,
-  Operand, Literal, Register, ScopeQualifiedIdent,
+  Operand, Expr, Literal, Register, ScopeQualifiedIdent,
   Loc, SourceLoc
 } from './ast';
 export { assemble, parseOnly, Diagnostic } from './asm';
