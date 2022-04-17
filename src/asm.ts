@@ -367,6 +367,10 @@ class Assembler {
       case 'literal': {
         return mkEvalValue(node.lit, true);
       }
+      case 'register': {
+        this.addError('Unexpected register', node.loc);
+        return mkErrorValue(0);
+      }
       case 'ident': {
         throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
       }
@@ -489,7 +493,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    let val = this.checkLiteral(stmt.p1, 0x00, 0xFF);
+    let val = this.checkLiteral(stmt.p1, 0x00, 0xFF, 'h');
     if (val === undefined) { return; }
     opcode |= opc.p1.op(val);
 
@@ -528,7 +532,7 @@ class Assembler {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.value.toLowerCase()];
+      let reg = available.cs![given.value];
       if (reg === undefined) {
         this.addError(`Invalid register - choose one of [${Object.keys(available.cs!).join('|')}]`, given.loc);
       }
@@ -537,14 +541,13 @@ class Assembler {
     return undefined;
   }
 
-  checkLiteral(given: ast.Expr, min: number, max: number): number | undefined {
-    if (given.type !== 'literal' || !(typeof given.lit === 'number')) {
-      this.addError('Literal numeric required', given.loc);
-    } else {
-      let val = <number>given.lit;
+  checkLiteral(given: ast.Expr, min: number, max: number, rangeDisplay: 'b' | 'h' | 'd' = 'd'): number | undefined {
+    const ev = this.evalExprToInt(given, 'value');
+    if (!anyErrors(ev)) {
+      let val = ev.value;
       if (val < min || val > max) {
         let range = '';
-        switch (given.ot) {
+        switch (rangeDisplay) {
           case 'b':
             const maxb = max.toString(2);
             const minb = ('0'.repeat(maxb.length) + min.toString(2)).slice(-maxb.length);
