@@ -1,6 +1,6 @@
 export {
   Program, Line, Label,
-  StmtInsn, StmtSetPC, Node,
+  StmtInsn, StmtSetPC, StmtData, Node,
   Expr, Literal, Register, ScopeQualifiedIdent,
   Loc, SourceLoc
 } from './ast';
