@@ -39,7 +39,7 @@ Directive
       return ast.mkData(dataSize, values, loc());
     }
 
-ExprList = head:Expr tail:(__ CMA __ Expr)* { return buildList(head, tail, 1); }
+ExprList = head:Expr tail:(__ CMA __ Expr)* { return buildList(head, tail, 3); }
 
 Instruction
   = m:MNEMONIC __ o1:Expr __ CMA __ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }

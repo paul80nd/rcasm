@@ -17,4 +17,7 @@ suite('rcasm - Compiler Decls', () => {
     assertProgram('dfb 11111110b', [0, 0, 0xFE]);
   });
 
+  test('data numbers', function () {
+    assertProgram('dfb 254, 253, 252', [0, 0, 0xFE, 0xFD, 0xFC]);
+  });
 });

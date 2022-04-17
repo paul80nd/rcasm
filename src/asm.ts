@@ -410,7 +410,7 @@ class Assembler {
       default:
         break;
     }
-    throw new Error(`should be unreachable`);
+    throw new Error(`should be unreachable on ${node}`);
     return mkErrorValue(0); // TODO is this even reachable?
   }
 
