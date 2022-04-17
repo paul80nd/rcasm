@@ -34,8 +34,8 @@ Statement
 
 
 Directive
-  = size:PSEUDO_BYTE __ values:ExprList  {
-      const dataSize = ast.DataSize.Byte;
+  = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
+      const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
     }
 
@@ -83,6 +83,7 @@ COL = ':'
 SEM = ';'
 
 PSEUDO_BYTE = 'dfb'i { return 'byte'; }
+PSEUDO_WORD = "dfw"i { return 'word'; }
 
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }

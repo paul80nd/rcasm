@@ -421,6 +421,11 @@ class Assembler {
     }
   }
 
+  emit16(word: number): void {
+    this.emit((word >> 8) & 0xff);
+    this.emit(word & 0xff);
+  }
+
   assembleAluInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx [dest]
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
@@ -613,13 +618,16 @@ class Assembler {
     }
   }
 
-  emit8(v: number) {
-    this.emit(v);
-    return;
+  emit8or16(v: number, bits: number) {
+    if (bits === 8) {
+      this.emit(v);
+      return;
+    }
+    this.emit16(v);
   }
 
-  emitData(exprList: ast.Expr[]) {
-    const maxval = Math.pow(2,8);
+  emitData(exprList: ast.Expr[], bits: number) {
+    const maxval = Math.pow(2, bits);
     for (let i = 0; i < exprList.length; i++) {
       const ee = this.evalExpr(exprList[i]);
       if (anyErrors(ee)) {
@@ -628,16 +636,16 @@ class Assembler {
       const { value: e } = ee;
       if (typeof e === 'number') {
         if (e >= maxval) {
-          this.addError('Data out of range for 8 bits', exprList[i].loc);
+          this.addError(`Data out of range for ${bits} bits`, exprList[i].loc);
         } else {
-          this.emit8(e);
+          this.emit8or16(e, bits);
         }
       } else if (typeof e === 'string') {
         const vs = e.split('').map(c => c.charCodeAt(0));
         if (vs.find(n => n >= maxval)) {
-          this.addError('Data contains character out of range for 8 bits', exprList[i].loc);
+          this.addError(`Data contains character out of range for ${bits} bits`, exprList[i].loc);
         } else {
-          vs.forEach(v => this.emit8(v));
+          vs.forEach(v => this.emit8or16(v, bits));
         }
       } else {
         this.addError(`Only literal types can be emitted. Got ${formatTypename(e)}`, exprList[i].loc);
@@ -648,7 +656,7 @@ class Assembler {
   checkDirectives(node: ast.Stmt, localScopeName: string | null): void {
     switch (node.type) {
       case 'data': {
-        this.emitData(node.values);
+        this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);
         break;
       }
       case 'setpc': {
