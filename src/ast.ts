@@ -1,11 +1,9 @@
 export interface Loc { offset: number, line: number, column: number }
 export interface SourceLoc { start: Loc, end: Loc }
 
-
 export interface Node {
   loc: SourceLoc;
 }
-
 
 export interface Program extends Node {
   lines: Line[] | null;
@@ -29,7 +27,10 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
   return { name, loc };
 }
 
-export type Stmt = StmtInsn | StmtSetPC;
+export type Stmt
+  = StmtInsn
+  | StmtSetPC
+  | StmtData;
 
 export interface StmtSetPC extends Node {
   type: 'setpc';
@@ -42,15 +43,33 @@ export function mkSetPC(pc: Expr, loc: SourceLoc): StmtSetPC {
 export interface StmtInsn extends Node {
   type: 'insn';
   mnemonic: string;
-  p1: Operand | null;
-  p2: Operand | null;
+  p1: Expr | null;
+  p2: Expr | null;
 }
-export function mkInsn(mnemonic: string, p1: Operand | null, p2: Operand | null, loc: SourceLoc): StmtInsn {
+export function mkInsn(mnemonic: string, p1: Expr | null, p2: Expr | null, loc: SourceLoc): StmtInsn {
   return { type: 'insn', mnemonic, p1, p2, loc };
 }
 
-export type Operand = Ident | Literal | Register | ScopeQualifiedIdent;
-export type Expr = Ident | Literal | ScopeQualifiedIdent;
+export enum DataSize { Byte };
+export interface StmtData extends Node {
+  type: 'data';
+  dataSize: DataSize;
+  values: Expr[];
+}
+export function mkData(dataSize: DataSize, values: Expr[], loc: SourceLoc): StmtData {
+  return {
+    type: 'data',
+    values,
+    dataSize,
+    loc
+  };
+}
+
+export type Expr
+  = Ident
+  | ScopeQualifiedIdent
+  | Register
+  | Literal;
 
 export interface Ident extends Node {
   type: 'ident';
@@ -59,11 +78,11 @@ export interface Ident extends Node {
 
 export interface Literal extends Node {
   type: 'literal',
-  value: number,
+  lit: number | string,
   ot: string
 }
-export function mkLiteral(value: number, ot: string, loc: SourceLoc): Literal {
-  return { type: 'literal', value, ot, loc };
+export function mkLiteral(lit: number | string, ot: string, loc: SourceLoc): Literal {
+  return { type: 'literal', lit, ot, loc };
 }
 
 export interface Register extends Node {

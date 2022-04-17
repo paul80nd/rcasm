@@ -82,7 +82,7 @@ suite('rcasm - Compiler', () => {
 
   test('opc mis-ops', function () {
     assertHasError('opc', '1:1: error: Parameter required');
-    assertHasError('opc a', '1:5: error: Literal required');
+    assertHasError('opc a', '1:5: error: Literal numeric required');
     assertHasError('opc 111111111b', '1:5: error: Literal out of range (must be between 00000000b and 11111111b)');
     assertHasError('opc 0x1FF', '1:5: error: Literal out of range (must be between 0x00 and 0xFF)');
     assertHasError('opc 256', '1:5: error: Literal out of range (must be between 0 and 255)');
@@ -97,7 +97,7 @@ suite('rcasm - Compiler', () => {
   test('ldi mis-ops', function () {
     assertHasError('ldi', '1:1: error: Two parameters required');
     assertHasError('ldi 56,0', '1:5: error: Register required');
-    assertHasError('ldi a,g', '1:7: error: Literal required');
+    assertHasError('ldi a,g', '1:7: error: Literal numeric required');
     assertHasError('ldi g,3', '1:5: error: Register required');
     assertHasError('ldi x,3', '1:5: error: Invalid register - choose one of [a|b|m|j]');
     assertHasError('ldi a,16', '1:7: error: Literal out of range (must be between -16 and 15)');

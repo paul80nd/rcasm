@@ -1,17 +1,14 @@
 {
-  var ast = require('./ast')
-
+  var ast = require('./ast')  
   function extractList(list, index) {
     return list.map(function(element) { return element[index]; });
   }
-
   function buildList(head, tail, index) {
     return [head].concat(extractList(tail, index));
   }
-
-   function loc() {
-     return { ...location() }
-   }
+  function loc() {
+    return { ...location() }
+  }
 }
 
 // ----- G.1 Grammer Parser -----
@@ -21,10 +18,10 @@ Lines
       return ast.mkProgram(buildList(head, tail, 1), loc());
     }
 
-LineWithComment 
+LineWithComment
   = __ line:Line __ COMMENT? { return line }
 
-Line 
+Line
   = l:LABEL __ s:Statement   { return ast.mkAsmLine(l,s,loc()); }
   / l:LABEL                  { return ast.mkAsmLine(l,null,loc()); }
   / o:ORG                    { return ast.mkAsmLine(null,o,loc()); }
@@ -32,15 +29,24 @@ Line
   / __                       { return ast.mkAsmLine(null,null,loc()); }
 
 Statement
-  = insn:Instruction         { return insn; }
-  // Directives potentially in future
+  = drct:Directive   { return drct; }
+  / insn:Instruction { return insn; }
+
+
+Directive
+  = size:PSEUDO_BYTE __ values:ExprList  {
+      const dataSize = ast.DataSize.Byte;
+      return ast.mkData(dataSize, values, loc());
+    }
+
+ExprList = head:Expr tail:(__ CMA __ Expr)* { return buildList(head, tail, 1); }
 
 Instruction
-  = m:MNEMONIC __ o1:Operand __ CMA __ o2:Operand { return ast.mkInsn(m,o1,o2,loc()); }
-  / m:MNEMONIC __ o1:Operand                      { return ast.mkInsn(m,o1,null,loc()); }
-  / m:MNEMONIC                                    { return ast.mkInsn(m,null,null,loc()); }
+  = m:MNEMONIC __ o1:Expr __ CMA __ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
+  / m:MNEMONIC __ o1:Expr                   { return ast.mkInsn(m,o1,null,loc()); }
+  / m:MNEMONIC                              { return ast.mkInsn(m,null,null,loc()); }
 
-Operand
+Expr
   = (LITERAL / REGISTER / SQIDENTIFIER)
 
 // ----- G.2 Lexical Scanner -----
@@ -76,9 +82,15 @@ CMA = ','
 COL = ':'
 SEM = ';'
 
+PSEUDO_BYTE = 'dfb'i { return 'byte'; }
+
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
 DEC = v:$decimal D?       { return parseInt(v); } 
+
+STR = '"' c:doubleStringCharacter* '"' { return c.join(''); }
+
+doubleStringCharacter = !'"' char:. { return char; }
 
 identNoWS = (alpha+ alphanum*) { return text(); }
 
@@ -105,6 +117,7 @@ LITERAL "literal"
   = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }
   / v:HEX  { return ast.mkLiteral(v, 'h', loc()); }
   / v:DEC  { return ast.mkLiteral(v, 'd', loc()); }
+  / s:STR  { return ast.mkLiteral(s, 's', loc()); }
 
 SQIDENTIFIER "identifier" 
   = head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }

@@ -365,7 +365,7 @@ class Assembler {
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
       case 'literal': {
-        return mkEvalValue(node.value, true);
+        return mkEvalValue(node.lit, true);
       }
       case 'ident': {
         throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
@@ -524,7 +524,7 @@ class Assembler {
     this.emit(opcode);
   }
 
-  checkRegister(given: ast.Operand, available: opc.OpCodeParam): number | undefined {
+  checkRegister(given: ast.Expr, available: opc.OpCodeParam): number | undefined {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
@@ -537,11 +537,11 @@ class Assembler {
     return undefined;
   }
 
-  checkLiteral(given: ast.Operand, min: number, max: number): number | undefined {
-    if (given.type !== 'literal') {
-      this.addError('Literal required', given.loc);
+  checkLiteral(given: ast.Expr, min: number, max: number): number | undefined {
+    if (given.type !== 'literal' || !(typeof given.lit === 'number')) {
+      this.addError('Literal numeric required', given.loc);
     } else {
-      let val = given.value;
+      let val = <number>given.lit;
       if (val < min || val > max) {
         let range = '';
         switch (given.ot) {

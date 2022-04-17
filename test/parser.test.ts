@@ -34,13 +34,22 @@ export function assertInstruction(code: string, mnemonic: string, op1: number | 
   if (op1 !== null) {
     let op = result[0].stmt?.p1;
     if (op?.type === 'ident') assert.equal(op.name, op1);
-    if (op?.type === 'literal') assert.equal(op.value, op1);
+    if (op?.type === 'literal') assert.equal(op.lit, op1);
   }
   if (op2 !== null) {
     let op = result[0].stmt?.p2;
     if (op?.type === 'ident') assert.equal(op.name, op2);
-    if (op?.type === 'literal') assert.equal(op.value, op2);
+    if (op?.type === 'literal') assert.equal(op.lit, op2);
   }
+}
+
+export function assertData(code: string, dataSize: ast.DataSize, debug: boolean = false) {
+  let result = parse(code);
+  if (debug) console.log(JSON.stringify(result));
+  assert.equal(result.length, 1);
+  if (result[0].stmt?.type != 'data') assert.fail('expected data');
+  const data = result[0].stmt;
+  assert.equal(data.dataSize, dataSize);
 }
 
 export function assertError(code: string, message: string, offset: number) {
@@ -95,7 +104,11 @@ suite('rcasm - Parser', () => {
     assertInstruction('loop: mov a,d', 'mov', 'a', 'd');
     assertInstruction('loop: mov a,d ; comment', 'mov', 'a', 'd');
     assertError('loop2: loop3:', 'Expected ",", comment, end of input, or end of line but ":" found.', 12);
-    assertError('loop2: 45', 'Expected comment, end of input, end of line, or mnemonic but "4" found.', 7);
+    assertError('loop2: 45', 'Expected "dfb", comment, end of input, end of line, or mnemonic but "4" found.', 7);
+  });
+
+  test('Data', function () {
+    assertData('dfb "test"', ast.DataSize.Byte);
   });
 
   test('Program Loc', function () {
