@@ -23,7 +23,7 @@ function assertHasWarning(code: string, warning: string, debug: boolean = false)
   assert.equal(result.warnings[0].formatted, warning);
 }
 
-suite('rcasm - Compiler', () => {
+suite('rcasm - Compiler Instrs', () => {
 
   test('parse fails', function () {
     let result = asm.assemble('start: ldi a,');

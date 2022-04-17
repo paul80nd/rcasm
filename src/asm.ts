@@ -613,14 +613,36 @@ class Assembler {
     }
   }
 
+  emit8(v: number) {
+    this.emit(v);
+    return;
+  }
+
+  emitData(exprList: ast.Expr[]) {
+    for (let i = 0; i < exprList.length; i++) {
+      const ee = this.evalExpr(exprList[i]);
+      if (anyErrors(ee)) {
+        continue;
+      }
+      const { value: e } = ee;
+      if (typeof e === 'number') {
+        this.emit8(e);
+      }
+    }
+  }
+
   checkDirectives(node: ast.Stmt, localScopeName: string | null): void {
     switch (node.type) {
+      case 'data': {
+        this.emitData(node.values);
+        break;
+      }
       case 'setpc': {
         this.handleSetPC(node.pc);
         break;
       }
       default:
-        this.addError(`unknown directive ${node.type} `, node.loc);
+        this.addError(`unknown directive ${node.type}`, node.loc);
         return;
     }
   }
