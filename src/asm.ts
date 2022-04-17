@@ -619,6 +619,7 @@ class Assembler {
   }
 
   emitData(exprList: ast.Expr[]) {
+    const maxval = Math.pow(2,8);
     for (let i = 0; i < exprList.length; i++) {
       const ee = this.evalExpr(exprList[i]);
       if (anyErrors(ee)) {
@@ -626,7 +627,20 @@ class Assembler {
       }
       const { value: e } = ee;
       if (typeof e === 'number') {
-        this.emit8(e);
+        if (e >= maxval) {
+          this.addError('Data out of range for 8 bits', exprList[i].loc);
+        } else {
+          this.emit8(e);
+        }
+      } else if (typeof e === 'string') {
+        const vs = e.split('').map(c => c.charCodeAt(0));
+        if (vs.find(n => n >= maxval)) {
+          this.addError('Data contains character out of range for 8 bits', exprList[i].loc);
+        } else {
+          vs.forEach(v => this.emit8(v));
+        }
+      } else {
+        this.addError(`Only literal types can be emitted. Got ${formatTypename(e)}`, exprList[i].loc);
       }
     }
   }

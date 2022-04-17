@@ -9,6 +9,13 @@ function assertProgram(code: string, data: number[], debug: boolean = false) {
   assert.deepEqual(result.prg, Uint8Array.from(data));
 }
 
+function assertHasError(code: string, error: string, debug: boolean = false) {
+  let result = asm.assemble(code);
+  if (debug) console.log(JSON.stringify(result));
+  assert.equal(result.errors.length, 1);
+  assert.equal(result.errors[0].formatted, error);
+}
+
 suite('rcasm - Compiler Decls', () => {
 
   test('data number', function () {
@@ -17,7 +24,30 @@ suite('rcasm - Compiler Decls', () => {
     assertProgram('dfb 11111110b', [0, 0, 0xFE]);
   });
 
+  test('data bad number', function () {
+    assertHasError('dfb 256', '1:5: error: Data out of range for 8 bits');
+    assertHasError('dfb 0x100', '1:5: error: Data out of range for 8 bits');
+    assertHasError('dfb 100000000b', '1:5: error: Data out of range for 8 bits');
+  });
+
   test('data numbers', function () {
     assertProgram('dfb 254, 253, 252', [0, 0, 0xFE, 0xFD, 0xFC]);
+    assertProgram('dfb 254, 0xFE, 11111110b', [0, 0, 0xFE, 0xFE, 0xFE]);
+  });
+
+  test('data string', function () {
+    assertProgram('dfb "test"', [0, 0, 0x74, 0x65, 0x73, 0x74]);
+  });
+
+  test('data bad string', function () {
+    assertHasError('dfb "tĕst"', '1:5: error: Data contains character out of range for 8 bits');
+  });
+
+  test('data strings', function () {
+    assertProgram('dfb "test", "ING"', [0, 0, 0x74, 0x65, 0x73, 0x74, 0x49, 0x4E, 0x47]);
+  });
+
+  test('data mix', function () {
+    assertProgram('dfb 254, 0xFC, 10001100b, "ING"', [0, 0, 0xFE, 0xFC, 0x8C, 0x49, 0x4E, 0x47]);
   });
 });
