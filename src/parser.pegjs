@@ -33,7 +33,7 @@ Statement
   / insn:Instruction { return insn; }
 
 
-Directive
+Directive "directive"
   = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
       const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
