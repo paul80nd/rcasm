@@ -7,7 +7,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 import { assemble } from '../src/asm'
-import { disassemble } from '../src/disasm'
+import { DisasmOptions, disassemble } from '../src/disasm'
 
 function readLines(fname: string) {
   const lines = fs.readFileSync(fname).toString().split('\n');
@@ -23,14 +23,27 @@ suite('rcasm - Snapshots', () => {
       files.forEach(fname => {
         const src = fs.readFileSync(fname).toString();
         const lines = src.split('\n');
-        const { prg, errors } = assemble(src)!;
+        const disasmOptions: DisasmOptions = {
+        };
+
+        const { prg, errors, debugInfo } = assemble(src)!;
+
+        if (lines.length > 0) {
+          const match = /;\s+disasm:\s+(.*)/.exec(lines[0]);
+          if (match !== null) {
+            const opts = match[1].split(' ');
+            if (opts.includes('debuginfo')) {
+              disasmOptions.isInstruction = debugInfo!.info().isInstruction;
+            }
+          }
+        }
 
         if (errors.length > 0) {
           console.error(errors);
           assert.fail();
         }
 
-        const disasmLines = disassemble(prg/*, undefined, disasmOptions*/).concat('');
+        const disasmLines = disassemble(prg /*, undefined*/, disasmOptions).concat('');
         const expectedFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'expected.asm');
         const actualFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'actual.asm');
 
@@ -62,7 +75,7 @@ To gild to actual output:
 
 cp ${actualFname} ${expectedFname}
 
-            `);
+`);
             assert.fail(`Test ${fname} failed`);
           }
         }

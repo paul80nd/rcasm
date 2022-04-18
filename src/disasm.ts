@@ -1,5 +1,9 @@
 import { opcodes_reverse_map, opcodes_reverse_class } from './opcodes';
 
+export interface DisasmOptions {
+  isInstruction?: (addr: number) => boolean;
+};
+
 function toHex8(v: number): string {
   return `${v.toString(16).toUpperCase().padStart(2, '0')}`;
 }
@@ -9,11 +13,11 @@ function toHex16(v: number): string {
 }
 
 /**
- * Returns an array with arrays of the given size.
- *
- * @param myArray {Array} array to split
- * @param chunk_size {Integer} Size of every group
- */
+* Returns an array with arrays of the given size.
+*
+* @param myArray {Array} array to split
+* @param chunk_size {Integer} Size of every group
+*/
 export function chunkArray<T>(myArray: T[], chunk_size: number) {
   var index = 0;
   var arrayLength = myArray.length;
@@ -40,10 +44,17 @@ class Disassembler {
     bytes: number[]
   } = { startPC: 0, bytes: [] };
 
-  constructor(private buf: Uint8Array) {
+  private disasmOptions?: DisasmOptions;
+
+  constructor(private buf: Uint8Array, disasmOptions?: DisasmOptions) {
     this.output = [];
     this.curAddr = buf[0] + (buf[1] << 8);
     this.curOffs = 2;
+    this.disasmOptions = disasmOptions;
+
+    if (this.disasmOptions?.isInstruction) {
+      this.outputBytesPerLine = 4;
+    }
   }
 
   byte = () => {
@@ -99,6 +110,9 @@ class Disassembler {
   disassemble() {
     const len = this.buf.byteLength;
     let isInsn = (addr: number) => true;
+    if (this.disasmOptions && this.disasmOptions.isInstruction) {
+      isInsn = this.disasmOptions.isInstruction;
+    }
 
     let oldOffs = this.curOffs;
     while (this.curOffs < len) {
@@ -108,7 +122,7 @@ class Disassembler {
       const op = this.byte();
       const decl = opcodes_reverse_map[(op & 0xF0) >> 4][(op & 0x0F)];
 
-      if (decl !== null) {
+      if (isInsn(this.curAddr) && decl !== null) {
         const cls = opcodes_reverse_class(op);
         if (cls.cycles === 3) {
           this.disTriple(decl, op, cls);
@@ -127,7 +141,7 @@ class Disassembler {
 
 }
 
-export function disassemble(prg: Uint8Array) {
-  let disasm = new Disassembler(prg);
+export function disassemble(prg: Uint8Array, options?: DisasmOptions) {
+  let disasm = new Disassembler(prg, options);
   return disasm.disassemble();
 }

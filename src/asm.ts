@@ -6,6 +6,7 @@ import { toHex16 } from './util';
 import * as ast from './ast';
 import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
+import { DebugInfoTracker } from './debugInfo';
 
 var parser = require('./g_parser');
 
@@ -270,6 +271,9 @@ class Assembler {
   private errorList: Error[] = [];
   private warningList: Error[] = [];
 
+  // PC<->source location tracking for debugging support.  Reset on each pass
+  debugInfo = new DebugInfoTracker();
+
   prg(): Uint8Array {
     const { startPC, binary } = mergeSegments(this.segments);
     const startLo = startPC & 255;
@@ -319,6 +323,7 @@ class Assembler {
     this.needPass = false;
     this.errorList = [];
     this.scopes.startPass(pass);
+    this.debugInfo = new DebugInfoTracker();
 
     // Empty segments list and register the 'default' segment
     this.segments = [];
@@ -679,7 +684,9 @@ class Assembler {
 
     const assemble = (lines: ast.Line[]) => {
       for (let i = 0; i < lines.length; i++) {
+        this.debugInfo.startLine(lines[i].loc, this.getPC(), this.curSegment);
         this.assembleLine(lines[i]);
+        this.debugInfo.endLine(this.getPC(), this.curSegment);
       }
     };
 
@@ -735,29 +742,41 @@ class Assembler {
     const stmt = line.stmt;
     const op = opc.opcodes[stmt.mnemonic.toLocaleLowerCase()];
 
+    // Mark the emitted output address range as
+    // containing machine code instructions.  This
+    // is used for smarter disassembly.
+    const withMarkAsInsn = (f: () => void) => {
+      const startPC = this.getPC();
+      f();
+      const endPC = this.getPC();
+      this.debugInfo.markAsInstruction(startPC, endPC);
+    };
+
     if (op !== undefined) {
-      switch (op.pf) {
-        case opc.ParamForm.AluDst:
-          this.assembleAluInstr(op, stmt);
-          break;
-        case opc.ParamForm.ClrTgt:
-          this.assembleClrInstr(op, stmt);
-          break;
-        case opc.ParamForm.MovDstSrc:
-          this.assembleMovInstr(op, stmt);
-          break;
-        case opc.ParamForm.LitOpc:
-          this.assembleLitOpc(op, stmt);
-          break;
-        case opc.ParamForm.SetTgtVal:
-          this.assembleSetInstr(op, stmt);
-          break;
-        case opc.ParamForm.GtoTgt:
-          this.assembleBranch(op, stmt);
-          break;
-        default:
-          this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);
-      }
+      withMarkAsInsn(() => {
+        switch (op.pf) {
+          case opc.ParamForm.AluDst:
+            this.assembleAluInstr(op, stmt);
+            break;
+          case opc.ParamForm.ClrTgt:
+            this.assembleClrInstr(op, stmt);
+            break;
+          case opc.ParamForm.MovDstSrc:
+            this.assembleMovInstr(op, stmt);
+            break;
+          case opc.ParamForm.LitOpc:
+            this.assembleLitOpc(op, stmt);
+            break;
+          case opc.ParamForm.SetTgtVal:
+            this.assembleSetInstr(op, stmt);
+            break;
+          case opc.ParamForm.GtoTgt:
+            this.assembleBranch(op, stmt);
+            break;
+          default:
+            this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);
+        }
+      });
     } else {
       this.addError(`Unknown mnemonic '${stmt.mnemonic}'`, stmt.loc);
     }
@@ -812,6 +831,7 @@ export function assemble(source: string) {
         prg: Uint8Array.from([]),
         labels: [],
         segments: [],
+        debugInfo: undefined,
         errors: asm.errors(),
         warnings: asm.warnings()
       };
@@ -825,6 +845,7 @@ export function assemble(source: string) {
     errors: asm.errors(),
     warnings: asm.warnings(),
     labels: asm.dumpLabels(),
-    segments: asm.collectSegmentInfo()
+    segments: asm.collectSegmentInfo(),
+    debugInfo: asm.debugInfo
   };
 }
