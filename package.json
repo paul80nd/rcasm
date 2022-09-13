@@ -1,6 +1,6 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Relay Computer Assembler",
   "main": "./lib/umd/src/index.js",
   "typings": "./lib/umd/src/index",

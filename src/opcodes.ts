@@ -82,22 +82,22 @@ export const opcodes: { [index: string]: OpCode } = {
 
 export const opcodes_reverse_map: (string | null)[][] = [
   // Hi/Lo 0 1 2 3 4 5 6 7 8 9 A B C D E F
-  /* 0 */ ['clr a',     'mov a,b',   'mov a,c',   'mov a,d',    null,        null,        null,        null,      'mov b,a',  'clr b',    'mov b,c',  'mov b,d',   null,       null,       null,       null],
-  /* 1 */ ['mov c,a',   'mov c,b',   'clr c',     'mov c,d',    null,        null,        null,        null,      'mov d,a',  'mov d,b',  'mov d,c',  'clr d',     null,       null,       null,       null],
-  /* 2 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* 3 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* 4 */ ['ldi a,0',   'ldi a,1',   'ldi a,2',   'ldi a,3',   'ldi a,4',   'ldi a,5',   'ldi a,6',   'ldi a,7',  'ldi a,8',  'ldi a,9',  'ldi a,10', 'ldi a,11', 'ldi a,12', 'ldi a,13', 'ldi a,14', 'ldi a,15'],
-  /* 5 */ ['ldi a,-16', 'ldi a,-15', 'ldi a,-14', 'ldi a,-13', 'ldi a,-12', 'ldi a,-11', 'ldi a,-10', 'ldi a,-9', 'ldi a,-8', 'ldi a,-7', 'ldi a,-6', 'ldi a,-5', 'ldi a,-4', 'ldi a,-3', 'ldi a,-2', 'ldi a,-1'],
-  /* 6 */ ['ldi b,0',   'ldi b,1',   'ldi b,2',   'ldi b,3',   'ldi b,4',   'ldi b,5',   'ldi b,6',   'ldi b,7',  'ldi b,8',  'ldi b,9',  'ldi b,10', 'ldi b,11', 'ldi b,12', 'ldi b,13', 'ldi b,14', 'ldi b,15'],
-  /* 7 */ ['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4', 'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
-  /* 8 */ ['clr a',     'add',       'inc',       'and',       'orr',       'eor',       'not',       'rol',      'clr d',    'add d',    'inc d',    'and d',    'orr d',    'eor d',    'not d',    'rol d'],
-  /* 9 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* A */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* B */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* C */ ['ldi m,',     null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* D */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null],
-  /* E */ ['ldi j,',     null,       'bne',        null,       'beq',        null,       'jmp',       'jsr',      'bcs',       null,       null,       null,       null,       null,       null,       null],
-  /* F */ ['blt',       'jlt',        null,        null,       'ble',        null,        null,        null,       null,       null,       null,       null,       null,       null,       null,       null]
+  /* 0 */ ['clr a',     'mov a,b',   'mov a,c',   'mov a,d',   'mov a,m1',  'mov a,m2',  'mov a,x',   'mov a,y',  'mov b,a',  'clr b',    'mov b,c',  'mov b,d',  'mov b,m1',  'mov b,m2', 'mov b,x',  'mov b,y'],
+  /* 1 */ ['mov c,a',   'mov c,b',   'clr c',     'mov c,d',   'mov c,m1',  'mov c,m2',  'mov c,x',   'mov c,y',  'mov d,a',  'mov d,b',  'mov d,c',  'clr d',    'mov d,m1',  'mov d,m2', 'mov d,x',  'mov d,y'],
+  /* 2 */ ['mov m1,a',  'mov m1,b',  'mov m1,c',  'mov m1,d',  'clr m1',    'mov m1,m2', 'mov m1,x',  'mov m1,y', 'mov m2,a', 'mov m2,b', 'mov m2,c', 'mov m2,d', 'mov m2,m1', 'clr m2',   'mov m2,x', 'mov m2,y'],
+  /* 3 */ ['mov x,a',   'mov x,b',   'mov x,c',   'mov x,d',   'mov x,m1',  'mov x,m2',  'clr x',     'mov x,y',  'mov y,a',  'mov y,b',  'mov y,c',  'mov y,d',  'mov y,m1',  'mov y,m2', 'mov y,x',  'clr y'],
+  /* 4 */ ['ldi a,0',   'ldi a,1',   'ldi a,2',   'ldi a,3',   'ldi a,4',   'ldi a,5',   'ldi a,6',   'ldi a,7',  'ldi a,8',  'ldi a,9',  'ldi a,10', 'ldi a,11', 'ldi a,12',  'ldi a,13', 'ldi a,14', 'ldi a,15'],
+  /* 5 */ ['ldi a,-16', 'ldi a,-15', 'ldi a,-14', 'ldi a,-13', 'ldi a,-12', 'ldi a,-11', 'ldi a,-10', 'ldi a,-9', 'ldi a,-8', 'ldi a,-7', 'ldi a,-6', 'ldi a,-5', 'ldi a,-4',  'ldi a,-3', 'ldi a,-2', 'ldi a,-1'],
+  /* 6 */ ['ldi b,0',   'ldi b,1',   'ldi b,2',   'ldi b,3',   'ldi b,4',   'ldi b,5',   'ldi b,6',   'ldi b,7',  'ldi b,8',  'ldi b,9',  'ldi b,10', 'ldi b,11', 'ldi b,12',  'ldi b,13', 'ldi b,14', 'ldi b,15'],
+  /* 7 */ ['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4',  'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
+  /* 8 */ ['clr a',     'add',       'inc',       'and',       'orr',       'eor',       'not',       'rol',      'clr d',    'add d',    'inc d',    'and d',    'orr d',     'eor d',    'not d',    'rol d'],
+  /* 9 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* A */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* B */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* C */ ['ldi m,',     null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* D */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* E */ ['ldi j,',     null,       'bne',        null,       'beq',        null,       'jmp',       'jsr',      'bcs',       null,       null,       null,       null,        null,       null,       null],
+  /* F */ ['blt',       'jlt',        null,        null,       'ble',        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null]
 ];
 
 export const opcodes_reverse_class = (opcode: number): { class: string, cycles: number } => {
