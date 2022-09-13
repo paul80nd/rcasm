@@ -52,13 +52,14 @@ suite('rcasm - Compiler Instrs', () => {
 
   test('clr ops', function () {
     assertProgram('clr a \n clr b \n clr c \n clr d', [0, 0, 0x00, 0x09, 0x12, 0x1B]);
+    assertProgram('clr m1 \n clr m2 \n clr x \n clr y', [0, 0, 0x24, 0x2D, 0x36, 0x3F]);
   });
 
   test('clr mis-ops', function () {
     assertHasError('clr', '1:1: error: Parameter required');
     assertHasError('clr 45', '1:5: error: Register required');
     assertHasError('clr g', '1:5: error: Register required');
-    assertHasError('clr x', '1:5: error: Invalid register - choose one of [a|b|c|d]');
+    assertHasError('clr j1', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
   });
 
@@ -67,17 +68,32 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasError('mov a', '1:1: error: Two parameters required');
     assertHasError('mov 45,a', '1:5: error: Register required');
     assertHasError('mov g,a', '1:5: error: Register required');
-    assertHasError('mov x,a', '1:5: error: Invalid register - choose one of [a|b|c|d]');
+    assertHasError('mov j1,a', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
     assertHasError('mov a,45', '1:7: error: Register required');
     assertHasError('mov a,g', '1:7: error: Register required');
-    assertHasError('mov a,x', '1:7: error: Invalid register - choose one of [a|b|c|d]');
+    assertHasError('mov a,j2', '1:7: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
   });
 
-  test('mov ops', function () {
+  test('mov ops lo', function () {
     assertProgram('mov a,a \n mov a,b \n mov a,c \n mov a,d', [0, 0, 0x00, 0x01, 0x02, 0x03]);
+    assertProgram('mov a,m1 \n mov a,m2 \n mov a,x \n mov a,y', [0, 0, 0x04, 0x05, 0x06, 0x07]);
     assertProgram('mov b,a \n mov b,b \n mov b,c \n mov b,d', [0, 0, 0x08, 0x09, 0x0A, 0x0B]);
+    assertProgram('mov b,m1 \n mov b,m2 \n mov b,x \n mov b,y', [0, 0, 0x0C, 0x0D, 0x0E, 0x0F]);
     assertProgram('mov c,a \n mov c,b \n mov c,c \n mov c,d', [0, 0, 0x10, 0x11, 0x12, 0x13]);
+    assertProgram('mov c,m1 \n mov c,m2 \n mov c,x \n mov c,y', [0, 0, 0x14, 0x15, 0x16, 0x17]);
     assertProgram('mov d,a \n mov d,b \n mov d,c \n mov d,d', [0, 0, 0x18, 0x19, 0x1A, 0x1B]);
+    assertProgram('mov d,m1 \n mov d,m2 \n mov d,x \n mov d,y', [0, 0, 0x1C, 0x1D, 0x1E, 0x1F]);
+  });
+
+  test('mov ops hi', function () {
+    assertProgram('mov m1,a \n mov m1,b \n mov m1,c \n mov m1,d', [0, 0, 0x20, 0x21, 0x22, 0x23]);
+    assertProgram('mov m1,m1 \n mov m1,m2 \n mov m1,x \n mov m1,y', [0, 0, 0x24, 0x25, 0x26, 0x27]);
+    assertProgram('mov m2,a \n mov m2,b \n mov m2,c \n mov m2,d', [0, 0, 0x28, 0x29, 0x2A, 0x2B]);
+    assertProgram('mov m2,m1 \n mov m2,m2 \n mov m2,x \n mov m2,y', [0, 0, 0x2C, 0x2D, 0x2E, 0x2F]);
+    assertProgram('mov x,a \n mov x,b \n mov x,c \n mov x,d', [0, 0, 0x30, 0x31, 0x32, 0x33]);
+    assertProgram('mov x,m1 \n mov x,m2 \n mov x,x \n mov x,y', [0, 0, 0x34, 0x35, 0x36, 0x37]);
+    assertProgram('mov y,a \n mov y,b \n mov y,c \n mov y,d', [0, 0, 0x38, 0x39, 0x3A, 0x3B]);
+    assertProgram('mov y,m1 \n mov y,m2 \n mov y,x \n mov y,y', [0, 0, 0x3C, 0x3D, 0x3E, 0x3F]);
   });
 
   test('opc mis-ops', function () {

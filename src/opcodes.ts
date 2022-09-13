@@ -15,7 +15,11 @@ const movTargets: { [index: string]: number } = {
   'a': 0x0,
   'b': 0x1,
   'c': 0x2,
-  'd': 0x3
+  'd': 0x3,
+  'm1': 0x4,
+  'm2': 0x5,
+  'x': 0x6,
+  'y': 0x7
 };
 
 export enum ParamForm {
