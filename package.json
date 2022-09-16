@@ -1,10 +1,14 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Relay Computer Assembler",
   "main": "./lib/umd/src/index.js",
   "typings": "./lib/umd/src/index",
   "module": "./lib/esm/src/index.js",
+  "files": [
+    "/lib/esm/src",
+    "/lib/umd/src"
+  ],
   "author": "Paul Law",
   "license": "MIT",
   "repository": {
