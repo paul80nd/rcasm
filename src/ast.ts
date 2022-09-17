@@ -50,7 +50,7 @@ export function mkInsn(mnemonic: string, p1: Expr | null, p2: Expr | null, loc: 
   return { type: 'insn', mnemonic, p1, p2, loc };
 }
 
-export enum DataSize { Byte, Word };
+export enum DataSize { Byte, Word }
 export interface StmtData extends Node {
   type: 'data';
   dataSize: DataSize;

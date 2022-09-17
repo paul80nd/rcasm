@@ -132,7 +132,7 @@ function mergeSegments(segments_: [string, Segment][]): {
     };
   }
 
-  const [_, s0] = segments[0];
+  const [, s0] = segments[0];
   const block0 = s0.blocks[0];
   const blockN = s0.blocks[s0.blocks.length - 1];
   let minAddr = block0.start;
@@ -147,7 +147,7 @@ function mergeSegments(segments_: [string, Segment][]): {
   }
 
   const buf = new Uint8Array(maxAddr);
-  for (const [_, seg] of segments) {
+  for (const [, seg] of segments) {
     for (const b of seg.blocks) {
       for (let i = 0; i < b.binary.length; i++) {
         buf[b.start + i] = b.binary[i];

@@ -2,7 +2,7 @@ import { opcodes_reverse_map, opcodes_reverse_class } from './opcodes';
 
 export interface DisasmOptions {
   isInstruction?: (addr: number) => boolean;
-};
+}
 
 function toHex8(v: number): string {
   return `${v.toString(16).toUpperCase().padStart(2, '0')}`;
@@ -19,9 +19,9 @@ function toHex16(v: number): string {
 * @param chunk_size {Integer} Size of every group
 */
 export function chunkArray<T>(myArray: T[], chunk_size: number) {
-  var index = 0;
-  var arrayLength = myArray.length;
-  var tempArray = [];
+  let index = 0;
+  const arrayLength = myArray.length;
+  const tempArray = [];
 
   for (index = 0; index < arrayLength; index += chunk_size) {
     const myChunk = myArray.slice(index, index + chunk_size);
@@ -75,7 +75,7 @@ class Disassembler {
     this.bytes.bytes = [];
   }
 
-  print = (addr: number, bytes: number[], decoded: string, cycle: string) => {
+  print = (addr: number, bytes: number[], decoded: string) => {
     this.flushBytes();
     const b0 = toHex8(bytes[0]);
     const b1 = bytes.length >= 2 ? toHex8(bytes[1]) : '  ';
@@ -84,16 +84,16 @@ class Disassembler {
     this.output.push(line);
   };
 
-  disSingle(decl: string, op: number, cls: { class: string; cycles: number; }) {
+  disSingle(decl: string, op: number) {
     const addr = this.curAddr;
-    this.print(addr, [op], decl, cls.cycles.toString());
+    this.print(addr, [op], decl);
   }
 
-  disTriple(decl: string, op: number, cls: { class: string; cycles: number; }) {
+  disTriple(decl: string, op: number) {
     const addr = this.curAddr;
     const hi = this.byte();
     const lo = this.byte();
-    this.print(addr, [op, hi, lo], decl, /*label,*/ cls.cycles.toString());
+    this.print(addr, [op, hi, lo], decl);
   }
 
   disUnknown(op: number) {
@@ -109,7 +109,7 @@ class Disassembler {
 
   disassemble() {
     const len = this.buf.byteLength;
-    let isInsn = (addr: number) => true;
+    let isInsn = (_addr: number) => true;
     if (this.disasmOptions && this.disasmOptions.isInstruction) {
       isInsn = this.disasmOptions.isInstruction;
     }
@@ -125,10 +125,10 @@ class Disassembler {
       if (isInsn(this.curAddr) && decl !== null) {
         const cls = opcodes_reverse_class(op);
         if (cls.cycles === 3) {
-          this.disTriple(decl, op, cls);
+          this.disTriple(decl, op);
           continue;
         } else {
-          this.disSingle(decl, op, cls);
+          this.disSingle(decl, op);
           continue;
         }
       } else {
@@ -142,6 +142,6 @@ class Disassembler {
 }
 
 export function disassemble(prg: Uint8Array, options?: DisasmOptions) {
-  let disasm = new Disassembler(prg, options);
+  const disasm = new Disassembler(prg, options);
   return disasm.disassemble();
 }

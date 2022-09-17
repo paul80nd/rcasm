@@ -8,7 +8,7 @@ import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
 
-var parser = require('./g_parser');
+const parser = require('./g_parser');
 
 interface Error {
   loc: SourceLoc,
@@ -17,7 +17,7 @@ interface Error {
 
 export interface Diagnostic extends Error {
   formatted: string;
-};
+}
 
 interface LabelAddr {
   addr: number,
@@ -119,7 +119,7 @@ interface SymSegment {
 }
 
 class Scopes {
-  passCount: number = 0;
+  passCount = 0;
   root: NamedScope<SymEntry> = new NamedScope<SymEntry>(null, '');
   curSymtab = this.root;
   private anonScopeCount = 0;
@@ -211,7 +211,7 @@ class Scopes {
     const labels = [];
     while (stack.length > 0) {
       const s = stack.pop()!;
-      for (let [k, lbl] of s.sym.syms) {
+      for (const [k, lbl] of s.sym.syms) {
         if (lbl.type === 'label') {
           labels.push({
             path: [...s.path, k],
@@ -221,7 +221,7 @@ class Scopes {
           });
         }
       }
-      for (let [k, sym] of s.sym.children) {
+      for (const [, sym] of s.sym.children) {
         pushScope(s.path, sym);
       }
     }
@@ -440,7 +440,7 @@ class Assembler {
 
     // Optional first parameter
     if (stmt.p1 && opc.p1) {
-      let tgt = this.checkRegister(stmt.p1, opc.p1);
+      const tgt = this.checkRegister(stmt.p1, opc.p1);
       if (tgt === undefined) { return; }
       opcode |= opc.p1.op(tgt);
     }
@@ -460,7 +460,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
@@ -479,12 +479,12 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
-    let src = this.checkRegister(stmt.p2, opc.p2);
+    const src = this.checkRegister(stmt.p2, opc.p2);
     if (src === undefined) { return; }
     opcode |= opc.p2.op(src);
 
@@ -503,7 +503,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    let val = this.checkLiteral(stmt.p1, 0x00, 0xFF, 'h');
+    const val = this.checkLiteral(stmt.p1, 0x00, 0xFF, 'h');
     if (val === undefined) { return; }
     opcode |= opc.p1.op(val);
 
@@ -521,14 +521,14 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
     if (tgt <= 0x10) {
       // 8 bit ldi
-      let val = this.checkLiteral(stmt.p2, -16, 15);
+      const val = this.checkLiteral(stmt.p2, -16, 15);
       if (val === undefined) { return; }
       opcode |= opc.p2.op(val);
     } else {
@@ -542,7 +542,7 @@ class Assembler {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.value];
+      const reg = available.cs?.[given.value];
       if (reg === undefined) {
         this.addError(`Invalid register - choose one of [${Object.keys(available.cs!).join('|')}]`, given.loc);
       }
@@ -554,20 +554,22 @@ class Assembler {
   checkLiteral(given: ast.Expr, min: number, max: number, rangeDisplay: 'b' | 'h' | 'd' = 'd'): number | undefined {
     const ev = this.evalExprToInt(given, 'value');
     if (!anyErrors(ev)) {
-      let val = ev.value;
+      const val = ev.value;
       if (val < min || val > max) {
         let range = '';
         switch (rangeDisplay) {
-          case 'b':
+          case 'b': {
             const maxb = max.toString(2);
             const minb = ('0'.repeat(maxb.length) + min.toString(2)).slice(-maxb.length);
             range = `${minb}b and ${maxb}b`;
             break;
-          case 'h':
+          }
+          case 'h': {
             const maxh = max.toString(16).toUpperCase();
             const minh = ('0'.repeat(maxh.length) + min.toString(16).toUpperCase()).slice(-maxh.length);
             range = `0x${minh} and 0x${maxh}`;
             break;
+          }
           default:
             range = `${min} and ${max}`;
         }
@@ -658,7 +660,7 @@ class Assembler {
     }
   }
 
-  checkDirectives(node: ast.Stmt, localScopeName: string | null): void {
+  checkDirectives(node: ast.Stmt, _localScopeName: string | null): void {
     switch (node.type) {
       case 'data': {
         this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);

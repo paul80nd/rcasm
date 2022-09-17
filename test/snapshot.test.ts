@@ -1,6 +1,6 @@
 // Closely inspired by https://github.com/nurpax/c64jasm/blob/master/test/test.ts
 
-var glob = require('glob').glob;
+const glob = require('glob').glob;
 
 import * as assert from 'assert';
 import * as path from 'path';
@@ -26,14 +26,14 @@ suite('rcasm - Snapshots', () => {
         const disasmOptions: DisasmOptions = {
         };
 
-        const { prg, errors, debugInfo } = assemble(src)!;
+        const { prg, errors, debugInfo } = assemble(src);
 
         if (lines.length > 0) {
           const match = /;\s+disasm:\s+(.*)/.exec(lines[0]);
           if (match !== null) {
             const opts = match[1].split(' ');
             if (opts.includes('debuginfo')) {
-              disasmOptions.isInstruction = debugInfo!.info().isInstruction;
+              disasmOptions.isInstruction = debugInfo?.info().isInstruction;
             }
           }
         }
