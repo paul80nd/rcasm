@@ -1,24 +1,24 @@
 'use strict';
 
 import * as assert from 'assert';
-import * as asm from '../src/asm'
+import * as asm from '../src/asm';
 
 function assertProgram(code: string, data: number[], debug: boolean = false) {
   let result = asm.assemble(code);
-  if (debug) console.log(JSON.stringify(result));
+  if (debug) { console.log(JSON.stringify(result)); }
   assert.deepEqual(result.prg, Uint8Array.from(data));
 }
 
 function assertHasError(code: string, error: string, debug: boolean = false) {
   let result = asm.assemble(code);
-  if (debug) console.log(JSON.stringify(result));
+  if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.errors.length, 1);
   assert.equal(result.errors[0].formatted, error);
 }
 
 function assertHasWarning(code: string, warning: string, debug: boolean = false) {
   let result = asm.assemble(code);
-  if (debug) console.log(JSON.stringify(result));
+  if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.warnings.length, 1);
   assert.equal(result.warnings[0].formatted, warning);
 }
