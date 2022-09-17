@@ -8,6 +8,7 @@ import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const parser = require('./g_parser');
 
 interface Error {
@@ -38,7 +39,7 @@ function mkEvalValue<T>(v: T, complete: boolean): EvalValue<T> {
   return { value: v, errors: false, completeFirstPass: complete };
 }
 
-function anyErrors(...args: (EvalValue<any> | undefined)[]) {
+function anyErrors(...args: (EvalValue<unknown> | undefined)[]) {
   return args.some(e => e !== undefined && e.errors);
 }
 
@@ -55,6 +56,7 @@ class NamedScope<T> {
 
   // Find symbol from current and all parent scopes
   findSymbol(name: string): T & { seen: number } | undefined {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
       const n = cur.syms.get(name);
       if (n !== undefined) {
@@ -72,6 +74,7 @@ class NamedScope<T> {
 
     // Go up the scope tree until we find the start of
     // the relative path.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let tab: NamedScope<T> | null | undefined = this;
     while (tab.children.get(path[0]) === undefined) {
       tab = tab.parent;
@@ -95,6 +98,7 @@ class NamedScope<T> {
   }
 
   updateSymbol(name: string, val: T, pass: number) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
       const v = cur.syms.get(name);
       if (v !== undefined) {
@@ -210,19 +214,21 @@ class Scopes {
 
     const labels = [];
     while (stack.length > 0) {
-      const s = stack.pop()!;
-      for (const [k, lbl] of s.sym.syms) {
-        if (lbl.type === 'label') {
-          labels.push({
-            path: [...s.path, k],
-            addr: lbl.data.value.addr,
-            size: 0,
-            segmentName: segmentToName[lbl.segment.id]
-          });
+      const s = stack.pop();
+      if (s) {
+        for (const [k, lbl] of s.sym.syms) {
+          if (lbl.type === 'label') {
+            labels.push({
+              path: [...s.path, k],
+              addr: lbl.data.value.addr,
+              size: 0,
+              segmentName: segmentToName[lbl.segment.id]
+            });
+          }
         }
-      }
-      for (const [, sym] of s.sym.children) {
-        pushScope(s.path, sym);
+        for (const [, sym] of s.sym.children) {
+          pushScope(s.path, sym);
+        }
       }
     }
 
@@ -246,6 +252,7 @@ class Scopes {
 
 // Format "typeof foo" for error messages.  Want 'object' type
 // to return 'array' if it's an Array instance.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatTypename(v: any): string {
   const typeName = typeof v;
   if (typeName === 'object') {
@@ -367,6 +374,7 @@ class Assembler {
     return this.evalExprType(node, 'number', msg);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
       case 'literal': {
@@ -544,7 +552,11 @@ class Assembler {
     } else {
       const reg = available.cs?.[given.value];
       if (reg === undefined) {
-        this.addError(`Invalid register - choose one of [${Object.keys(available.cs!).join('|')}]`, given.loc);
+        if (available.cs) {
+          this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+        } else {
+          this.addError(`Invalid register`, given.loc);
+        }
       }
       return reg;
     }
