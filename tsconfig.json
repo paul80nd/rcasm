@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
 		"module": "umd",
 		"moduleResolution": "node",
     "removeComments": true,
@@ -18,7 +18,7 @@
     "stripInternal": true,
     "downlevelIteration": true,
     "lib": [
-			"es5", "es2015.promise"
+			"es2020"
 		]
   },
   "include": [

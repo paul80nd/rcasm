@@ -1,5 +1,6 @@
 // Direct copy of https://github.com/nurpax/c64jasm/blob/master/src/debugInfo.ts minus multiple file support
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const FastBitSet = require('fastbitset');
 
 import { SourceLoc } from './ast';

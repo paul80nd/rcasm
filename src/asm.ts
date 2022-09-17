@@ -8,7 +8,8 @@ import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
 
-var parser = require('./g_parser');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const parser = require('./g_parser');
 
 interface Error {
   loc: SourceLoc,
@@ -17,7 +18,7 @@ interface Error {
 
 export interface Diagnostic extends Error {
   formatted: string;
-};
+}
 
 interface LabelAddr {
   addr: number,
@@ -38,7 +39,7 @@ function mkEvalValue<T>(v: T, complete: boolean): EvalValue<T> {
   return { value: v, errors: false, completeFirstPass: complete };
 }
 
-function anyErrors(...args: (EvalValue<any> | undefined)[]) {
+function anyErrors(...args: (EvalValue<unknown> | undefined)[]) {
   return args.some(e => e !== undefined && e.errors);
 }
 
@@ -55,6 +56,7 @@ class NamedScope<T> {
 
   // Find symbol from current and all parent scopes
   findSymbol(name: string): T & { seen: number } | undefined {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
       const n = cur.syms.get(name);
       if (n !== undefined) {
@@ -72,6 +74,7 @@ class NamedScope<T> {
 
     // Go up the scope tree until we find the start of
     // the relative path.
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     let tab: NamedScope<T> | null | undefined = this;
     while (tab.children.get(path[0]) === undefined) {
       tab = tab.parent;
@@ -95,6 +98,7 @@ class NamedScope<T> {
   }
 
   updateSymbol(name: string, val: T, pass: number) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
     for (let cur: NamedScope<T> | null = this; cur !== null; cur = cur.parent) {
       const v = cur.syms.get(name);
       if (v !== undefined) {
@@ -119,7 +123,7 @@ interface SymSegment {
 }
 
 class Scopes {
-  passCount: number = 0;
+  passCount = 0;
   root: NamedScope<SymEntry> = new NamedScope<SymEntry>(null, '');
   curSymtab = this.root;
   private anonScopeCount = 0;
@@ -210,19 +214,21 @@ class Scopes {
 
     const labels = [];
     while (stack.length > 0) {
-      const s = stack.pop()!;
-      for (let [k, lbl] of s.sym.syms) {
-        if (lbl.type === 'label') {
-          labels.push({
-            path: [...s.path, k],
-            addr: lbl.data.value.addr,
-            size: 0,
-            segmentName: segmentToName[lbl.segment.id]
-          });
+      const s = stack.pop();
+      if (s) {
+        for (const [k, lbl] of s.sym.syms) {
+          if (lbl.type === 'label') {
+            labels.push({
+              path: [...s.path, k],
+              addr: lbl.data.value.addr,
+              size: 0,
+              segmentName: segmentToName[lbl.segment.id]
+            });
+          }
         }
-      }
-      for (let [k, sym] of s.sym.children) {
-        pushScope(s.path, sym);
+        for (const [, sym] of s.sym.children) {
+          pushScope(s.path, sym);
+        }
       }
     }
 
@@ -246,6 +252,7 @@ class Scopes {
 
 // Format "typeof foo" for error messages.  Want 'object' type
 // to return 'array' if it's an Array instance.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function formatTypename(v: any): string {
   const typeName = typeof v;
   if (typeName === 'object') {
@@ -367,6 +374,7 @@ class Assembler {
     return this.evalExprType(node, 'number', msg);
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
       case 'literal': {
@@ -440,7 +448,7 @@ class Assembler {
 
     // Optional first parameter
     if (stmt.p1 && opc.p1) {
-      let tgt = this.checkRegister(stmt.p1, opc.p1);
+      const tgt = this.checkRegister(stmt.p1, opc.p1);
       if (tgt === undefined) { return; }
       opcode |= opc.p1.op(tgt);
     }
@@ -460,7 +468,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
@@ -479,12 +487,12 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
-    let src = this.checkRegister(stmt.p2, opc.p2);
+    const src = this.checkRegister(stmt.p2, opc.p2);
     if (src === undefined) { return; }
     opcode |= opc.p2.op(src);
 
@@ -503,7 +511,7 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    let val = this.checkLiteral(stmt.p1, 0x00, 0xFF, 'h');
+    const val = this.checkLiteral(stmt.p1, 0x00, 0xFF, 'h');
     if (val === undefined) { return; }
     opcode |= opc.p1.op(val);
 
@@ -521,14 +529,14 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    let tgt = this.checkRegister(stmt.p1, opc.p1);
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
     if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
     if (tgt <= 0x10) {
       // 8 bit ldi
-      let val = this.checkLiteral(stmt.p2, -16, 15);
+      const val = this.checkLiteral(stmt.p2, -16, 15);
       if (val === undefined) { return; }
       opcode |= opc.p2.op(val);
     } else {
@@ -542,9 +550,13 @@ class Assembler {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      let reg = available.cs![given.value];
+      const reg = available.cs?.[given.value];
       if (reg === undefined) {
-        this.addError(`Invalid register - choose one of [${Object.keys(available.cs!).join('|')}]`, given.loc);
+        if (available.cs) {
+          this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+        } else {
+          this.addError(`Invalid register`, given.loc);
+        }
       }
       return reg;
     }
@@ -554,20 +566,22 @@ class Assembler {
   checkLiteral(given: ast.Expr, min: number, max: number, rangeDisplay: 'b' | 'h' | 'd' = 'd'): number | undefined {
     const ev = this.evalExprToInt(given, 'value');
     if (!anyErrors(ev)) {
-      let val = ev.value;
+      const val = ev.value;
       if (val < min || val > max) {
         let range = '';
         switch (rangeDisplay) {
-          case 'b':
+          case 'b': {
             const maxb = max.toString(2);
             const minb = ('0'.repeat(maxb.length) + min.toString(2)).slice(-maxb.length);
             range = `${minb}b and ${maxb}b`;
             break;
-          case 'h':
+          }
+          case 'h': {
             const maxh = max.toString(16).toUpperCase();
             const minh = ('0'.repeat(maxh.length) + min.toString(16).toUpperCase()).slice(-maxh.length);
             range = `0x${minh} and 0x${maxh}`;
             break;
+          }
           default:
             range = `${min} and ${max}`;
         }
@@ -658,7 +672,7 @@ class Assembler {
     }
   }
 
-  checkDirectives(node: ast.Stmt, localScopeName: string | null): void {
+  checkDirectives(node: ast.Stmt, _localScopeName: string | null): void {
     switch (node.type) {
       case 'data': {
         this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);

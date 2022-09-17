@@ -1,9 +1,9 @@
 'use strict';
 
 import * as assert from 'assert';
-import * as ast from '../src/ast'
+import * as ast from '../src/ast';
 
-var parser = require('../src/g_parser')
+const parser = require('../src/g_parser');
 
 export function parse(source: string): ast.Line[] {
   const program = <ast.Program>parser.parse(source);
@@ -25,29 +25,29 @@ export function assertLabel(node: ast.Line, label: string, from: number, to: num
   assert.equal(node.label?.loc.end.column, to);
 }
 
-export function assertInstruction(code: string, mnemonic: string, op1: number | string | null, op2: number | string | null, debug: boolean = false) {
-  let result = parse(code);
-  if (debug) console.log(JSON.stringify(result));
+export function assertInstruction(code: string, mnemonic: string, op1: number | string | null, op2: number | string | null, debug = false) {
+  const result = parse(code);
+  if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.length, 1);
-  if (result[0].stmt?.type != 'insn') assert.fail('expected instruction');
+  if (result[0].stmt?.type !== 'insn') { assert.fail('expected instruction'); }
   assert.equal(result[0].stmt?.mnemonic, mnemonic);
   if (op1 !== null) {
-    let op = result[0].stmt?.p1;
-    if (op?.type === 'ident') assert.equal(op.name, op1);
-    if (op?.type === 'literal') assert.equal(op.lit, op1);
+    const op = result[0].stmt?.p1;
+    if (op?.type === 'ident') { assert.equal(op.name, op1); }
+    if (op?.type === 'literal') { assert.equal(op.lit, op1); }
   }
   if (op2 !== null) {
-    let op = result[0].stmt?.p2;
-    if (op?.type === 'ident') assert.equal(op.name, op2);
-    if (op?.type === 'literal') assert.equal(op.lit, op2);
+    const op = result[0].stmt?.p2;
+    if (op?.type === 'ident') { assert.equal(op.name, op2); }
+    if (op?.type === 'literal') { assert.equal(op.lit, op2); }
   }
 }
 
-export function assertData(code: string, dataSize: ast.DataSize, debug: boolean = false) {
-  let result = parse(code);
-  if (debug) console.log(JSON.stringify(result));
+export function assertData(code: string, dataSize: ast.DataSize, debug = false) {
+  const result = parse(code);
+  if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.length, 1);
-  if (result[0].stmt?.type != 'data') assert.fail('expected data');
+  if (result[0].stmt?.type !== 'data') { assert.fail('expected data'); }
   const data = result[0].stmt;
   assert.equal(data.dataSize, dataSize);
 }
@@ -57,7 +57,7 @@ export function assertError(code: string, message: string, offset: number) {
     parse(code);
     assert.fail('no error thrown');
   } catch (err) {
-    if ('name' in err && err.name == 'SyntaxError') {
+    if ('name' in err && err.name === 'SyntaxError') {
       assert.equal(err.message, message);
       assert.equal(err.location.start.offset, offset);
     } else {
@@ -69,18 +69,18 @@ export function assertError(code: string, message: string, offset: number) {
 suite('rcasm - Parser', () => {
 
   test('Empty Orchestra', function () {
-    let result = parse('');
+    const result = parse('');
     assertNoop(result[0]);
   });
 
   test('No-ops', function () {
-    let result = parse('    \n   ');
+    const result = parse('    \n   ');
     assertNoop(result[0]);
     assertNoop(result[1]);
   });
 
   test('Comments Only', function () {
-    let result = parse('; comment\n; comment2');
+    const result = parse('; comment\n; comment2');
     assert.equal(result.length, 2);
     assertNoop(result[0]);
     assertNoLabel(result[0]);
@@ -89,7 +89,7 @@ suite('rcasm - Parser', () => {
   });
 
   test('Label No Stmt', function () {
-    let result = parse('xyz:');
+    const result = parse('xyz:');
     assertLabel(result[0], 'xyz', 1, 5);
     assertNoop(result[0]);
   });
@@ -118,6 +118,6 @@ suite('rcasm - Parser', () => {
     assert.strictEqual(3, program.loc.end.line);
     assert.strictEqual(14, program.loc.end.column);
     assert.strictEqual(33, program.loc.end.offset);
-  })
+  });
 
 });

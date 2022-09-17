@@ -1,13 +1,13 @@
 // Closely inspired by https://github.com/nurpax/c64jasm/blob/master/test/test.ts
 
-var glob = require('glob').glob;
+const glob = require('glob').glob;
 
 import * as assert from 'assert';
 import * as path from 'path';
 import * as fs from 'fs';
 
-import { assemble } from '../src/asm'
-import { DisasmOptions, disassemble } from '../src/disasm'
+import { assemble } from '../src/asm';
+import { DisasmOptions, disassemble } from '../src/disasm';
 
 function readLines(fname: string) {
   const lines = fs.readFileSync(fname).toString().split('\n');
@@ -26,14 +26,14 @@ suite('rcasm - Snapshots', () => {
         const disasmOptions: DisasmOptions = {
         };
 
-        const { prg, errors, debugInfo } = assemble(src)!;
+        const { prg, errors, debugInfo } = assemble(src);
 
         if (lines.length > 0) {
           const match = /;\s+disasm:\s+(.*)/.exec(lines[0]);
           if (match !== null) {
             const opts = match[1].split(' ');
             if (opts.includes('debuginfo')) {
-              disasmOptions.isInstruction = debugInfo!.info().isInstruction;
+              disasmOptions.isInstruction = debugInfo?.info().isInstruction;
             }
           }
         }
@@ -49,12 +49,12 @@ suite('rcasm - Snapshots', () => {
 
         // If the expected file doesn't exist, create it.  This is for new test authoring.
         if (!fs.existsSync(expectedFname)) {
-          fs.writeFileSync(expectedFname, disasmLines.join('\n'))
+          fs.writeFileSync(expectedFname, disasmLines.join('\n'));
         }
 
         const expectedLines = readLines(expectedFname);
         for (let lineIdx = 0; lineIdx < expectedLines.length; lineIdx++) {
-          if (expectedLines[lineIdx].trim() != disasmLines[lineIdx].trim()) {
+          if (expectedLines[lineIdx].trim() !== disasmLines[lineIdx].trim()) {
             fs.writeFileSync(actualFname, disasmLines.join('\n'));
             console.error(`Test failed.
 Input .asm:
