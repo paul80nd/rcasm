@@ -23,6 +23,7 @@ const movTargets: { [index: string]: number } = {
 };
 
 export enum ParamForm {
+  None,
   AluDst,
   ClrTgt,
   GtoTgt,
@@ -66,6 +67,9 @@ export const opcodes: { [index: string]: OpCode } = {
     p2: { cs: null, op: p => p }
   },
 
+  // MISC 10101---
+  'hlt': { op: 0xA8 | 0x06 , pf: ParamForm.None, p1: null, p2: null },
+
   // GOTO 11dscznx
   'jmp': { op: 0xC0 | 0x26, pf: ParamForm.GtoTgt, p1: null, p2: null },
   'jsr': { op: 0xC0 | 0x27, pf: ParamForm.GtoTgt, p1: null, p2: null },
@@ -92,7 +96,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 7 */ ['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4',  'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
   /* 8 */ ['clr a',     'add',       'inc',       'and',       'orr',       'eor',       'not',       'rol',      'clr d',    'add d',    'inc d',    'and d',    'orr d',     'eor d',    'not d',    'rol d'],
   /* 9 */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
-  /* A */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
+  /* A */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,      'hlt',       null],
   /* B */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
   /* C */ ['ldi m,',     null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
   /* D */ [ null,        null,        null,        null,        null,        null,        null,        null,       null,       null,       null,       null,       null,        null,       null,       null],
