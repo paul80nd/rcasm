@@ -63,6 +63,14 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
   });
 
+  test('hlt ops', function() {
+    assertProgram('hlt', [0, 0, 0xAE]);
+  });
+
+  test('hlt mis-ops', function () {
+    assertHasWarning('hlt a', '1:5: warning: Parameter not required');
+  });
+
   test('mov mis-ops', function () {
     assertHasError('mov', '1:1: error: Two parameters required');
     assertHasError('mov a', '1:1: error: Two parameters required');

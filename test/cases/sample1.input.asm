@@ -12,6 +12,8 @@ loop:   mov c,b     ; slide B -> C
         mov b,a     ;       A -> B
         add         ; and add together
 
-done:   bcs done    ; infinite loop if overflowed
+        bcs end     ; jump to end if overflowed
 
         jmp loop    ; otherwise have another go
+
+end:    hlt         ; halt

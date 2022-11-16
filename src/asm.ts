@@ -439,6 +439,15 @@ class Assembler {
     this.emit(word & 0xff);
   }
 
+  assembleNonInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
+    // Form: xxx
+    if (stmt.p1) { this.addWarning(`Parameter not required`, stmt.p1.loc); }
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    // Base opcode
+    this.emit(opc.op);
+  }
+
   assembleAluInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
     // Form: xxx [dest]
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
@@ -769,6 +778,9 @@ class Assembler {
     if (op !== undefined) {
       withMarkAsInsn(() => {
         switch (op.pf) {
+          case opc.ParamForm.None:
+            this.assembleNonInstr(op, stmt);
+            break;
           case opc.ParamForm.AluDst:
             this.assembleAluInstr(op, stmt);
             break;
