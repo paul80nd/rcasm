@@ -65,10 +65,12 @@ suite('rcasm - Compiler Instrs', () => {
 
   test('hlt ops', function() {
     assertProgram('hlt', [0, 0, 0xAE]);
+    assertProgram('hlr', [0, 0, 0xAF]);
   });
 
   test('hlt mis-ops', function () {
     assertHasWarning('hlt a', '1:5: warning: Parameter not required');
+    assertHasWarning('hlr a', '1:5: warning: Parameter not required');
   });
 
   test('mov mis-ops', function () {

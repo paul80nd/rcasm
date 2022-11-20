@@ -62,3 +62,5 @@
 003D: 3D           mov y,m2
 003E: 3E           mov y,x
 003F: 3F           clr y
+0040: AE           hlt
+0041: AF           hlr

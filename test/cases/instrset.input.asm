@@ -73,3 +73,8 @@ move8s:
     mov y,m2
     mov y,x
     mov y,y
+
+miscs:
+
+    hlt
+    hlr
