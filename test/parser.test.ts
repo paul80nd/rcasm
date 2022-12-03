@@ -98,6 +98,7 @@ suite('rcasm - Parser', () => {
     assertInstruction('inc', 'inc', null, null);
     assertInstruction('and d', 'and', 'd', null);
     assertInstruction('ldi a,12', 'ldi', 'a', 12);
+    assertInstruction('ldi a,-12', 'ldi', 'a', -12);
     assertInstruction('mov a,d', 'mov', 'a', 'd');
     assertInstruction('mov a,d ; comment', 'mov', 'a', 'd');
     assertInstruction('mov xy,m2 ; comment', 'mov', 'xy', 'm2');
