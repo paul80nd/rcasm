@@ -133,6 +133,8 @@ suite('rcasm - Compiler Instrs', () => {
   test('ldi ops', function () {
     assertProgram('ldi a,0 \n ldi a,5 \n ldi a,10 \n ldi a,15', [0, 0, 0x40, 0x45, 0x4A, 0x4F]);
     assertProgram('ldi b,0 \n ldi b,5 \n ldi b,10 \n ldi b,15', [0, 0, 0x60, 0x65, 0x6A, 0x6F]);
+    assertProgram('ldi a,-16', [0, 0, 0x50]);
+    assertProgram('ldi b,-16', [0, 0, 0x70]);
     // TODO: Test negative
     // TODO: Test 16-bit ldi
     assertProgram('one: ldi a,one \n ldi a,one \n two: ldi a,two \n ldi a,two', [0, 0, 0x40, 0x40, 0x42, 0x42]);

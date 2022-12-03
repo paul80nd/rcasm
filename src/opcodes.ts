@@ -64,7 +64,7 @@ export const opcodes: { [index: string]: OpCode } = {
   'ldi': {
     op: 0x00 | 0x00, pf: ParamForm.SetTgtVal,
     p1: { cs: setDests, op: p => (((p & 0x2) === 0x2) ? 0xC0 : 0x40) | (p << 5) },
-    p2: { cs: null, op: p => p }
+    p2: { cs: null, op: p => p & 0x1F }
   },
 
   // MISC 10101---
