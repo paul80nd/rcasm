@@ -439,8 +439,9 @@ class Assembler {
     this.emit(word & 0xff);
   }
 
-  assembleNonInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx
+  assembleNonInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx
+    const opc = mne.ops[0];
     if (stmt.p1) { this.addWarning(`Parameter not required`, stmt.p1.loc); }
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
@@ -448,8 +449,9 @@ class Assembler {
     this.emit(opc.op);
   }
 
-  assembleAluInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx [dest]
+  assembleAluInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx [dest]
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
@@ -465,8 +467,9 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleClrInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest
+  assembleClrInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
@@ -484,8 +487,9 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleMovInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest, src
+  assembleMovInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest, src
+    const opc = mne.ops[0];
 
     if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
       this.addError(`Two parameters required`, stmt.loc);
@@ -508,8 +512,9 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleLitOpc(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx opcode
+  assembleLitOpc(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx opcode
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
@@ -527,8 +532,9 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleSetInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest,val OR xxx dest,label
+  assembleSetInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest,val OR xxx dest,label
+    const opc = mne.ops[0];
     if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
       this.addError(`Two parameters required`, stmt.loc);
       return;
@@ -602,8 +608,9 @@ class Assembler {
     return undefined;
   }
 
-  assembleBranch(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx label
+  assembleBranch(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx label
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
     if (!stmt.p1) {
       this.addError(`Parameter required`, stmt.loc);
@@ -763,7 +770,7 @@ class Assembler {
     }
 
     const stmt = line.stmt;
-    const op = opc.opcodes[stmt.mnemonic.toLocaleLowerCase()];
+    const mne = opc.mnemonics[stmt.mnemonic.toLocaleLowerCase()];
 
     // Mark the emitted output address range as
     // containing machine code instructions.  This
@@ -775,29 +782,29 @@ class Assembler {
       this.debugInfo.markAsInstruction(startPC, endPC);
     };
 
-    if (op !== undefined) {
+    if (mne !== undefined) {
       withMarkAsInsn(() => {
-        switch (op.pf) {
-          case opc.ParamForm.None:
-            this.assembleNonInstr(op, stmt);
+        switch (mne.mt) {
+          case opc.MnemonicType.Direct:
+            this.assembleNonInstr(mne, stmt);
             break;
-          case opc.ParamForm.AluDst:
-            this.assembleAluInstr(op, stmt);
+          case opc.MnemonicType.Alu:
+            this.assembleAluInstr(mne, stmt);
             break;
-          case opc.ParamForm.ClrTgt:
-            this.assembleClrInstr(op, stmt);
+          case opc.MnemonicType.Clear:
+            this.assembleClrInstr(mne, stmt);
             break;
-          case opc.ParamForm.MovDstSrc:
-            this.assembleMovInstr(op, stmt);
+          case opc.MnemonicType.Move:
+            this.assembleMovInstr(mne, stmt);
             break;
-          case opc.ParamForm.LitOpc:
-            this.assembleLitOpc(op, stmt);
+          case opc.MnemonicType.LitOpc:
+            this.assembleLitOpc(mne, stmt);
             break;
-          case opc.ParamForm.SetTgtVal:
-            this.assembleSetInstr(op, stmt);
+          case opc.MnemonicType.Set:
+            this.assembleSetInstr(mne, stmt);
             break;
-          case opc.ParamForm.GtoTgt:
-            this.assembleBranch(op, stmt);
+          case opc.MnemonicType.Goto:
+            this.assembleBranch(mne, stmt);
             break;
           default:
             this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);
