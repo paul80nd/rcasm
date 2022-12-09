@@ -67,7 +67,7 @@
 0042: A2           mov xy,j
 0043: A3           mov xy,as
 0044: A4           mov pc,m
-0045: A5           mov pc,xy
+0045: A5           rts
 0046: A6           mov pc,j
 0047: A7           mov pc,as
 0048: AE           hlt

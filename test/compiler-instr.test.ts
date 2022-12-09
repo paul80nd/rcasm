@@ -156,4 +156,9 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('one: ldi a,one \n ldi a,one \n two: ldi a,two \n ldi a,two', [0, 0, 0x40, 0x40, 0x42, 0x42]);
   });
 
+  test('jsr-rts ops', function () {
+    assertProgram('jsr label \n label: rts', [0, 0, 0xE7, 0x00, 0x03, 0xA5]);
+  });
+
+  //mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }]
 });
