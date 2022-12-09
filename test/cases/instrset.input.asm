@@ -13,6 +13,24 @@ clears:
 
     clr xy
 
+load8s:
+
+    ldi a,-16
+    ldi a,-8
+    ldi a,-1
+    ldi a,0
+    ldi a,1
+    ldi a,7
+    ldi a,15
+
+    ldi b,-16
+    ldi b,-8
+    ldi b,-1
+    ldi b,0
+    ldi b,1
+    ldi b,7
+    ldi b,15
+
 move8s:
 
     mov a,a
