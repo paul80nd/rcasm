@@ -102,13 +102,11 @@ export const mnemonics: { [index: string]: Mnemonic } = {
 
   // SETAB 01rvvvvv / GOTO 11d00000
   'ldi': {
-    mt: MnemonicType.Set, ops: [{
-      op: 0x40,
-      p1: { cs: set8Dests, op: p => p << 5 },
-      p2: { cs: null, op: p => p & 0x1F }
-    }]
+    mt: MnemonicType.Set, ops: [
+      { op: 0x40, p1: { cs: set8Dests, op: p => p << 5 }, p2: { cs: null, op: p => p & 0x1F } },
+      { op: 0xC0, p1: { cs: set16Dests, op: p => p << 5 }, p2: null }
+    ]
   },
-  // ldi a/b,-16..15 ldi m/j,0x0000-0xFFFF/label
 
   // MISC 10101---
   'hlt': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }] },

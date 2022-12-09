@@ -141,7 +141,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasError('ldi 56,0', '1:5: error: Register required');
     assertHasError('ldi a,g', '1:7: error: Undefined symbol \'g\'');
     assertHasError('ldi g,3', '1:5: error: Register required');
-    assertHasError('ldi x,3', '1:5: error: Invalid register - choose one of [a|b]');
+    assertHasError('ldi x,3', '1:5: error: Invalid register - choose one of [a|b] or [m|j]');
     assertHasError('ldi a,16', '1:7: error: Literal out of range (must be between -16 and 15)');
     assertHasError('ldi a,-17', '1:7: error: Literal out of range (must be between -16 and 15)');
   });
@@ -151,9 +151,19 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('ldi b,0 \n ldi b,5 \n ldi b,10 \n ldi b,15', [0, 0, 0x60, 0x65, 0x6A, 0x6F]);
     assertProgram('ldi a,-16', [0, 0, 0x50]);
     assertProgram('ldi b,-16', [0, 0, 0x70]);
-    // TODO: Test negative
-    // TODO: Test 16-bit ldi
     assertProgram('one: ldi a,one \n ldi a,one \n two: ldi a,two \n ldi a,two', [0, 0, 0x40, 0x40, 0x42, 0x42]);
+  });
+
+  test('ldi16 mis-ops', function () {
+    assertHasError('ldi m,g', '1:7: error: Undefined symbol \'g\'');
+    assertHasError('ldi m,0xFFFF1', '1:7: error: Value out of range (must be between 0x0000 and 0xFFFF)');
+  });
+
+  test('ldi16 ops', function () {
+    assertProgram('ldi m,0 \n ldi m,4660 \n ldi m,0xCDEF', [0, 0, 0xC0, 0x00, 0x00, 0xC0, 0x12, 0x34, 0xC0, 0xCD, 0xEF]);
+    assertProgram('ldi j,0 \n ldi j,17185 \n ldi j,0xFEDC', [0, 0, 0xE0, 0x00, 0x00, 0xE0, 0x43, 0x21, 0xE0, 0xFE, 0xDC]);
+    assertProgram('ldi m,label \n label: clr a', [0, 0, 0xC0, 0x00, 0x03, 0x00]);
+    assertProgram('ldi j,label \n label: clr a', [0, 0, 0xE0, 0x00, 0x03, 0x00]);
   });
 
   test('lds mis-ops', function () {

@@ -582,10 +582,27 @@ class Assembler {
   }
 
   assembleSetInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
-    // Single Form: xxx dest,val OR xxx dest,label
-    const opc = mne.ops[0];
-    if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
+    // Dual Form: xxx dest,val (8-bit) OR xxx dest,label/val (16-bit)
+    if (!stmt.p1 || !stmt.p2) {
       this.addError(`Two parameters required`, stmt.loc);
+      return;
+    }
+
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const is16bit = this.hasRegister(stmt.p1, mne.ops[1].p1);
+    const opc = is16bit ? mne.ops[1] : mne.ops[0];
+
+    if (!opc.p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
       return;
     }
 
@@ -593,21 +610,41 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
-    if (tgt <= 0x10) {
+    if (is16bit) {
+      // 16 bit ldi
+      const ev = this.evalExpr(stmt.p2);
+      if (anyErrors(ev)) {
+        return;
+      }
+      if (typeof ev.value !== 'number') {
+        this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, stmt.p2.loc);
+        return;
+      }
+      const { value: addr } = ev;
+      if (addr > 0xFFFF) {
+        this.addError(`Value out of range (must be between 0x0000 and 0xFFFF)`, stmt.p2.loc);
+        return;
+      }
+      this.emit(opcode);
+      this.emit((addr & 0xff00) >> 8);
+      this.emit(addr & 0x00ff);
+    } else {
       // 8 bit ldi
+      if (!opc.p2) {
+        this.addError(`Internal opcode definition error`, stmt.loc);
+        return;
+      }
+
       const val = this.checkLiteral(stmt.p2, -16, 15);
       if (val === undefined) { return; }
       opcode |= opc.p2.op(val);
-    } else {
-      // 16 bit ldi
+      this.emit(opcode);
     }
 
-    this.emit(opcode);
+
   }
 
   checkRegister(given: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
