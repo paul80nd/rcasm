@@ -63,7 +63,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
   });
 
-  test('hlt ops', function() {
+  test('hlt ops', function () {
     assertProgram('hlt', [0, 0, 0xAE]);
     assertProgram('hlr', [0, 0, 0xAF]);
   });
@@ -73,7 +73,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasWarning('hlr a', '1:5: warning: Parameter not required');
   });
 
-  test('mov mis-ops', function () {
+  test('mov8 mis-ops', function () {
     assertHasError('mov', '1:1: error: Two parameters required');
     assertHasError('mov a', '1:1: error: Two parameters required');
     assertHasError('mov 45,a', '1:5: error: Register required');
@@ -84,7 +84,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasError('mov a,j2', '1:7: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
   });
 
-  test('mov ops lo', function () {
+  test('mov8 ops lo', function () {
     assertProgram('mov a,a \n mov a,b \n mov a,c \n mov a,d', [0, 0, 0x00, 0x01, 0x02, 0x03]);
     assertProgram('mov a,m1 \n mov a,m2 \n mov a,x \n mov a,y', [0, 0, 0x04, 0x05, 0x06, 0x07]);
     assertProgram('mov b,a \n mov b,b \n mov b,c \n mov b,d', [0, 0, 0x08, 0x09, 0x0A, 0x0B]);
@@ -95,7 +95,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('mov d,m1 \n mov d,m2 \n mov d,x \n mov d,y', [0, 0, 0x1C, 0x1D, 0x1E, 0x1F]);
   });
 
-  test('mov ops hi', function () {
+  test('mov8 ops hi', function () {
     assertProgram('mov m1,a \n mov m1,b \n mov m1,c \n mov m1,d', [0, 0, 0x20, 0x21, 0x22, 0x23]);
     assertProgram('mov m1,m1 \n mov m1,m2 \n mov m1,x \n mov m1,y', [0, 0, 0x24, 0x25, 0x26, 0x27]);
     assertProgram('mov m2,a \n mov m2,b \n mov m2,c \n mov m2,d', [0, 0, 0x28, 0x29, 0x2A, 0x2B]);
@@ -104,6 +104,18 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('mov x,m1 \n mov x,m2 \n mov x,x \n mov x,y', [0, 0, 0x34, 0x35, 0x36, 0x37]);
     assertProgram('mov y,a \n mov y,b \n mov y,c \n mov y,d', [0, 0, 0x38, 0x39, 0x3A, 0x3B]);
     assertProgram('mov y,m1 \n mov y,m2 \n mov y,x \n mov y,y', [0, 0, 0x3C, 0x3D, 0x3E, 0x3F]);
+  });
+
+  test('mov16 mis-ops', function () {
+    assertHasError('mov xy', '1:1: error: Two parameters required');
+    assertHasError('mov xy,45', '1:8: error: Register required');
+    assertHasError('mov xy,g', '1:8: error: Register required');
+    assertHasError('mov xy,a', '1:8: error: Invalid register - choose one of [m|xy|j|as]');
+  });
+
+  test('mov16 ops', function () {
+    assertProgram('mov xy,m \n mov xy,xy \n mov xy,j \n mov xy,as', [0, 0, 0xA0, 0xA1, 0xA2, 0xA3]);
+    assertProgram('mov pc,m \n mov pc,xy \n mov pc,j \n mov pc,as', [0, 0, 0xA4, 0xA5, 0xA6, 0xA7]);
   });
 
   test('opc mis-ops', function () {

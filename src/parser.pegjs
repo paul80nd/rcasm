@@ -70,7 +70,9 @@ H = 'h'i
 J = 'j'i
 M = 'm'i
 O = 'o'i
+P = 'p'i
 R = 'r'i
+S = 's'i
 X = 'x'i
 Y = 'y'i
 
@@ -125,4 +127,4 @@ SQIDENTIFIER "identifier"
   / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
 
 REGISTER "register"
- = name:$( A / B / C / D / M _2 / M _1 / M / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }
+ = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }

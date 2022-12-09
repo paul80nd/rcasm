@@ -74,6 +74,16 @@ move8s:
     mov y,x
     mov y,y
 
+    mov xy,m
+    mov xy,xy
+    mov xy,j
+    mov xy,as
+
+    mov pc,m
+    mov pc,xy
+    mov pc,j
+    mov pc,as
+
 miscs:
 
     hlt

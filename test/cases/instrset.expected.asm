@@ -62,5 +62,13 @@
 003D: 3D           mov y,m2
 003E: 3E           mov y,x
 003F: 3F           clr y
-0040: AE           hlt
-0041: AF           hlr
+0040: A0           mov xy,m
+0041: A1           mov xy,xy
+0042: A2           mov xy,j
+0043: A3           mov xy,as
+0044: A4           mov pc,m
+0045: A5           mov pc,xy
+0046: A6           mov pc,j
+0047: A7           mov pc,as
+0048: AE           hlt
+0049: AF           hlr

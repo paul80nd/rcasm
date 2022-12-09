@@ -11,7 +11,7 @@ const setDests: { [index: string]: number } = {
   'j': 0x3
 };
 
-const movTargets: { [index: string]: number } = {
+const mov8Targets: { [index: string]: number } = {
   'a': 0x0,
   'b': 0x1,
   'c': 0x2,
@@ -21,6 +21,18 @@ const movTargets: { [index: string]: number } = {
   'x': 0x6,
   'y': 0x7
 };
+
+const mov16Dests: { [index: string]: number } = {
+  'xy': 0x0,
+  'pc': 0x1
+};
+
+const mov16Sources: { [index: string]: number } = {
+  'm': 0x0,
+  'xy': 0x1,
+  'j': 0x2,
+  'as': 0x3
+}
 
 export interface OpCodeParam {
   cs: { [index: string]: number } | null,
@@ -61,39 +73,44 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   'rol': { mt: MnemonicType.Alu, ops: [{ op: 0x80 | 0x07, p1: { cs: aluDests, op: p => p << 3 }, p2: null }] },
 
   // MOV8 00dddsss / MOV16 10100dss
-  'mov': { mt: MnemonicType.Move, ops: [{ op: 0x00 | 0x00, p1: { cs: movTargets, op: p => p << 3 }, p2: { cs: movTargets, op: p => p }}] },
-  'clr': { mt: MnemonicType.Clear, ops: [{ op: 0x00 | 0x00, p1: { cs: movTargets, op: p => (p << 3) | p }, p2: null }] },
+  'mov': {
+    mt: MnemonicType.Move, ops: [
+      { op: 0x00, p1: { cs: mov8Targets, op: p => p << 3 }, p2: { cs: mov8Targets, op: p => p } },
+      { op: 0xA0, p1: { cs: mov16Dests, op: p => p << 2 }, p2: { cs: mov16Sources, op: p => p } },
+    ]
+  },
+  'clr': { mt: MnemonicType.Clear, ops: [{ op: 0x00 | 0x00, p1: { cs: mov8Targets, op: p => (p << 3) | p }, p2: null }] },
 
-  // MOV16 10100dss (0XY 1PC - 00M 01XY 10J 11AS)
-  // mov xy/pc, m/xy/j/as
   // clr a/b/c/d/m1/m2/x/y
 
   // LDSW 1010110d (0A 1D)
 
   // SETAB 01rvvvvv / GOTO 11d00000
-  'ldi': { mt: MnemonicType.Set, ops: [{
-    op: 0x00 | 0x00,
-    p1: { cs: setDests, op: p => (((p & 0x2) === 0x2) ? 0xC0 : 0x40) | (p << 5) },
-    p2: { cs: null, op: p => p & 0x1F }}]
+  'ldi': {
+    mt: MnemonicType.Set, ops: [{
+      op: 0x00 | 0x00,
+      p1: { cs: setDests, op: p => (((p & 0x2) === 0x2) ? 0xC0 : 0x40) | (p << 5) },
+      p2: { cs: null, op: p => p & 0x1F }
+    }]
   },
   // ldi a/b,-16..15 ldi m/j,0x0000-0xFFFF/label
 
   // MISC 10101---
-  'hlt': { mt: MnemonicType.Direct, ops:[{ op: 0xA8 | 0x06, p1: null, p2: null }] },
-  'hlr': { mt: MnemonicType.Direct, ops:[{ op: 0xA8 | 0x07, p1: null, p2: null }] },
+  'hlt': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }] },
+  'hlr': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x07, p1: null, p2: null }] },
 
   // GOTO 11dscznx
-  'jmp': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x26, p1: null, p2: null }] },
-  'jsr': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x27, p1: null, p2: null }] },
-  'bne': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x22, p1: null, p2: null }] },
-  'beq': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x24, p1: null, p2: null }] },
-  'bcs': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x28, p1: null, p2: null }] },
-  'bmi': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x30, p1: null, p2: null }] },
-  'blt': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x30, p1: null, p2: null }] },
-  'ble': { mt: MnemonicType.Goto, ops:[{op: 0xC0 | 0x34, p1: null, p2: null }] },
+  'jmp': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x26, p1: null, p2: null }] },
+  'jsr': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x27, p1: null, p2: null }] },
+  'bne': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x22, p1: null, p2: null }] },
+  'beq': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x24, p1: null, p2: null }] },
+  'bcs': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x28, p1: null, p2: null }] },
+  'bmi': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x30, p1: null, p2: null }] },
+  'blt': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x30, p1: null, p2: null }] },
+  'ble': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x34, p1: null, p2: null }] },
 
   // Literal OpCode
-  'opc': { mt: MnemonicType.LitOpc, ops:[{op: 0x00 | 0x00, p1: { cs: null, op: p => p }, p2: null }] }
+  'opc': { mt: MnemonicType.LitOpc, ops: [{ op: 0x00 | 0x00, p1: { cs: null, op: p => p }, p2: null }] }
 
 };
 
@@ -109,7 +126,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 7 */['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4', 'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
   /* 8 */['clr a', 'add', 'inc', 'and', 'orr', 'eor', 'not', 'rol', 'clr d', 'add d', 'inc d', 'and d', 'orr d', 'eor d', 'not d', 'rol d'],
   /* 9 */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-  /* A */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, 'hlt', 'hlr'],
+  /* A */['mov xy,m', 'mov xy,xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'mov pc,xy', 'mov pc,j', 'mov pc,as', null, null, null, null, null, null, 'hlt', 'hlr'],
   /* B */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* C */['ldi m,', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* D */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],

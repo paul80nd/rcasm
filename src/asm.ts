@@ -488,9 +488,21 @@ class Assembler {
   }
 
   assembleMovInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
-    // Single Form: xxx dest, src
-    const opc = mne.ops[0];
+    // Single Form: xxx dest, src (with 8-bit and 16-bit variants)
+    if (!stmt.p1 || !stmt.p2) {
+      this.addError(`Two parameters required`, stmt.loc);
+      return;
+    }
 
+    if (!mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
+
+    // Check opc params defined
     if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
       this.addError(`Two parameters required`, stmt.loc);
       return;
@@ -576,6 +588,14 @@ class Assembler {
       return reg;
     }
     return undefined;
+  }
+  hasRegister(given: ast.Expr, available: opc.OpCodeParam): boolean {
+    if (given.type !== 'register') {
+      return false;
+    } else {
+      const reg = available.cs?.[given.value];
+      return reg !== undefined;
+    }
   }
 
   checkLiteral(given: ast.Expr, min: number, max: number, rangeDisplay: 'b' | 'h' | 'd' = 'd'): number | undefined {
