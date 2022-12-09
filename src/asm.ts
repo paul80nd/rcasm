@@ -439,8 +439,9 @@ class Assembler {
     this.emit(word & 0xff);
   }
 
-  assembleNonInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx
+  assembleNonInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx
+    const opc = mne.ops[0];
     if (stmt.p1) { this.addWarning(`Parameter not required`, stmt.p1.loc); }
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
@@ -448,8 +449,9 @@ class Assembler {
     this.emit(opc.op);
   }
 
-  assembleAluInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx [dest]
+  assembleAluInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx [dest]
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
@@ -465,28 +467,61 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleClrInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest
+  assembleClrInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest (with 8-bit and 16-bit variants)
+    if (!stmt.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
+
+    // Check opc params defined
+    if (!opc.p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
 
     // Base opcode
     let opcode = opc.op;
 
     // First paramter
-    if (!stmt.p1 || !opc.p1) {
-      this.addError(`Parameter required`, stmt.loc);
-      return;
-    }
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     this.emit(opcode);
   }
 
-  assembleMovInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest, src
+  assembleMovInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest, src (with 8-bit and 16-bit variants)
+    if (!stmt.p1 || !stmt.p2) {
+      this.addError(`Two parameters required`, stmt.loc);
+      return;
+    }
 
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
+
+    // Check opc params defined
     if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
       this.addError(`Two parameters required`, stmt.loc);
       return;
@@ -496,8 +531,6 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
@@ -508,8 +541,9 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleLitOpc(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx opcode
+  assembleLitOpc(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx opcode
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
     // Base opcode
@@ -527,10 +561,48 @@ class Assembler {
     this.emit(opcode);
   }
 
-  assembleSetInstr(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx dest,val OR xxx dest,label
-    if (!stmt.p1 || !opc.p1 || !stmt.p2 || !opc.p2) {
+  assembleLodSwInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest
+    const opc = mne.ops[0];
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // First paramter
+    if (!stmt.p1 || !opc.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
+    if (tgt === undefined) { return; }
+    opcode |= opc.p1.op(tgt);
+
+    this.emit(opcode);
+  }
+
+  assembleSetInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Dual Form: xxx dest,val (8-bit) OR xxx dest,label/val (16-bit)
+    if (!stmt.p1 || !stmt.p2) {
       this.addError(`Two parameters required`, stmt.loc);
+      return;
+    }
+
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const is16bit = this.hasRegister(stmt.p1, mne.ops[1].p1);
+    const opc = is16bit ? mne.ops[1] : mne.ops[0];
+
+    if (!opc.p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
       return;
     }
 
@@ -538,31 +610,55 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second parameter
-    if (tgt <= 0x10) {
+    if (is16bit) {
+      // 16 bit ldi
+      const ev = this.evalExpr(stmt.p2);
+      if (anyErrors(ev)) {
+        return;
+      }
+      if (typeof ev.value !== 'number') {
+        this.addError(`Expecting branch label to evaluate to integer, got ${formatTypename(ev.value)}`, stmt.p2.loc);
+        return;
+      }
+      const { value: addr } = ev;
+      if (addr > 0xFFFF) {
+        this.addError(`Value out of range (must be between 0x0000 and 0xFFFF)`, stmt.p2.loc);
+        return;
+      }
+      this.emit(opcode);
+      this.emit((addr & 0xff00) >> 8);
+      this.emit(addr & 0x00ff);
+    } else {
       // 8 bit ldi
+      if (!opc.p2) {
+        this.addError(`Internal opcode definition error`, stmt.loc);
+        return;
+      }
+
       const val = this.checkLiteral(stmt.p2, -16, 15);
       if (val === undefined) { return; }
       opcode |= opc.p2.op(val);
-    } else {
-      // 16 bit ldi
+      this.emit(opcode);
     }
 
-    this.emit(opcode);
+
   }
 
-  checkRegister(given: ast.Expr, available: opc.OpCodeParam): number | undefined {
+  checkRegister(given: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      const reg = available.cs?.[given.value];
+      const reg = available.cs?.[given.value] ?? furtherAvailable?.cs?.[given.value];
       if (reg === undefined) {
         if (available.cs) {
-          this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+          if (furtherAvailable && furtherAvailable.cs) {
+            this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}] or [${Object.keys(furtherAvailable.cs).join('|')}]`, given.loc);
+          } else {
+            this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+          }
         } else {
           this.addError(`Invalid register`, given.loc);
         }
@@ -570,6 +666,14 @@ class Assembler {
       return reg;
     }
     return undefined;
+  }
+  hasRegister(given: ast.Expr, available: opc.OpCodeParam): boolean {
+    if (given.type !== 'register') {
+      return false;
+    } else {
+      const reg = available.cs?.[given.value];
+      return reg !== undefined;
+    }
   }
 
   checkLiteral(given: ast.Expr, min: number, max: number, rangeDisplay: 'b' | 'h' | 'd' = 'd'): number | undefined {
@@ -602,8 +706,9 @@ class Assembler {
     return undefined;
   }
 
-  assembleBranch(opc: opc.OpCode, stmt: ast.StmtInsn) {
-    // Form: xxx label
+  assembleBranch(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx label
+    const opc = mne.ops[0];
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
     if (!stmt.p1) {
       this.addError(`Parameter required`, stmt.loc);
@@ -763,7 +868,7 @@ class Assembler {
     }
 
     const stmt = line.stmt;
-    const op = opc.opcodes[stmt.mnemonic.toLocaleLowerCase()];
+    const mne = opc.mnemonics[stmt.mnemonic.toLocaleLowerCase()];
 
     // Mark the emitted output address range as
     // containing machine code instructions.  This
@@ -775,29 +880,32 @@ class Assembler {
       this.debugInfo.markAsInstruction(startPC, endPC);
     };
 
-    if (op !== undefined) {
+    if (mne !== undefined) {
       withMarkAsInsn(() => {
-        switch (op.pf) {
-          case opc.ParamForm.None:
-            this.assembleNonInstr(op, stmt);
+        switch (mne.mt) {
+          case opc.MnemonicType.Direct:
+            this.assembleNonInstr(mne, stmt);
             break;
-          case opc.ParamForm.AluDst:
-            this.assembleAluInstr(op, stmt);
+          case opc.MnemonicType.Alu:
+            this.assembleAluInstr(mne, stmt);
             break;
-          case opc.ParamForm.ClrTgt:
-            this.assembleClrInstr(op, stmt);
+          case opc.MnemonicType.Clear:
+            this.assembleClrInstr(mne, stmt);
             break;
-          case opc.ParamForm.MovDstSrc:
-            this.assembleMovInstr(op, stmt);
+          case opc.MnemonicType.Move:
+            this.assembleMovInstr(mne, stmt);
             break;
-          case opc.ParamForm.LitOpc:
-            this.assembleLitOpc(op, stmt);
+          case opc.MnemonicType.LitOpc:
+            this.assembleLitOpc(mne, stmt);
             break;
-          case opc.ParamForm.SetTgtVal:
-            this.assembleSetInstr(op, stmt);
+          case opc.MnemonicType.LodSw:
+            this.assembleLodSwInstr(mne, stmt);
             break;
-          case opc.ParamForm.GtoTgt:
-            this.assembleBranch(op, stmt);
+          case opc.MnemonicType.Set:
+            this.assembleSetInstr(mne, stmt);
+            break;
+          case opc.MnemonicType.Goto:
+            this.assembleBranch(mne, stmt);
             break;
           default:
             this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);

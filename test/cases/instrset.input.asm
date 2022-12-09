@@ -1,5 +1,107 @@
 ; Testing instruction set
 
+alus:
+
+    add
+    inc
+    orr
+    eor
+    cmp
+    not
+    rol
+
+    add a
+    inc a
+    orr a
+    eor a
+    cmp a
+    not a
+    rol a
+       
+    add d
+    inc d
+    orr d
+    eor d
+    cmp d
+    not d
+    rol d
+
+branching:
+
+    jmp branching
+    jsr branching
+    rts
+    bne branching
+    beq branching
+    bcs branching
+    bmi branching
+    blt branching
+    ble branching
+
+clears:
+    
+    clr a
+    clr b
+    clr c
+    clr d
+    clr m1
+    clr m2
+    clr x
+    clr y
+
+    clr xy
+
+litopc:
+
+    opc 00011001b   ; MOV8  D=B
+    opc 0x81        ; ALU   A=B+C
+    opc 0x6F        ; SETAB B=15
+    opc 11100110b   ; GOTO  jump
+    opc 0x01        ;   addr-hi
+    opc 10101010b   ;   addr-lo
+
+load8s:
+
+    ldi a,-16
+    ldi a,-8
+    ldi a,-1
+    ldi a,0
+    ldi a,1
+    ldi a,7
+    ldi a,15
+
+    ldi b,-16
+    ldi b,-8
+    ldi b,-1
+    ldi b,0
+    ldi b,1
+    ldi b,7
+    ldi b,15
+
+load16s:
+
+    ldi m,0
+    ldi m,4096
+    ldi m,0x0000
+    ldi m,0xABCD
+    ldi m,0xFFFF
+    ldi m,load16s    
+
+    ldi j,0
+    ldi j,4096
+    ldi j,0x0000
+    ldi j,0xABCD
+    ldi j,0xFFFF
+    ldi j,load16s    
+
+miscs:
+
+    hlt
+    hlr
+    
+    lds a
+    lds d
+
 move8s:
 
     mov a,a
@@ -74,7 +176,14 @@ move8s:
     mov y,x
     mov y,y
 
-miscs:
+mov16s:
 
-    hlt
-    hlr
+    mov xy,m
+    mov xy,xy
+    mov xy,j
+    mov xy,as
+
+    mov pc,m
+    mov pc,xy
+    mov pc,j
+    mov pc,as
