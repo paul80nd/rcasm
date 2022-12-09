@@ -1,5 +1,18 @@
 ; Testing instruction set
 
+clears:
+    
+    clr a
+    clr b
+    clr c
+    clr d
+    clr m1
+    clr m2
+    clr x
+    clr y
+
+    clr xy
+
 move8s:
 
     mov a,a
