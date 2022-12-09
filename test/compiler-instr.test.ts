@@ -54,7 +54,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasError('clr', '1:1: error: Parameter required');
     assertHasError('clr 45', '1:5: error: Register required');
     assertHasError('clr g', '1:5: error: Register required');
-    assertHasError('clr j1', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
+    assertHasError('clr j1', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y] or [xy]');
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
   });
 
@@ -82,7 +82,7 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasError('mov a', '1:1: error: Two parameters required');
     assertHasError('mov 45,a', '1:5: error: Register required');
     assertHasError('mov g,a', '1:5: error: Register required');
-    assertHasError('mov j1,a', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
+    assertHasError('mov j1,a', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y] or [xy|pc]');
     assertHasError('mov a,45', '1:7: error: Register required');
     assertHasError('mov a,g', '1:7: error: Register required');
     assertHasError('mov a,j2', '1:7: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');

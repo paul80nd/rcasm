@@ -475,24 +475,28 @@ class Assembler {
     }
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
 
-    if (!mne.ops[1] || !mne.ops[1].p1) {
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
       this.addError(`Internal opcode definition error`, stmt.loc);
       return;
     }
 
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
+
     // Pick 16-bit variant if first param is in 16-bit dests
     const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
+
+    // Check opc params defined
+    if (!opc.p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
 
     // Base opcode
     let opcode = opc.op;
 
     // First paramter
-    if (!stmt.p1 || !opc.p1) {
-      this.addError(`Parameter required`, stmt.loc);
-      return;
-    }
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     this.emit(opcode);
@@ -505,10 +509,14 @@ class Assembler {
       return;
     }
 
-    if (!mne.ops[1] || !mne.ops[1].p1) {
+    if (!mne.ops[0] || !mne.ops[0].p1 || !mne.ops[1] || !mne.ops[1].p1) {
       this.addError(`Internal opcode definition error`, stmt.loc);
       return;
     }
+
+    // First paramter check
+    const tgt = this.checkRegister(stmt.p1, mne.ops[0].p1, mne.ops[1].p1);
+    if (tgt === undefined) { return; }
 
     // Pick 16-bit variant if first param is in 16-bit dests
     const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
@@ -523,8 +531,6 @@ class Assembler {
     let opcode = opc.op;
 
     // First paramter
-    const tgt = this.checkRegister(stmt.p1, opc.p1);
-    if (tgt === undefined) { return; }
     opcode |= opc.p1.op(tgt);
 
     // Second paramter
@@ -584,14 +590,18 @@ class Assembler {
     this.emit(opcode);
   }
 
-  checkRegister(given: ast.Expr, available: opc.OpCodeParam): number | undefined {
+  checkRegister(given: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
-      const reg = available.cs?.[given.value];
+      const reg = available.cs?.[given.value] ?? furtherAvailable?.cs?.[given.value];
       if (reg === undefined) {
         if (available.cs) {
-          this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+          if (furtherAvailable && furtherAvailable.cs) {
+            this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}] or [${Object.keys(furtherAvailable.cs).join('|')}]`, given.loc);
+          } else {
+            this.addError(`Invalid register - choose one of [${Object.keys(available.cs).join('|')}]`, given.loc);
+          }
         } else {
           this.addError(`Invalid register`, given.loc);
         }
