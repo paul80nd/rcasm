@@ -9,11 +9,14 @@ const ldsDests: { [index: string]: number } = {
   'd': 0x1
 };
 
-const setDests: { [index: string]: number } = {
+const set8Dests: { [index: string]: number } = {
   'a': 0x0,
-  'b': 0x1,
-  'm': 0x2,
-  'j': 0x3
+  'b': 0x1
+};
+
+const set16Dests: { [index: string]: number } = {
+  'm': 0x0,
+  'j': 0x1
 };
 
 const mov8Targets: { [index: string]: number } = {
@@ -100,8 +103,8 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   // SETAB 01rvvvvv / GOTO 11d00000
   'ldi': {
     mt: MnemonicType.Set, ops: [{
-      op: 0x00 | 0x00,
-      p1: { cs: setDests, op: p => (((p & 0x2) === 0x2) ? 0xC0 : 0x40) | (p << 5) },
+      op: 0x40,
+      p1: { cs: set8Dests, op: p => p << 5 },
       p2: { cs: null, op: p => p & 0x1F }
     }]
   },
