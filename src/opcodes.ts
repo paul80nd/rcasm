@@ -142,9 +142,9 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 9 */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, 'lds a', 'lds d', 'hlt', 'hlr'],
   /* B */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-  /* C */['ldi m,', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  /* C */['ldi m', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* D */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-  /* E */['ldi j,', null, 'bne', null, 'beq', null, 'jmp', 'jsr', 'bcs', null, null, null, null, null, null, null],
+  /* E */['ldi j', null, 'bne', null, 'beq', null, 'jmp', 'jsr', 'bcs', null, null, null, null, null, null, null],
   /* F */['blt', 'jlt', null, null, 'ble', null, null, null, null, null, null, null, null, null, null, null]
 ];
 

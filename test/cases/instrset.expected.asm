@@ -51,18 +51,18 @@
 0042: 61           ldi b,1
 0043: 67           ldi b,7
 0044: 6F           ldi b,15
-0045: C0 00 00     ldi m,
-0048: C0 10 00     ldi m,
-004B: C0 00 00     ldi m,
-004E: C0 AB CD     ldi m,
-0051: C0 FF FF     ldi m,
-0054: C0 00 45     ldi m,
-0057: E0 00 00     ldi j,
-005A: E0 10 00     ldi j,
-005D: E0 00 00     ldi j,
-0060: E0 AB CD     ldi j,
-0063: E0 FF FF     ldi j,
-0066: E0 00 45     ldi j,
+0045: C0 00 00     ldi m
+0048: C0 10 00     ldi m
+004B: C0 00 00     ldi m
+004E: C0 AB CD     ldi m
+0051: C0 FF FF     ldi m
+0054: C0 00 45     ldi m
+0057: E0 00 00     ldi j
+005A: E0 10 00     ldi j
+005D: E0 00 00     ldi j
+0060: E0 AB CD     ldi j
+0063: E0 FF FF     ldi j
+0066: E0 00 45     ldi j
 0069: AE           hlt
 006A: AF           hlr
 006B: AC           lds a
