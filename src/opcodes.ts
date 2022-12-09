@@ -4,6 +4,11 @@ const aluDests: { [index: string]: number } = {
   'd': 0x1
 };
 
+const ldsDests: { [index: string]: number } = {
+  'a': 0x0,
+  'd': 0x1
+};
+
 const setDests: { [index: string]: number } = {
   'a': 0x0,
   'b': 0x1,
@@ -54,6 +59,7 @@ export enum MnemonicType {
   Alu,
   Clear,
   Goto,
+  LodSw,
   LitOpc,
   Move,
   Set
@@ -91,8 +97,6 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   },
   'rts': { mt: MnemonicType.Direct, ops: [{ op: 0xA0 | 0x05, p1: null, p2: null }] },
 
-  // LDSW 1010110d (0A 1D)
-
   // SETAB 01rvvvvv / GOTO 11d00000
   'ldi': {
     mt: MnemonicType.Set, ops: [{
@@ -106,6 +110,7 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   // MISC 10101---
   'hlt': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }] },
   'hlr': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x07, p1: null, p2: null }] },
+  'lds': { mt: MnemonicType.LodSw, ops: [{ op: 0xA8 | 0x04, p1: { cs: ldsDests, op: p => p }, p2: null }] },
 
   // GOTO 11dscznx
   'jmp': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x26, p1: null, p2: null }] },
@@ -134,7 +139,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 7 */['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4', 'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
   /* 8 */['clr a', 'add', 'inc', 'and', 'orr', 'eor', 'not', 'rol', 'clr d', 'add d', 'inc d', 'and d', 'orr d', 'eor d', 'not d', 'rol d'],
   /* 9 */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
-  /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, null, null, 'hlt', 'hlr'],
+  /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, 'lds a', 'lds d', 'hlt', 'hlr'],
   /* B */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* C */['ldi m,', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* D */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],

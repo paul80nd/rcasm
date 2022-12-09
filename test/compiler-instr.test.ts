@@ -156,6 +156,14 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('one: ldi a,one \n ldi a,one \n two: ldi a,two \n ldi a,two', [0, 0, 0x40, 0x40, 0x42, 0x42]);
   });
 
+  test('lds mis-ops', function () {
+    assertHasError('lds', '1:1: error: Parameter required');
+    assertHasError('lds 45', '1:5: error: Register required');
+    assertHasError('lds g', '1:5: error: Register required');
+    assertHasError('lds j1', '1:5: error: Invalid register - choose one of [a|d]');
+    assertHasWarning('lds a,b', '1:7: warning: Parameter not required');
+  });
+
   test('jsr-rts ops', function () {
     assertProgram('jsr label \n label: rts', [0, 0, 0xE7, 0x00, 0x03, 0xA5]);
   });

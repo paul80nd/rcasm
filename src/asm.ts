@@ -561,6 +561,26 @@ class Assembler {
     this.emit(opcode);
   }
 
+  assembleLodSwInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest
+    const opc = mne.ops[0];
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // First paramter
+    if (!stmt.p1 || !opc.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
+    if (tgt === undefined) { return; }
+    opcode |= opc.p1.op(tgt);
+
+    this.emit(opcode);
+  }
+
   assembleSetInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
     // Single Form: xxx dest,val OR xxx dest,label
     const opc = mne.ops[0];
@@ -840,6 +860,9 @@ class Assembler {
             break;
           case opc.MnemonicType.LitOpc:
             this.assembleLitOpc(mne, stmt);
+            break;
+          case opc.MnemonicType.LodSw:
+            this.assembleLodSwInstr(mne, stmt);
             break;
           case opc.MnemonicType.Set:
             this.assembleSetInstr(mne, stmt);

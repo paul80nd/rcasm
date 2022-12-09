@@ -72,3 +72,5 @@
 0047: A7           mov pc,as
 0048: AE           hlt
 0049: AF           hlr
+004A: AC           lds a
+004B: AD           lds d

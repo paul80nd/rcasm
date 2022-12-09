@@ -88,3 +88,5 @@ miscs:
 
     hlt
     hlr
+    lds a
+    lds d
