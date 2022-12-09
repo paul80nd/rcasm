@@ -69,6 +69,22 @@ load8s:
     ldi b,7
     ldi b,15
 
+load16s:
+
+    ldi m,0
+    ldi m,4096
+    ldi m,0x0000
+    ldi m,0xABCD
+    ldi m,0xFFFF
+    ldi m,load16s    
+
+    ldi j,0
+    ldi j,4096
+    ldi j,0x0000
+    ldi j,0xABCD
+    ldi j,0xFFFF
+    ldi j,load16s    
+
 miscs:
 
     hlt
