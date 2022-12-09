@@ -26,6 +26,18 @@ alus:
     not d
     rol d
 
+branching:
+
+    jmp branching
+    jsr branching
+    rts
+    bne branching
+    beq branching
+    bcs branching
+    bmi branching
+    blt branching
+    ble branching
+
 clears:
     
     clr a
