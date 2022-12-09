@@ -1,5 +1,31 @@
 ; Testing instruction set
 
+alus:
+
+    add
+    inc
+    orr
+    eor
+    cmp
+    not
+    rol
+
+    add a
+    inc a
+    orr a
+    eor a
+    cmp a
+    not a
+    rol a
+       
+    add d
+    inc d
+    orr d
+    eor d
+    cmp d
+    not d
+    rol d
+
 clears:
     
     clr a
@@ -30,6 +56,13 @@ load8s:
     ldi b,1
     ldi b,7
     ldi b,15
+
+miscs:
+
+    hlt
+    hlr
+    lds a
+    lds d
 
 move8s:
 
@@ -114,10 +147,3 @@ move8s:
     mov pc,xy
     mov pc,j
     mov pc,as
-
-miscs:
-
-    hlt
-    hlr
-    lds a
-    lds d
