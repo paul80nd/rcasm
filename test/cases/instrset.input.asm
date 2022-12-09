@@ -175,6 +175,8 @@ move8s:
     mov y,x
     mov y,y
 
+mov16s:
+
     mov xy,m
     mov xy,xy
     mov xy,j
