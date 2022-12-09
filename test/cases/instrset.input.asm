@@ -51,6 +51,15 @@ clears:
 
     clr xy
 
+litopc:
+
+    opc 00011001b   ; MOV8  D=B
+    opc 0x81        ; ALU   A=B+C
+    opc 0x6F        ; SETAB B=15
+    opc 11100110b   ; GOTO  jump
+    opc 0x01        ;   addr-hi
+    opc 10101010b   ;   addr-lo
+
 load8s:
 
     ldi a,-16

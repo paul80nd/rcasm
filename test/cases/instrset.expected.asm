@@ -37,105 +37,109 @@
 0034: 36           clr x
 0035: 3F           clr y
 0036: A1           clr xy
-0037: 50           ldi a,-16
-0038: 58           ldi a,-8
-0039: 5F           ldi a,-1
-003A: 40           ldi a,0
-003B: 41           ldi a,1
-003C: 47           ldi a,7
-003D: 4F           ldi a,15
-003E: 70           ldi b,-16
-003F: 78           ldi b,-8
-0040: 7F           ldi b,-1
-0041: 60           ldi b,0
-0042: 61           ldi b,1
-0043: 67           ldi b,7
-0044: 6F           ldi b,15
-0045: C0 00 00     ldi m
-0048: C0 10 00     ldi m
+0037: 19           mov d,b
+0038: 81           add
+0039: 6F           ldi b,15
+003A: E6 01 AA     jmp
+003D: 50           ldi a,-16
+003E: 58           ldi a,-8
+003F: 5F           ldi a,-1
+0040: 40           ldi a,0
+0041: 41           ldi a,1
+0042: 47           ldi a,7
+0043: 4F           ldi a,15
+0044: 70           ldi b,-16
+0045: 78           ldi b,-8
+0046: 7F           ldi b,-1
+0047: 60           ldi b,0
+0048: 61           ldi b,1
+0049: 67           ldi b,7
+004A: 6F           ldi b,15
 004B: C0 00 00     ldi m
-004E: C0 AB CD     ldi m
-0051: C0 FF FF     ldi m
-0054: C0 00 45     ldi m
-0057: E0 00 00     ldi j
-005A: E0 10 00     ldi j
+004E: C0 10 00     ldi m
+0051: C0 00 00     ldi m
+0054: C0 AB CD     ldi m
+0057: C0 FF FF     ldi m
+005A: C0 00 4B     ldi m
 005D: E0 00 00     ldi j
-0060: E0 AB CD     ldi j
-0063: E0 FF FF     ldi j
-0066: E0 00 45     ldi j
-0069: AE           hlt
-006A: AF           hlr
-006B: AC           lds a
-006C: AD           lds d
-006D: 00           clr a
-006E: 01           mov a,b
-006F: 02           mov a,c
-0070: 03           mov a,d
-0071: 04           mov a,m1
-0072: 05           mov a,m2
-0073: 06           mov a,x
-0074: 07           mov a,y
-0075: 08           mov b,a
-0076: 09           clr b
-0077: 0A           mov b,c
-0078: 0B           mov b,d
-0079: 0C           mov b,m1
-007A: 0D           mov b,m2
-007B: 0E           mov b,x
-007C: 0F           mov b,y
-007D: 10           mov c,a
-007E: 11           mov c,b
-007F: 12           clr c
-0080: 13           mov c,d
-0081: 14           mov c,m1
-0082: 15           mov c,m2
-0083: 16           mov c,x
-0084: 17           mov c,y
-0085: 18           mov d,a
-0086: 19           mov d,b
-0087: 1A           mov d,c
-0088: 1B           clr d
-0089: 1C           mov d,m1
-008A: 1D           mov d,m2
-008B: 1E           mov d,x
-008C: 1F           mov d,y
-008D: 20           mov m1,a
-008E: 21           mov m1,b
-008F: 22           mov m1,c
-0090: 23           mov m1,d
-0091: 24           clr m1
-0092: 25           mov m1,m2
-0093: 26           mov m1,x
-0094: 27           mov m1,y
-0095: 28           mov m2,a
-0096: 29           mov m2,b
-0097: 2A           mov m2,c
-0098: 2B           mov m2,d
-0099: 2C           mov m2,m1
-009A: 2D           clr m2
-009B: 2E           mov m2,x
-009C: 2F           mov m2,y
-009D: 30           mov x,a
-009E: 31           mov x,b
-009F: 32           mov x,c
-00A0: 33           mov x,d
-00A1: 34           mov x,m1
-00A2: 35           mov x,m2
-00A3: 36           clr x
-00A4: 37           mov x,y
-00A5: 38           mov y,a
-00A6: 39           mov y,b
-00A7: 3A           mov y,c
-00A8: 3B           mov y,d
-00A9: 3C           mov y,m1
-00AA: 3D           mov y,m2
-00AB: 3E           mov y,x
-00AC: 3F           clr y
-00AD: A0           mov xy,m
-00AE: A1           clr xy
-00AF: A2           mov xy,j
-00B0: A3           mov xy,as
-00B1: A4           mov pc,m
-00B2: A5           rts
-00B3: A6           mov pc,j
-00B4: A7           mov pc,as
+0060: E0 10 00     ldi j
+0063: E0 00 00     ldi j
+0066: E0 AB CD     ldi j
+0069: E0 FF FF     ldi j
+006C: E0 00 4B     ldi j
+006F: AE           hlt
+0070: AF           hlr
+0071: AC           lds a
+0072: AD           lds d
+0073: 00           clr a
+0074: 01           mov a,b
+0075: 02           mov a,c
+0076: 03           mov a,d
+0077: 04           mov a,m1
+0078: 05           mov a,m2
+0079: 06           mov a,x
+007A: 07           mov a,y
+007B: 08           mov b,a
+007C: 09           clr b
+007D: 0A           mov b,c
+007E: 0B           mov b,d
+007F: 0C           mov b,m1
+0080: 0D           mov b,m2
+0081: 0E           mov b,x
+0082: 0F           mov b,y
+0083: 10           mov c,a
+0084: 11           mov c,b
+0085: 12           clr c
+0086: 13           mov c,d
+0087: 14           mov c,m1
+0088: 15           mov c,m2
+0089: 16           mov c,x
+008A: 17           mov c,y
+008B: 18           mov d,a
+008C: 19           mov d,b
+008D: 1A           mov d,c
+008E: 1B           clr d
+008F: 1C           mov d,m1
+0090: 1D           mov d,m2
+0091: 1E           mov d,x
+0092: 1F           mov d,y
+0093: 20           mov m1,a
+0094: 21           mov m1,b
+0095: 22           mov m1,c
+0096: 23           mov m1,d
+0097: 24           clr m1
+0098: 25           mov m1,m2
+0099: 26           mov m1,x
+009A: 27           mov m1,y
+009B: 28           mov m2,a
+009C: 29           mov m2,b
+009D: 2A           mov m2,c
+009E: 2B           mov m2,d
+009F: 2C           mov m2,m1
+00A0: 2D           clr m2
+00A1: 2E           mov m2,x
+00A2: 2F           mov m2,y
+00A3: 30           mov x,a
+00A4: 31           mov x,b
+00A5: 32           mov x,c
+00A6: 33           mov x,d
+00A7: 34           mov x,m1
+00A8: 35           mov x,m2
+00A9: 36           clr x
+00AA: 37           mov x,y
+00AB: 38           mov y,a
+00AC: 39           mov y,b
+00AD: 3A           mov y,c
+00AE: 3B           mov y,d
+00AF: 3C           mov y,m1
+00B0: 3D           mov y,m2
+00B1: 3E           mov y,x
+00B2: 3F           clr y
+00B3: A0           mov xy,m
+00B4: A1           clr xy
+00B5: A2           mov xy,j
+00B6: A3           mov xy,as
+00B7: A4           mov pc,m
+00B8: A5           rts
+00B9: A6           mov pc,j
+00BA: A7           mov pc,as
