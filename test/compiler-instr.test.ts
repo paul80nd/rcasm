@@ -50,17 +50,21 @@ suite('rcasm - Compiler Instrs', () => {
     assertHasWarning('inc a,b', '1:7: warning: Parameter not required');
   });
 
-  test('clr ops', function () {
-    assertProgram('clr a \n clr b \n clr c \n clr d', [0, 0, 0x00, 0x09, 0x12, 0x1B]);
-    assertProgram('clr m1 \n clr m2 \n clr x \n clr y', [0, 0, 0x24, 0x2D, 0x36, 0x3F]);
-  });
-
   test('clr mis-ops', function () {
     assertHasError('clr', '1:1: error: Parameter required');
     assertHasError('clr 45', '1:5: error: Register required');
     assertHasError('clr g', '1:5: error: Register required');
     assertHasError('clr j1', '1:5: error: Invalid register - choose one of [a|b|c|d|m1|m2|x|y]');
     assertHasWarning('clr a,b', '1:7: warning: Parameter not required');
+  });
+
+  test('clr8 ops', function () {
+    assertProgram('clr a \n clr b \n clr c \n clr d', [0, 0, 0x00, 0x09, 0x12, 0x1B]);
+    assertProgram('clr m1 \n clr m2 \n clr x \n clr y', [0, 0, 0x24, 0x2D, 0x36, 0x3F]);
+  });
+
+  test('clr16 ops', function () {
+    assertProgram('clr xy', [0, 0, 0xA1]);
   });
 
   test('hlt ops', function () {

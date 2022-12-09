@@ -468,9 +468,20 @@ class Assembler {
   }
 
   assembleClrInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
-    // Single Form: xxx dest
-    const opc = mne.ops[0];
+    // Single Form: xxx dest (with 8-bit and 16-bit variants)
+    if (!stmt.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
     if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    if (!mne.ops[1] || !mne.ops[1].p1) {
+      this.addError(`Internal opcode definition error`, stmt.loc);
+      return;
+    }
+
+    // Pick 16-bit variant if first param is in 16-bit dests
+    const opc = this.hasRegister(stmt.p1, mne.ops[1].p1) ? mne.ops[1] : mne.ops[0];
 
     // Base opcode
     let opcode = opc.op;
