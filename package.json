@@ -30,7 +30,7 @@
     "watch": "tsc --watch -p ."
   },
   "dependencies": {
-    "fastbitset": "^0.4.0"
+    "fastbitset": "^0.4.1"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.1",
