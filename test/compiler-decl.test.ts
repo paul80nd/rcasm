@@ -58,4 +58,10 @@ suite('rcasm - Compiler Decls', () => {
   test('data mix', function () {
     assertProgram('dfb 254, 0xFC, 10001100b, "ING"', [0, 0, 0xFE, 0xFC, 0x8C, 0x49, 0x4E, 0x47]);
   });
+
+  test('data fill', function () {
+    assertProgram('dff 4, 0', [0, 0, 0x00, 0x00, 0x00, 0x00]);
+    assertProgram('dff 3, 0xFE', [0, 0, 0xFE, 0xFE, 0xFE]);
+    assertProgram('dff 2, 11111110b', [0, 0, 0xFE, 0xFE]);
+  });
 });

@@ -38,6 +38,9 @@ Directive "directive"
       const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
     }
+  / PSEUDO_FILL __ numBytes:Expr __ CMA __ fillValue:Expr {
+      return ast.mkFill(numBytes, fillValue, loc());
+    }
 
 ExprList = head:Expr tail:(__ CMA __ Expr)* { return buildList(head, tail, 3); }
 
@@ -85,6 +88,7 @@ COL = ':'
 SEM = ';'
 
 PSEUDO_BYTE = 'dfb'i { return 'byte'; }
+PSEUDO_FILL = "dff"i
 PSEUDO_WORD = "dfw"i { return 'word'; }
 
 BIN = v:$binary B         { return parseInt(v,2); }

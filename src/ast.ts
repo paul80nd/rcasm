@@ -30,7 +30,8 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
 export type Stmt
   = StmtInsn
   | StmtSetPC
-  | StmtData;
+  | StmtData
+  | StmtFill;
 
 export interface StmtSetPC extends Node {
   type: 'setpc';
@@ -63,6 +64,15 @@ export function mkData(dataSize: DataSize, values: Expr[], loc: SourceLoc): Stmt
     dataSize,
     loc
   };
+}
+
+export interface StmtFill extends Node {
+  type: 'fill';
+  numBytes: Expr;
+  fillValue: Expr;
+}
+export function mkFill(numBytes: Expr, fillValue: Expr, loc: SourceLoc): StmtFill {
+  return { type: 'fill', numBytes, fillValue, loc }
 }
 
 export type Expr
