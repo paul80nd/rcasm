@@ -108,6 +108,8 @@ store_load:
 
 miscs:
 
+    ixy
+
     hlt
     hlr
     

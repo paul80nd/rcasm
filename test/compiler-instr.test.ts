@@ -202,5 +202,9 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('str a \n str b \n str c \n str d', [0, 0, 0x98, 0x99, 0x9A, 0x9B]);
   });
 
+  test('ixy', function () {
+    assertProgram('ixy', [0, 0, 0xB0]);
+  });
+
   //mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }]
 });

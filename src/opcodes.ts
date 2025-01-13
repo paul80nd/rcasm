@@ -125,6 +125,9 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   'hlr': { mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x07, p1: null, p2: null }] },
   'lds': { mt: MnemonicType.LodSw, ops: [{ op: 0xA8 | 0x04, p1: { cs: ldsDests, op: p => p }, p2: null }] },
 
+  // INCXY 10110000
+  'ixy': { mt: MnemonicType.Direct, ops: [{ op: 0xB0, p1: null, p2: null }] },
+
   // GOTO 11dscznx
   'jmp': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x26, p1: null, p2: null }] },
   'jsr': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x27, p1: null, p2: null }] },
@@ -153,7 +156,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 8 */['clr a', 'add', 'inc', 'and', 'orr', 'eor', 'not', 'rol', 'clr d', 'add d', 'inc d', 'and d', 'orr d', 'eor d', 'not d', 'rol d'],
   /* 9 */['ldr a', 'ldr b', 'ldr c', 'ldr d', null, null, null, null, 'str a', 'str b', 'str c', 'str d', null, null, null, null],
   /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, 'lds a', 'lds d', 'hlt', 'hlr'],
-  /* B */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  /* B */['ixy', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* C */['ldi m', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* D */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* E */['ldi j', null, 'bne', null, 'beq', null, 'jmp', 'jsr', 'bcs', null, null, null, null, null, null, null],
@@ -174,6 +177,8 @@ export const opcodes_reverse_class = (opcode: number): { class: string, cycles: 
       return { class: "STORE", cycles: 1 };
     case (opcode & 0xC0) === 0xC0: // GOTO 11dscznx
       return { class: "GOTO", cycles: 3 };
+    case (opcode & 0xFF) === 0xA0: // INCXY 10110000
+      return { class: "INCXY", cycles: 1 };
     default:
       return { class: "MISC", cycles: 1 };
   }
