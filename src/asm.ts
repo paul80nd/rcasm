@@ -647,6 +647,26 @@ class Assembler {
 
   }
 
+  assembleLoadStoreInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx dest
+    const opc = mne.ops[0];
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // First paramter
+    if (!stmt.p1 || !opc.p1) {
+      this.addError(`Parameter required`, stmt.loc);
+      return;
+    }
+    const tgt = this.checkRegister(stmt.p1, opc.p1);
+    if (tgt === undefined) { return; }
+    opcode |= opc.p1.op(tgt);
+
+    this.emit(opcode);
+  }
+
   checkRegister(given: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
@@ -903,6 +923,9 @@ class Assembler {
             break;
           case opc.MnemonicType.Set:
             this.assembleSetInstr(mne, stmt);
+            break;
+          case opc.MnemonicType.LoadStore:
+            this.assembleLoadStoreInstr(mne, stmt);
             break;
           case opc.MnemonicType.Goto:
             this.assembleBranch(mne, stmt);

@@ -46,6 +46,13 @@ const clr16Targets: { [index: string]: number } = {
   'xy': 0x1
 }
 
+const loadStoreDests: { [index: string]: number } = {
+  'a': 0x0,
+  'b': 0x1,
+  'c': 0x2,
+  'd': 0x3
+};
+
 export interface OpCodeParam {
   cs: { [index: string]: number } | null,
   op: (p: number) => number
@@ -65,7 +72,8 @@ export enum MnemonicType {
   LodSw,
   LitOpc,
   Move,
-  Set
+  Set,
+  LoadStore
 }
 
 export interface Mnemonic {
@@ -99,6 +107,10 @@ export const mnemonics: { [index: string]: Mnemonic } = {
     ]
   },
   'rts': { mt: MnemonicType.Direct, ops: [{ op: 0xA0 | 0x05, p1: null, p2: null }] },
+
+  // LOAD 100100dd / STORE 100110ss
+  'ldr': { mt: MnemonicType.LoadStore, ops: [{ op: 0x90, p1: { cs: loadStoreDests, op: p => p}, p2: null }] },
+  'str': { mt: MnemonicType.LoadStore, ops: [{ op: 0x98, p1: { cs: loadStoreDests, op: p => p}, p2: null }] },
 
   // SETAB 01rvvvvv / GOTO 11d00000
   'ldi': {
@@ -139,7 +151,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 6 */['ldi b,0', 'ldi b,1', 'ldi b,2', 'ldi b,3', 'ldi b,4', 'ldi b,5', 'ldi b,6', 'ldi b,7', 'ldi b,8', 'ldi b,9', 'ldi b,10', 'ldi b,11', 'ldi b,12', 'ldi b,13', 'ldi b,14', 'ldi b,15'],
   /* 7 */['ldi b,-16', 'ldi b,-15', 'ldi b,-14', 'ldi b,-13', 'ldi b,-12', 'ldi b,-11', 'ldi b,-10', 'ldi b,-9', 'ldi b,-8', 'ldi b,-7', 'ldi b,-6', 'ldi b,-5', 'ldi b,-4', 'ldi b,-3', 'ldi b,-2', 'ldi b,-1'],
   /* 8 */['clr a', 'add', 'inc', 'and', 'orr', 'eor', 'not', 'rol', 'clr d', 'add d', 'inc d', 'and d', 'orr d', 'eor d', 'not d', 'rol d'],
-  /* 9 */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  /* 9 */['ldr a', 'ldr b', 'ldr c', 'ldr d', null, null, null, null, 'str a', 'str b', 'str c', 'str d', null, null, null, null],
   /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, 'lds a', 'lds d', 'hlt', 'hlr'],
   /* B */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* C */['ldi m', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
@@ -156,6 +168,10 @@ export const opcodes_reverse_class = (opcode: number): { class: string, cycles: 
       return { class: "SETAB", cycles: 1 };
     case (opcode & 0xF0) === 0x80: // ALU 1000rfff
       return { class: "ALU", cycles: 1 };
+    case (opcode & 0xFC) === 0x90: // LOAD 100100dd
+      return { class: "LOAD", cycles: 1 };
+    case (opcode & 0xFC) === 0x98: // STORE 100110dd
+      return { class: "STORE", cycles: 1 };
     case (opcode & 0xC0) === 0xC0: // GOTO 11dscznx
       return { class: "GOTO", cycles: 3 };
     default:

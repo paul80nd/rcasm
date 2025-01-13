@@ -178,5 +178,29 @@ suite('rcasm - Compiler Instrs', () => {
     assertProgram('jsr label \n label: rts', [0, 0, 0xE7, 0x00, 0x03, 0xA5]);
   });
 
+  test('ldr mis-ops', function () {
+    assertHasError('ldr', '1:1: error: Parameter required');
+    assertHasError('ldr 45', '1:5: error: Register required');
+    assertHasError('ldr g', '1:5: error: Register required');
+    assertHasError('ldr j1', '1:5: error: Invalid register - choose one of [a|b|c|d]');
+    assertHasWarning('ldr a,b', '1:7: warning: Parameter not required');
+  });
+
+  test('ldr ops', function () {
+    assertProgram('ldr a \n ldr b \n ldr c \n ldr d', [0, 0, 0x90, 0x91, 0x92, 0x93]);
+  });
+
+  test('str mis-ops', function () {
+    assertHasError('str', '1:1: error: Parameter required');
+    assertHasError('str 45', '1:5: error: Register required');
+    assertHasError('str g', '1:5: error: Register required');
+    assertHasError('str j1', '1:5: error: Invalid register - choose one of [a|b|c|d]');
+    assertHasWarning('str a,b', '1:7: warning: Parameter not required');
+  });
+
+  test('str ops', function () {
+    assertProgram('str a \n str b \n str c \n str d', [0, 0, 0x98, 0x99, 0x9A, 0x9B]);
+  });
+
   //mt: MnemonicType.Direct, ops: [{ op: 0xA8 | 0x06, p1: null, p2: null }]
 });

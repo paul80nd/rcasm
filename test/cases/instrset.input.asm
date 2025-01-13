@@ -94,6 +94,18 @@ load16s:
     ldi j,0xFFFF
     ldi j,load16s    
 
+store_load:
+
+    ldr a
+    ldr b
+    ldr c
+    ldr d
+
+    str a
+    str b
+    str c
+    str d
+
 miscs:
 
     hlt
