@@ -4,7 +4,7 @@ Typescript based assembler for the Relay Computer specific assembly language
 
 Heavily inspired by https://github.com/nurpax/c64jasm
 
-# Developing rcasm
+## Developing rcasm
 
 - Restore packages with `npm install`
 - Perform full build with `npm run prepublishOnly`
