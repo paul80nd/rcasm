@@ -18,6 +18,7 @@ suite('rcasm - Snapshots', () => {
   test('Output', function () {
 
     glob.sync("test/cases/*.input.asm").forEach(fname => {
+      console.info(`      ${fname}`);
       const src = fs.readFileSync(fname).toString();
       const lines = src.split('\n');
       const disasmOptions: DisasmOptions = {

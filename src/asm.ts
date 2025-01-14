@@ -8,7 +8,7 @@ import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const parser = require('./g_parser');
 
 interface Error {
