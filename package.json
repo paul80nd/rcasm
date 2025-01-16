@@ -1,6 +1,6 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.8.0",
+  "version": "1.8.1",
   "description": "Relay Computer Assembler",
   "main": "./lib/umd/src/index.js",
   "typings": "./lib/umd/src/index",
@@ -30,17 +30,17 @@
     "watch": "tsc --watch -p ."
   },
   "dependencies": {
-    "fastbitset": "^0.4.1"
+    "fastbitset": "0.4.1"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.10",
-    "@types/node": "22.x",
-    "@typescript-eslint/eslint-plugin": "^8.17.0",
-    "@typescript-eslint/parser": "^8.3.0",
-    "eslint": "^9.16.0",
-    "glob": "^11.0.1",
-    "mocha": "^11.0.1",
-    "rimraf": "^6.0.1",
+    "@types/mocha": "10.0.10",
+    "@types/node": "22.10.7",
+    "@typescript-eslint/eslint-plugin": "8.20.0",
+    "@typescript-eslint/parser": "8.20.0",
+    "eslint": "9.18.0",
+    "glob": "11.0.1",
+    "mocha": "11.0.1",
+    "rimraf": "6.0.1",
     "typescript": "5.7.3"
   }
 }
