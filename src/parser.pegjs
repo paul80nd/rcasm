@@ -51,7 +51,7 @@ Instruction
 Expr
   = Additive
 
-Additive = first:Primary rest:((PLUS / MINUS) Primary)* {
+Additive = first:Primary rest:((PLUS / MINUS / SECT) Primary)* {
     return rest.reduce(function(memo, curr) {
       return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
     }, first);
@@ -93,8 +93,9 @@ _2 = '2'
 
 COMMA = ','
 COLON = ':'
-MINUS = s:'-'  WSS { return s; }
-PLUS  =  s:'+' WSS { return s; }
+MINUS = s:'-' WSS { return s; }
+PLUS  = s:'+' WSS { return s; }
+SECT  = s:'§' WSS { return s; }
 SEMI  = ';'
 STAR  = '*'
 

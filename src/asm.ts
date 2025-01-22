@@ -419,6 +419,7 @@ class Assembler {
           switch (node.op) {
             case '+': return  runBinop(left, right, (a,b) => a + b)
             case '-': return  runBinop(left, right, (a,b) => a - b)
+            case '§': return runBinop(left, right, (a,b) => ((a & 0xFF) << 8) | (b & 0xFF))
             default:
               throw new Error(`Unhandled binary operator ${node.op}`);
           }
