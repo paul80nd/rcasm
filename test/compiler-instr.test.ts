@@ -28,7 +28,7 @@ suite('rcasm - Compiler Instrs', () => {
   test('parse fails', function () {
     const result = asm.assemble('start: ldi a,');
     assert.equal(result.errors.length, 1);
-    assert.equal(result.errors[0].formatted, "1:14: error: Syntax error: Expected identifier, literal, or register but end of input found.");
+    assert.equal(result.errors[0].formatted, "1:14: error: Syntax error: Expected current-pc, identifier, literal, or register but end of input found.");
   });
 
   test('unknown mnemonic', function () {

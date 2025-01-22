@@ -43,6 +43,14 @@ function anyErrors(...args: (EvalValue<unknown> | undefined)[]) {
   return args.some(e => e !== undefined && e.errors);
 }
 
+// Compute "computeFirstPass" info for a multiple expression values
+// Any non-first pass value means the result expression is also
+// not evaluatable to a value in the first pass.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function combineEvalPassInfo(...args: (EvalValue<any> | undefined)[]) {
+  return args.every(e => e !== undefined && e.completeFirstPass);
+}
+
 class NamedScope<T> {
   syms: Map<string, T & { seen: number }> = new Map();
   readonly parent: NamedScope<T> | null = null;
@@ -267,6 +275,15 @@ function formatSymbolPath(p: ast.ScopeQualifiedIdent): string {
   return `${p.absolute ? '::' : ''}${p.path.join('::')}`;
 }
 
+const runBinop = (a: EvalValue<number>, b: EvalValue<number>, f: (a: number, b: number) => number | boolean): EvalValue<number> => {
+  const res = f(a.value as number, b.value as number);
+  const firstPassComplete = combineEvalPassInfo(a, b);
+  if (typeof res == 'boolean') {
+      return mkEvalValue(res ? 1 : 0, firstPassComplete);
+  }
+  return mkEvalValue(res, firstPassComplete);
+}
+
 class Assembler {
   private lineLoc: SourceLoc;
   private curSegmentName = '';
@@ -377,55 +394,78 @@ class Assembler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
-      case 'literal': {
-        return mkEvalValue(node.lit, true);
-      }
-      case 'register': {
-        this.addError('Unexpected register', node.loc);
-        return mkErrorValue(0);
-      }
-      case 'ident': {
-        throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
-      }
-      case 'qualified-ident': {
-        // Namespace qualified ident, like foo::bar::baz
-        const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
-        if (sym === undefined) {
-          if (this.pass >= 1) {
-            this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
+        case 'binary': {
+          const left = this.evalExpr(node.left);
+          const right = this.evalExpr(node.right);
+          if (anyErrors(left, right)) {
             return mkErrorValue(0);
           }
-          // Return a placeholder that should be resolved in the next pass
-          this.needPass = true;
-          // Evaluated value is marked as "incomplete in first pass"
-          return mkEvalValue(0, false);
+          if (typeof left.value !== typeof right.value) {
+            this.addError(`Binary expression operands are expected to be of the same type.  Got: '${formatTypename(left.value)}' (left), '${formatTypename(right.value)}' (right)`, node.loc);
+            return mkErrorValue(0);
+          }
+          if (typeof left.value !== 'string' && typeof left.value !== 'number') {
+            this.addError(`Binary expression operands can only operator on numbers or strings.  Got: '${formatTypename(left.value)}'`, node.loc);
+            return mkErrorValue(0);
+          }
+          // Allow only a subset of operators for strings
+          if (typeof left.value == 'string') {
+            const okOps = ['+']; //, '==', '<', '<=', '>', '>='];
+            if (okOps.indexOf(node.op) < 0) {
+                this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
+                return mkErrorValue(0);
+            }
+          }
+          switch (node.op) {
+            case '+': return  runBinop(left, right, (a,b) => a + b)
+            case '-': return  runBinop(left, right, (a,b) => a - b)
+            default:
+              throw new Error(`Unhandled binary operator ${node.op}`);
+          }
         }
+        case 'literal': {
+            return mkEvalValue(node.lit, true);
+        }
+        case 'register': {
+          this.addError('Unexpected register', node.loc);
+          return mkErrorValue(0);
+        }
+        case 'ident': {
+            throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
+        }
+        case 'qualified-ident': {
+            // Namespace qualified ident, like foo::bar::baz
+            const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
+            if (sym === undefined) {
+                if (this.pass >= 1) {
+                    this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
+                    return mkErrorValue(0);
+                }
+                // Return a placeholder that should be resolved in the next pass
+                this.needPass = true;
+                // Evaluated value is marked as "incomplete in first pass"
+                return mkEvalValue(0, false);
+            }
 
-        switch (sym.type) {
-          case 'label':
-            return {
-              errors: sym.data.errors,
-              value: sym.data.value.addr,
-              completeFirstPass: sym.seen === this.pass
-            };
-          //                     case 'var':
-          //                         if (sym.seen < this.pass) {
-          //                             this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
-          //                         }
-          //                         return sym.data;
-          //                     case 'macro':
-          //                     case 'segment':
-          //                         this.addError(`Must have a label or a variable identifier here, got ${sym.type} name`, node.loc);
-          //                         return mkErrorValue(0);
+            switch (sym.type) {
+                case 'label':
+                    return {
+                        errors: sym.data.errors,
+                        value: sym.data.value.addr,
+                        completeFirstPass: sym.seen === this.pass
+                    };
+                }
+            break;
         }
-        break;
-      }
-      default:
-        break;
+        case 'getcurpc': {
+            return mkEvalValue(this.getPC(), true);
+        }
+        default:
+            break;
     }
     throw new Error(`should be unreachable on ${node}`);
     return mkErrorValue(0); // TODO is this even reachable?
-  }
+}
 
   emit(byte: number): void {
     const err = this.curSegment.emit(byte);
@@ -734,10 +774,6 @@ class Assembler {
       this.addError(`Parameter required`, stmt.loc);
       return;
     }
-    if (stmt.p1.type !== 'qualified-ident') {
-      this.addError(`Identifier required`, stmt.p1.loc);
-      return;
-    }
 
     const ev = this.evalExpr(stmt.p1);
     if (anyErrors(ev)) {
@@ -806,25 +842,25 @@ class Assembler {
     }
   }
 
-  fillBytes (n: ast.StmtFill): void {
+  fillBytes(n: ast.StmtFill): void {
     const numVals = this.evalExprToInt(n.numBytes, 'dff num_bytes');
     const fillValue = this.evalExprToInt(n.fillValue, 'dff value');
     if (anyErrors(numVals, fillValue)) {
-        return;
+      return;
     }
 
     const { value: fv } = fillValue;
     if (fv < 0 || fv >= 256) {
-        this.addError(`dff value to repeat must be in 8-bit range, '${fv}' given`, n.fillValue.loc);
-        return;
+      this.addError(`dff value to repeat must be in 8-bit range, '${fv}' given`, n.fillValue.loc);
+      return;
     }
     const nb = numVals.value;
     if (nb < 0) {
-        this.addError(`dff repeat count must be >= 0, got ${nb}`, n.numBytes.loc);
-        return;
+      this.addError(`dff repeat count must be >= 0, got ${nb}`, n.numBytes.loc);
+      return;
     }
     for (let i = 0; i < nb; i++) {
-        this.emit(fv);
+      this.emit(fv);
     }
   }
 

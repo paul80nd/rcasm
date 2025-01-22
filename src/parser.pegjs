@@ -32,25 +32,33 @@ Statement
   = drct:Directive   { return drct; }
   / insn:Instruction { return insn; }
 
-
 Directive "directive"
   = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
       const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
     }
-  / PSEUDO_FILL __ numBytes:Expr __ CMA __ fillValue:Expr {
+  / PSEUDO_FILL __ numBytes:Expr __ COMMA __ fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
 
-ExprList = head:Expr tail:(__ CMA __ Expr)* { return buildList(head, tail, 3); }
+ExprList = head:Expr tail:(__ COMMA __ Expr)* { return buildList(head, tail, 3); }
 
 Instruction
-  = m:MNEMONIC __ o1:Expr __ CMA __ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
-  / m:MNEMONIC __ o1:Expr                   { return ast.mkInsn(m,o1,null,loc()); }
-  / m:MNEMONIC                              { return ast.mkInsn(m,null,null,loc()); }
+  = m:MNEMONIC __ o1:Expr __ COMMA __ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
+  / m:MNEMONIC __ o1:Expr                     { return ast.mkInsn(m,o1,null,loc()); }
+  / m:MNEMONIC                                { return ast.mkInsn(m,null,null,loc()); }
 
 Expr
-  = (LITERAL / REGISTER / SQIDENTIFIER)
+  = Additive
+
+Additive = first:Primary rest:((PLUS / MINUS) Primary)* {
+    return rest.reduce(function(memo, curr) {
+      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+    }, first);
+  }
+
+Primary
+  = (LITERAL / REGISTER / SQIDENTIFIER / CURRENTPC)
 
 // ----- G.2 Lexical Scanner -----
 
@@ -83,9 +91,12 @@ _0 = '0'
 _1 = '1'
 _2 = '2'
 
-CMA = ','
-COL = ':'
-SEM = ';'
+COMMA = ','
+COLON = ':'
+MINUS = s:'-'  WSS { return s; }
+PLUS  =  s:'+' WSS { return s; }
+SEMI  = ';'
+STAR  = '*'
 
 PSEUDO_BYTE = 'dfb'i { return 'byte'; }
 PSEUDO_FILL = "dff"i
@@ -114,9 +125,9 @@ WS  "whitespace"
   / '\uFEFF'  // zero width no break space
 
 EOL        "end of line" = [\n\r]
-COMMENT    "comment"     = (SEM (!EOL .)*)
+COMMENT    "comment"     = (SEMI (!EOL .)*)
 
-LABEL      "label"       = s:$ident COL       { return ast.mkLabel(s,loc()); }
+LABEL      "label"       = s:$ident COLON     { return ast.mkLabel(s,loc()); }
 ORG        "ORG"         = O R G __ v:LITERAL { return ast.mkSetPC(v, loc()); }
 MNEMONIC   "mnemonic"    = [a-z]i+            { return text(); }
 
@@ -132,3 +143,5 @@ SQIDENTIFIER "identifier"
 
 REGISTER "register"
  = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }
+
+CURRENTPC "current-pc" = STAR { return ast.mkGetCurPC(loc()); }

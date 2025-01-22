@@ -41,6 +41,16 @@ export function mkSetPC(pc: Expr, loc: SourceLoc): StmtSetPC {
   return { type: 'setpc', pc, loc };
 }
 
+export interface GetCurPC extends Node {
+  type: 'getcurpc';
+}
+export function mkGetCurPC(loc: SourceLoc): GetCurPC {
+  return {
+    type: 'getcurpc',
+    loc
+  }
+}
+
 export interface StmtInsn extends Node {
   type: 'insn';
   mnemonic: string;
@@ -79,7 +89,9 @@ export type Expr
   = Ident
   | ScopeQualifiedIdent
   | Register
-  | Literal;
+  | Literal
+  | BinaryOp
+  | GetCurPC;
 
 export interface Ident extends Node {
   type: 'ident';
@@ -110,4 +122,14 @@ export interface ScopeQualifiedIdent extends Node {
 }
 export function mkScopeQualifiedIdent(path: string[], absolute: boolean, loc: SourceLoc): ScopeQualifiedIdent {
   return { type: 'qualified-ident', path, absolute, loc };
+}
+
+export interface BinaryOp extends Node {
+  type: 'binary';
+  op: string;
+  left: Expr;
+  right: Expr;
+}
+export function mkBinaryOp(op: string, left: Expr, right: Expr, loc: SourceLoc): BinaryOp {
+  return { type: 'binary', op, left, right, loc };
 }
