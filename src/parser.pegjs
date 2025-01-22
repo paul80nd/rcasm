@@ -100,7 +100,7 @@ SEMI  = ';'
 STAR  = '*'
 
 PSEUDO_BYTE = 'dfb'i { return 'byte'; }
-PSEUDO_FILL = "dff"i
+PSEUDO_FILL = "dfs"i
 PSEUDO_WORD = "dfw"i { return 'word'; }
 
 BIN = v:$binary B         { return parseInt(v,2); }

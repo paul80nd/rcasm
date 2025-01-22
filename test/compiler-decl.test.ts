@@ -60,8 +60,8 @@ suite('rcasm - Compiler Decls', () => {
   });
 
   test('data fill', function () {
-    assertProgram('dff 4, 0', [0, 0, 0x00, 0x00, 0x00, 0x00]);
-    assertProgram('dff 3, 0xFE', [0, 0, 0xFE, 0xFE, 0xFE]);
-    assertProgram('dff 2, 11111110b', [0, 0, 0xFE, 0xFE]);
+    assertProgram('dfs 4, 0', [0, 0, 0x00, 0x00, 0x00, 0x00]);
+    assertProgram('dfs 3, 0xFE', [0, 0, 0xFE, 0xFE, 0xFE]);
+    assertProgram('dfs 2, 11111110b', [0, 0, 0xFE, 0xFE]);
   });
 });
