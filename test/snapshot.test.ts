@@ -40,18 +40,24 @@ suite('rcasm - Snapshots', () => {
       compareFiles(fname, expectedFname, actualFname, disasmLines);
     });
   });
+});
 
-  glob.sync("test/errors/*.input.asm").forEach(fname => {
-    const src = fs.readFileSync(fname).toString();
+suite('rcasm - Error Snapshots', () => {
 
-    const { errors } = assemble(src);
+  glob.sync("test/errors/*.rcasm").forEach(fname => {
+    test(fname, function () {
+      const src = fs.readFileSync(fname).toString();
 
-    const errorMessages = errors.map(e => cleanSyntaxError(e.formatted));
-    const errorsFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + `errors.txt`);
-    const actualFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'actual.asm');
+      const { errors } = assemble(src);
 
-    compareFiles(fname, errorsFname, actualFname, errorMessages);
+      const errorMessages = errors.map(e => cleanSyntaxError(e.formatted));
+      const errorsFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + `snap.txt`);
+      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'actual.txt');
+
+      compareFiles(fname, errorsFname, actualFname, errorMessages);
+    });
   });
+
 });
 
 function readLines(fname: string) {
@@ -63,7 +69,7 @@ function cleanSyntaxError(msg: string) {
   const fwdSlashesMsg = msg.replace(/\\/g, '/');
   const m = /(((.*): error:) (Syntax error: )).*$/.exec(fwdSlashesMsg);
   if (m) {
-      return m[1];
+    return m[1];
   }
   return fwdSlashesMsg;
 }
