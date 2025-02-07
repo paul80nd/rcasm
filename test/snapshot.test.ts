@@ -10,7 +10,7 @@ import { DisasmOptions, disassemble } from '../src/disasm';
 
 suite('rcasm - Snapshots', () => {
 
-  glob.sync("test/cases/*.input.asm").forEach(fname => {
+  glob.sync("test/cases/*.rcasm").forEach(fname => {
     test(fname, function () {
       const src = fs.readFileSync(fname).toString();
       const lines = src.split('\n');
@@ -34,8 +34,8 @@ suite('rcasm - Snapshots', () => {
       }
 
       const disasmLines = disassemble(prg /*, undefined*/, disasmOptions).concat('');
-      const expectedFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'expected.asm');
-      const actualFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'actual.asm');
+      const expectedFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'snap.rcdsm');
+      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'actual.rcdsm');
 
       compareFiles(fname, expectedFname, actualFname, disasmLines);
     });
