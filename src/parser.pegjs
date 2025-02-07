@@ -19,35 +19,35 @@ Lines
     }
 
 LineWithComment
-  = __ line:Line __ COMMENT? { return line }
+  = __ line:Line COMMENT? { return line }
 
 Line
-  = l:LABEL LWING sl:Lines __ RWING { return ast.mkAsmLine(l,null,sl,loc()); }
-  / l:LABEL s:Statement             { return ast.mkAsmLine(l,s,null,loc()); }
-  / l:LABEL                         { return ast.mkAsmLine(l,null,null,loc()); }
-  / o:ORG                           { return ast.mkAsmLine(null,o,null,loc()); }
-  / s:Statement                     { return ast.mkAsmLine(null,s,null,loc()); }
-  / __                              { return ast.mkAsmLine(null,null,null,loc()); }
+  = l:LABEL LWING sl:Lines RWING { return ast.mkAsmLine(l,null,sl,loc()); }
+  / l:LABEL s:Statement          { return ast.mkAsmLine(l,s,null,loc()); }
+  / l:LABEL                      { return ast.mkAsmLine(l,null,null,loc()); }
+  / o:ORG                        { return ast.mkAsmLine(null,o,null,loc()); }
+  / s:Statement                  { return ast.mkAsmLine(null,s,null,loc()); }
+  / __                           { return ast.mkAsmLine(null,null,null,loc()); }
 
 Statement
   = drct:Directive   { return drct; }
   / insn:Instruction { return insn; }
 
 Directive "directive"
-  = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
+  = size:(PSEUDO_BYTE / PSEUDO_WORD) values:ExprList  {
       const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
     }
-  / PSEUDO_FILL __ numBytes:Expr __ COMMA __ fillValue:Expr {
+  / PSEUDO_FILL numBytes:Expr COMMA fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
 
-ExprList = head:Expr tail:(__ COMMA __ Expr)* { return buildList(head, tail, 3); }
+ExprList = head:Expr tail:(COMMA Expr)* { return buildList(head, tail, 1); }
 
 Instruction
-  = m:MNEMONIC __ o1:Expr __ COMMA __ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
-  / m:MNEMONIC __ o1:Expr                     { return ast.mkInsn(m,o1,null,loc()); }
-  / m:MNEMONIC                                { return ast.mkInsn(m,null,null,loc()); }
+  = m:MNEMONIC o1:Expr COMMA o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
+  / m:MNEMONIC o1:Expr               { return ast.mkInsn(m,o1,null,loc()); }
+  / m:MNEMONIC                       { return ast.mkInsn(m,null,null,loc()); }
 
 Expr
   = Additive
@@ -92,7 +92,7 @@ _0 = '0'
 _1 = '1'
 _2 = '2'
 
-COMMA = ','
+COMMA = s:',' WSS { return s; }
 LWING = s:'{' WSS { return s; }
 RWING = s:'}' WSS { return s; }
 MINUS = s:'-' WSS { return s; }
@@ -100,9 +100,9 @@ PLUS  = s:'+' WSS { return s; }
 SECT  = s:'§' WSS { return s; }
 STAR  = '*'
 
-PSEUDO_BYTE = 'dfb'i { return 'byte'; }
-PSEUDO_FILL = "dfs"i
-PSEUDO_WORD = "dfw"i { return 'word'; }
+PSEUDO_BYTE = 'dfb'i __ { return 'byte'; }
+PSEUDO_FILL = "dfs"i __
+PSEUDO_WORD = "dfw"i __ { return 'word'; }
 
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
@@ -131,19 +131,19 @@ COMMENT    "comment"     = (';' (!EOL .)*)
 
 LABEL      "label"       = s:$ident ':' __       { return ast.mkLabel(s,loc()); }
 ORG        "ORG"         = O R G __ v:LITERAL __ { return ast.mkSetPC(v, loc()); }
-MNEMONIC   "mnemonic"    = [a-z]i+               { return text(); }
+MNEMONIC   "mnemonic"    = mne:identNoWS __      { return mne; }
 
 LITERAL "literal"
-  = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }
-  / v:HEX  { return ast.mkLiteral(v, 'h', loc()); }
-  / v:DEC  { return ast.mkLiteral(v, 'd', loc()); }
-  / s:STR  { return ast.mkLiteral(s, 's', loc()); }
+  = v:BIN __ { return ast.mkLiteral(v, 'b', loc()); }
+  / v:HEX __ { return ast.mkLiteral(v, 'h', loc()); }
+  / v:DEC __ { return ast.mkLiteral(v, 'd', loc()); }
+  / s:STR __ { return ast.mkLiteral(s, 's', loc()); }
 
 SQIDENTIFIER "identifier" 
-  = head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
-  / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
+  = head:identNoWS tail:('::' identNoWS)* __      { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
+  / '::' head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
 
 REGISTER "register"
- = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }
+ = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha __ { return ast.mkRegister(name.toLowerCase(),loc()); }
 
 CURRENTPC "current-pc" = STAR { return ast.mkGetCurPC(loc()); }
