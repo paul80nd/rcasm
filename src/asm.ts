@@ -62,6 +62,16 @@ class NamedScope<T> {
     this.name = name;
   }
 
+  newScope(name: string, parent: NamedScope<T>): NamedScope<T> {
+    const s = this.children.get(name);
+    if (s !== undefined) {
+      return s;
+    }
+    const newScope = new NamedScope<T>(parent, name);
+    this.children.set(name, newScope);
+    return newScope;
+  }
+
   // Find symbol from current and all parent scopes
   findSymbol(name: string): T & { seen: number } | undefined {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -140,6 +150,13 @@ class Scopes {
     this.curSymtab = this.root;
     this.anonScopeCount = 0;
     this.passCount = pass;
+  }
+
+  withLabelScope(name: string, body: () => void, parent?: NamedScope<SymEntry>) {
+    const curSym = this.curSymtab;
+    this.curSymtab = this.curSymtab.newScope(name, parent || curSym);
+    body();
+    this.curSymtab = curSym;
   }
 
   findPath(path: string[], absolute: boolean): SymEntry & { seen: number } | undefined {
@@ -279,7 +296,7 @@ const runBinop = (a: EvalValue<number>, b: EvalValue<number>, f: (a: number, b: 
   const res = f(a.value as number, b.value as number);
   const firstPassComplete = combineEvalPassInfo(a, b);
   if (typeof res == 'boolean') {
-      return mkEvalValue(res ? 1 : 0, firstPassComplete);
+    return mkEvalValue(res ? 1 : 0, firstPassComplete);
   }
   return mkEvalValue(res, firstPassComplete);
 }
@@ -394,79 +411,79 @@ class Assembler {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
-        case 'binary': {
-          const left = this.evalExpr(node.left);
-          const right = this.evalExpr(node.right);
-          if (anyErrors(left, right)) {
-            return mkErrorValue(0);
-          }
-          if (typeof left.value !== typeof right.value) {
-            this.addError(`Binary expression operands are expected to be of the same type.  Got: '${formatTypename(left.value)}' (left), '${formatTypename(right.value)}' (right)`, node.loc);
-            return mkErrorValue(0);
-          }
-          if (typeof left.value !== 'string' && typeof left.value !== 'number') {
-            this.addError(`Binary expression operands can only operator on numbers or strings.  Got: '${formatTypename(left.value)}'`, node.loc);
-            return mkErrorValue(0);
-          }
-          // Allow only a subset of operators for strings
-          if (typeof left.value == 'string') {
-            const okOps = ['+']; //, '==', '<', '<=', '>', '>='];
-            if (okOps.indexOf(node.op) < 0) {
-                this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
-                return mkErrorValue(0);
-            }
-          }
-          switch (node.op) {
-            case '+': return  runBinop(left, right, (a,b) => a + b)
-            case '-': return  runBinop(left, right, (a,b) => a - b)
-            case '§': return runBinop(left, right, (a,b) => ((a & 0xFF) << 8) | (b & 0xFF))
-            default:
-              throw new Error(`Unhandled binary operator ${node.op}`);
-          }
-        }
-        case 'literal': {
-            return mkEvalValue(node.lit, true);
-        }
-        case 'register': {
-          this.addError('Unexpected register', node.loc);
+      case 'binary': {
+        const left = this.evalExpr(node.left);
+        const right = this.evalExpr(node.right);
+        if (anyErrors(left, right)) {
           return mkErrorValue(0);
         }
-        case 'ident': {
-            throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
+        if (typeof left.value !== typeof right.value) {
+          this.addError(`Binary expression operands are expected to be of the same type.  Got: '${formatTypename(left.value)}' (left), '${formatTypename(right.value)}' (right)`, node.loc);
+          return mkErrorValue(0);
         }
-        case 'qualified-ident': {
-            // Namespace qualified ident, like foo::bar::baz
-            const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
-            if (sym === undefined) {
-                if (this.pass >= 1) {
-                    this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
-                    return mkErrorValue(0);
-                }
-                // Return a placeholder that should be resolved in the next pass
-                this.needPass = true;
-                // Evaluated value is marked as "incomplete in first pass"
-                return mkEvalValue(0, false);
-            }
+        if (typeof left.value !== 'string' && typeof left.value !== 'number') {
+          this.addError(`Binary expression operands can only operator on numbers or strings.  Got: '${formatTypename(left.value)}'`, node.loc);
+          return mkErrorValue(0);
+        }
+        // Allow only a subset of operators for strings
+        if (typeof left.value == 'string') {
+          const okOps = ['+']; //, '==', '<', '<=', '>', '>='];
+          if (okOps.indexOf(node.op) < 0) {
+            this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
+            return mkErrorValue(0);
+          }
+        }
+        switch (node.op) {
+          case '+': return runBinop(left, right, (a, b) => a + b)
+          case '-': return runBinop(left, right, (a, b) => a - b)
+          case '§': return runBinop(left, right, (a, b) => ((a & 0xFF) << 8) | (b & 0xFF))
+          default:
+            throw new Error(`Unhandled binary operator ${node.op}`);
+        }
+      }
+      case 'literal': {
+        return mkEvalValue(node.lit, true);
+      }
+      case 'register': {
+        this.addError('Unexpected register', node.loc);
+        return mkErrorValue(0);
+      }
+      case 'ident': {
+        throw new Error('should not see an ident here -- if you do, it is probably a wrong type node in parser');
+      }
+      case 'qualified-ident': {
+        // Namespace qualified ident, like foo::bar::baz
+        const sym = this.scopes.findQualifiedSym(node.path, node.absolute);
+        if (sym === undefined) {
+          if (this.pass >= 1) {
+            this.addError(`Undefined symbol '${formatSymbolPath(node)}'`, node.loc);
+            return mkErrorValue(0);
+          }
+          // Return a placeholder that should be resolved in the next pass
+          this.needPass = true;
+          // Evaluated value is marked as "incomplete in first pass"
+          return mkEvalValue(0, false);
+        }
 
-            switch (sym.type) {
-                case 'label':
-                    return {
-                        errors: sym.data.errors,
-                        value: sym.data.value.addr,
-                        completeFirstPass: sym.seen === this.pass
-                    };
-                }
-            break;
+        switch (sym.type) {
+          case 'label':
+            return {
+              errors: sym.data.errors,
+              value: sym.data.value.addr,
+              completeFirstPass: sym.seen === this.pass
+            };
         }
-        case 'getcurpc': {
-            return mkEvalValue(this.getPC(), true);
-        }
-        default:
-            break;
+        break;
+      }
+      case 'getcurpc': {
+        return mkEvalValue(this.getPC(), true);
+      }
+      default:
+        break;
     }
     throw new Error(`should be unreachable on ${node}`);
     return mkErrorValue(0); // TODO is this even reachable?
-}
+  }
 
   emit(byte: number): void {
     const err = this.curSegment.emit(byte);
@@ -865,6 +882,11 @@ class Assembler {
     }
   }
 
+  // Enter named scope
+  withLabelScope(name: string, compileScope: () => void, _parent?: NamedScope<SymEntry>): void {
+    this.scopes.withLabelScope(name, compileScope);
+  }
+
   checkDirectives(node: ast.Stmt, _localScopeName: string | null): void {
     switch (node.type) {
       case 'data': {
@@ -933,12 +955,23 @@ class Assembler {
   assembleLine(line: ast.Line): void {
     this.lineLoc = line.loc;
     // Empty lines are no-ops
-    if (line.label === null && line.stmt === null) {
+    if (line.label === null && line.stmt === null && line.scopedStmts === null) {
       return;
     }
 
     if (line.label !== null) {
       this.checkAndDeclareLabel(line.label);
+    }
+
+    const scopedStmts = line.scopedStmts;
+    if (scopedStmts != null) {
+      if (!line.label) {
+        throw new Error('ICE: line.label cannot be undefined');
+      }
+      this.withLabelScope(line.label.name, () => {
+        this.assembleLines(scopedStmts);
+      });
+      return;
     }
 
     if (line.stmt === null) {
