@@ -2,7 +2,7 @@
 
 Typescript based assembler for the Relay Computer specific assembly language
 
-Heavily inspired by https://github.com/nurpax/c64jasm
+Heavily inspired by <https://github.com/nurpax/c64jasm>
 
 ## Developing rcasm
 

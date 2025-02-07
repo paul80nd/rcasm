@@ -22,11 +22,12 @@ LineWithComment
   = __ line:Line __ COMMENT? { return line }
 
 Line
-  = l:LABEL __ s:Statement   { return ast.mkAsmLine(l,s,loc()); }
-  / l:LABEL                  { return ast.mkAsmLine(l,null,loc()); }
-  / o:ORG                    { return ast.mkAsmLine(null,o,loc()); }
-  / s:Statement              { return ast.mkAsmLine(null,s,loc()); }
-  / __                       { return ast.mkAsmLine(null,null,loc()); }
+  = l:LABEL LWING sl:Lines __ RWING { return ast.mkAsmLine(l,null,sl,loc()); }
+  / l:LABEL s:Statement             { return ast.mkAsmLine(l,s,null,loc()); }
+  / l:LABEL                         { return ast.mkAsmLine(l,null,null,loc()); }
+  / o:ORG                           { return ast.mkAsmLine(null,o,null,loc()); }
+  / s:Statement                     { return ast.mkAsmLine(null,s,null,loc()); }
+  / __                              { return ast.mkAsmLine(null,null,null,loc()); }
 
 Statement
   = drct:Directive   { return drct; }
@@ -92,11 +93,11 @@ _1 = '1'
 _2 = '2'
 
 COMMA = ','
-COLON = ':'
+LWING = s:'{' WSS { return s; }
+RWING = s:'}' WSS { return s; }
 MINUS = s:'-' WSS { return s; }
 PLUS  = s:'+' WSS { return s; }
 SECT  = s:'§' WSS { return s; }
-SEMI  = ';'
 STAR  = '*'
 
 PSEUDO_BYTE = 'dfb'i { return 'byte'; }
@@ -126,11 +127,11 @@ WS  "whitespace"
   / '\uFEFF'  // zero width no break space
 
 EOL        "end of line" = [\n\r]
-COMMENT    "comment"     = (SEMI (!EOL .)*)
+COMMENT    "comment"     = (';' (!EOL .)*)
 
-LABEL      "label"       = s:$ident COLON     { return ast.mkLabel(s,loc()); }
-ORG        "ORG"         = O R G __ v:LITERAL { return ast.mkSetPC(v, loc()); }
-MNEMONIC   "mnemonic"    = [a-z]i+            { return text(); }
+LABEL      "label"       = s:$ident ':' __       { return ast.mkLabel(s,loc()); }
+ORG        "ORG"         = O R G __ v:LITERAL __ { return ast.mkSetPC(v, loc()); }
+MNEMONIC   "mnemonic"    = [a-z]i+               { return text(); }
 
 LITERAL "literal"
   = v:BIN  { return ast.mkLiteral(v, 'b', loc()); }

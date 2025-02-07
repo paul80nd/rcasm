@@ -16,7 +16,11 @@ export interface Line extends Node {
   label: Label | null;
   stmt: Stmt | null;
 }
-export function mkAsmLine(label: Label | null, stmt: Stmt | null, loc: SourceLoc): Line {
+export function mkAsmLine(
+  label: Label | null,
+  stmt: Stmt | null,
+  scopedStmts: Line[] | null,
+  loc: SourceLoc): Line {
   return { label, stmt, loc };
 }
 
