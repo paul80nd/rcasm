@@ -3,6 +3,7 @@
 import * as assert from 'assert';
 import * as ast from '../src/ast';
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const parser = require('../src/g_parser');
 
 export function parse(source: string): ast.Line[] {

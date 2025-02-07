@@ -15,14 +15,11 @@ function readLines(fname: string) {
 
 suite('rcasm - Snapshots', () => {
 
-  test('Output', function () {
-
-    glob.sync("test/cases/*.input.asm").forEach(fname => {
-      console.info(`      ${fname}`);
+  glob.sync("test/cases/*.input.asm").forEach(fname => {
+    test(fname, function () {
       const src = fs.readFileSync(fname).toString();
       const lines = src.split('\n');
-      const disasmOptions: DisasmOptions = {
-      };
+      const disasmOptions: DisasmOptions = {};
 
       const { prg, errors, debugInfo } = assemble(src);
 
