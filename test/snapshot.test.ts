@@ -8,11 +8,6 @@ import * as fs from 'fs';
 import { assemble } from '../src/asm';
 import { DisasmOptions, disassemble } from '../src/disasm';
 
-function readLines(fname: string) {
-  const lines = fs.readFileSync(fname).toString().split('\n');
-  return lines.map(line => line.trimEnd());
-}
-
 suite('rcasm - Snapshots', () => {
 
   glob.sync("test/cases/*.input.asm").forEach(fname => {
@@ -42,16 +37,48 @@ suite('rcasm - Snapshots', () => {
       const expectedFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'expected.asm');
       const actualFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'actual.asm');
 
-      // If the expected file doesn't exist, create it.  This is for new test authoring.
-      if (!fs.existsSync(expectedFname)) {
-        fs.writeFileSync(expectedFname, disasmLines.join('\n'));
-      }
+      compareFiles(fname, expectedFname, actualFname, disasmLines);
+    });
+  });
 
-      const expectedLines = readLines(expectedFname);
-      for (let lineIdx = 0; lineIdx < expectedLines.length; lineIdx++) {
-        if (expectedLines[lineIdx].trim() !== disasmLines[lineIdx].trim()) {
-          fs.writeFileSync(actualFname, disasmLines.join('\n'));
-          console.error(`Test failed.
+  glob.sync("test/errors/*.input.asm").forEach(fname => {
+    const src = fs.readFileSync(fname).toString();
+
+    const { errors } = assemble(src);
+
+    const errorMessages = errors.map(e => cleanSyntaxError(e.formatted));
+    const errorsFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + `errors.txt`);
+    const actualFname = path.join(path.dirname(fname), path.basename(fname, 'input.asm') + 'actual.asm');
+
+    compareFiles(fname, errorsFname, actualFname, errorMessages);
+  });
+});
+
+function readLines(fname: string) {
+  const lines = fs.readFileSync(fname).toString().split('\n');
+  return lines.map(line => line.trimEnd());
+}
+
+function cleanSyntaxError(msg: string) {
+  const fwdSlashesMsg = msg.replace(/\\/g, '/');
+  const m = /(((.*): error:) (Syntax error: )).*$/.exec(fwdSlashesMsg);
+  if (m) {
+      return m[1];
+  }
+  return fwdSlashesMsg;
+}
+
+function compareFiles(fname: string, expectedFname: string, actualFname: string, actual: string[]) {
+  // If the expected file doesn't exist, create it.  This is for new test authoring.
+  if (!fs.existsSync(expectedFname)) {
+    fs.writeFileSync(expectedFname, actual.join('\n'));
+  }
+
+  const expectedLines = readLines(expectedFname);
+  for (let lineIdx = 0; lineIdx < expectedLines.length; lineIdx++) {
+    if (expectedLines[lineIdx].trim() !== actual[lineIdx].trim()) {
+      fs.writeFileSync(actualFname, actual.join('\n'));
+      console.error(`Test failed.
 Input .asm:
 
 cat ${fname}
@@ -64,17 +91,14 @@ ${expectedLines.join('\n')}
 
 Actual disassembly (also written into ${actualFname}):
 
-${disasmLines.join('\n')}
+${actual.join('\n')}
 
 To gild to actual output:
 
 cp ${actualFname} ${expectedFname}
 
 `);
-          assert.fail(`Test ${fname} failed`);
-        }
-      }
-    });
-
-  });
-});
+      assert.fail(`Test ${fname} failed`);
+    }
+  }
+}
