@@ -13,10 +13,11 @@
 
 // ----- G.1 Grammer Parser -----
 
+Program
+  = ls:Lines { return ast.mkProgram(ls, loc()); }
+
 Lines 
-  = head:LineWithComment tail:(EOL LineWithComment)* {
-      return ast.mkProgram(buildList(head, tail, 1), loc());
-    }
+  = head:LineWithComment tail:(EOL LineWithComment)* { return buildList(head, tail, 1); }
 
 LineWithComment
   = __ line:Line COMMENT? { return line }
@@ -129,7 +130,7 @@ WS  "whitespace"
 EOL        "end of line" = [\n\r]
 COMMENT    "comment"     = (';' (!EOL .)*)
 
-LABEL      "label"       = s:$ident ':' __       { return ast.mkLabel(s,loc()); }
+LABEL      "label"       = lbl:identNoWS ':' __  { return ast.mkLabel(lbl,loc()); }
 ORG        "ORG"         = O R G __ v:LITERAL __ { return ast.mkSetPC(v, loc()); }
 MNEMONIC   "mnemonic"    = mne:identNoWS __      { return mne; }
 

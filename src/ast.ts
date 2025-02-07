@@ -15,13 +15,14 @@ export function mkProgram(lines: Line[] | null, loc: SourceLoc): Program {
 export interface Line extends Node {
   label: Label | null;
   stmt: Stmt | null;
+  scopedStmts: Line[] | null;
 }
 export function mkAsmLine(
   label: Label | null,
   stmt: Stmt | null,
   scopedStmts: Line[] | null,
   loc: SourceLoc): Line {
-  return { label, stmt, loc };
+  return { label, stmt, scopedStmts, loc };
 }
 
 export interface Label extends Node {
