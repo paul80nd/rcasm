@@ -99,7 +99,7 @@ RWING = s:'}' WSS { return s; }
 MINUS = s:'-' WSS { return s; }
 PLUS  = s:'+' WSS { return s; }
 SECT  = s:'§' WSS { return s; }
-STAR  = '*'
+STAR  = s:'*' WSS { return s; }
 
 PSEUDO_BYTE = 'dfb'i __ { return 'byte'; }
 PSEUDO_FILL = "dfs"i __
