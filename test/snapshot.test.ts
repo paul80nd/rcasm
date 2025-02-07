@@ -34,8 +34,8 @@ suite('rcasm - Snapshots', () => {
       }
 
       const disasmLines = disassemble(prg /*, undefined*/, disasmOptions).concat('');
-      const expectedFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'snap.rcdsm');
-      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'actual.rcdsm');
+      const expectedFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + '.snap.rcdsm');
+      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + '.actual.rcdsm');
 
       compareFiles(fname, expectedFname, actualFname, disasmLines);
     });
@@ -51,8 +51,8 @@ suite('rcasm - Error Snapshots', () => {
       const { errors } = assemble(src);
 
       const errorMessages = errors.map(e => cleanSyntaxError(e.formatted));
-      const errorsFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + `snap.txt`);
-      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + 'actual.txt');
+      const errorsFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + `.snap.txt`);
+      const actualFname = path.join(path.dirname(fname), path.basename(fname, '.rcasm') + '.actual.txt');
 
       compareFiles(fname, errorsFname, actualFname, errorMessages);
     });
