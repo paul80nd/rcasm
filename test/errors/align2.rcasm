@@ -1,0 +1,4 @@
+    add a
+!align "string"
+!align -1
+    add d

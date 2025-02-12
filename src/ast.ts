@@ -35,6 +35,7 @@ export function mkLabel(name: string, loc: SourceLoc): Label {
 export type Stmt
   = StmtInsn
   | StmtSetPC
+  | StmtAlign
   | StmtData
   | StmtFill;
 
@@ -88,6 +89,15 @@ export interface StmtFill extends Node {
 }
 export function mkFill(numBytes: Expr, fillValue: Expr, loc: SourceLoc): StmtFill {
   return { type: 'fill', numBytes, fillValue, loc }
+}
+
+export interface StmtAlign extends Node {
+  type: 'align';
+  alignBytes: Expr;
+}
+
+export function mkAlign(alignBytes: Expr, loc: SourceLoc): StmtAlign {
+  return { type: 'align', alignBytes, loc }
 }
 
 export type Expr

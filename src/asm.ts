@@ -882,6 +882,25 @@ class Assembler {
     }
   }
 
+  alignBytes(n: ast.StmtAlign): void {
+    const v = this.evalExprToInt(n.alignBytes, 'alignment');
+    if (anyErrors(v)) {
+      return;
+    }
+    const { value: nb } = v;
+    if (nb < 1) {
+      this.addError(`Alignment must be a positive integer, ${nb} given`, n.alignBytes.loc);
+      return;
+    }
+    if ((nb & (nb - 1)) != 0) {
+      this.addError(`Alignment must be a power of two, ${nb} given`, n.loc);
+      return;
+    }
+    while ((this.getPC() & (nb - 1)) != 0) {
+      this.emit(0);
+    }
+  }
+
   // Enter named scope
   withLabelScope(name: string, compileScope: () => void, _parent?: NamedScope<SymEntry>): void {
     this.scopes.withLabelScope(name, compileScope);
@@ -895,6 +914,10 @@ class Assembler {
       }
       case 'fill': {
         this.fillBytes(node);
+        break;
+      }
+      case 'align': {
+        this.alignBytes(node);
         break;
       }
       case 'setpc': {

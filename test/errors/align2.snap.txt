@@ -1,0 +1,2 @@
+2:8: error: Expecting alignment to be 'number' type, got 'string'
+3:8: error: Alignment must be a positive integer, -1 given
