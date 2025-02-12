@@ -95,6 +95,11 @@ suite('rcasm - Parser', () => {
     assertNoop(result[0]);
   });
 
+  test('Label Stmt', function () {
+    const result = parse('xyz: inc');
+    assertLabel(result[0], 'xyz', 1, 6);
+  });
+
   test('Instructions', function () {
     assertInstruction('inc', 'inc', null, null);
     assertInstruction('and d', 'and', 'd', null);

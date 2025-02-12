@@ -1,8 +1,9 @@
 export {
+  Node, Loc, SourceLoc,
   Program, Line, Label,
-  StmtInsn, StmtSetPC, StmtData, Node,
-  Expr, Literal, Register, ScopeQualifiedIdent,
-  Loc, SourceLoc
+  StmtInsn, StmtSetPC, StmtData, StmtFill,
+  Expr, BinaryOp,
+  Literal, Register, Ident, ScopeQualifiedIdent, GetCurPC
 } from './ast';
 export { assemble, parseOnly, Diagnostic } from './asm';
 export { disassemble } from './disasm';
