@@ -116,7 +116,8 @@ suite('rcasm - Parser', () => {
   });
 
   test('Data', function () {
-    assertData('dfb "test"', ast.DataSize.Byte);
+    assertData('!byte "test"', ast.DataSize.Byte);
+    assertData('!word "test"', ast.DataSize.Word);
   });
 
   test('Program Loc', function () {

@@ -861,20 +861,20 @@ class Assembler {
   }
 
   fillBytes(n: ast.StmtFill): void {
-    const numVals = this.evalExprToInt(n.numBytes, 'dfs num_bytes');
-    const fillValue = this.evalExprToInt(n.fillValue, 'dfs value');
+    const numVals = this.evalExprToInt(n.numBytes, '!fill num_bytes');
+    const fillValue = this.evalExprToInt(n.fillValue, '!fill value');
     if (anyErrors(numVals, fillValue)) {
       return;
     }
 
     const { value: fv } = fillValue;
     if (fv < 0 || fv >= 256) {
-      this.addError(`dfs value to repeat must be in 8-bit range, '${fv}' given`, n.fillValue.loc);
+      this.addError(`!fill value to repeat must be in 8-bit range, '${fv}' given`, n.fillValue.loc);
       return;
     }
     const nb = numVals.value;
     if (nb < 0) {
-      this.addError(`dfs repeat count must be >= 0, got ${nb}`, n.numBytes.loc);
+      this.addError(`!fill repeat count must be >= 0, got ${nb}`, n.numBytes.loc);
       return;
     }
     for (let i = 0; i < nb; i++) {

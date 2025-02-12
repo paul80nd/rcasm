@@ -1,2 +1,2 @@
     add
-    dfs "foo", 0
+    !fill "foo", 0

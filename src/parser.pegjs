@@ -42,6 +42,10 @@ Directive "directive"
   / PSEUDO_FILL numBytes:Expr COMMA fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
+  / PSEUDO_ALIGN alignBytes:Expr {
+      return ast.mkAlign(alignBytes, loc());
+    }
+
 
 ExprList = head:Expr tail:(COMMA Expr)* { return buildList(head, tail, 1); }
 
@@ -101,9 +105,10 @@ PLUS  = s:'+' WSS { return s; }
 SECT  = s:'§' WSS { return s; }
 STAR  = s:'*' WSS { return s; }
 
-PSEUDO_BYTE = 'dfb'i __ { return 'byte'; }
-PSEUDO_FILL = "dfs"i __
-PSEUDO_WORD = "dfw"i __ { return 'word'; }
+PSEUDO_ALIGN = "!align" __
+PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
+PSEUDO_WORD  = "!word" __ { return 'word'; }
+PSEUDO_FILL  = "!fill" __
 
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
