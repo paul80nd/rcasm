@@ -1,7 +1,7 @@
 export {
   Node, Loc, SourceLoc,
   Program, Line, Label,
-  StmtInsn, StmtSetPC, StmtData, StmtFill, StmtAlign,
+  Stmt, StmtAlign, StmtData, StmtFill, StmtFor, StmtInsn, StmtSetPC,
   Expr, BinaryOp,
   Literal, Register, Ident, ScopeQualifiedIdent, GetCurPC
 } from './ast';
