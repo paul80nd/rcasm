@@ -1,0 +1,8 @@
+    ldi a,-1
+
+!for i in range(3) {
+    ldi a,i
+}
+!for i in range(10,12) {
+    ldi a,i
+}

@@ -127,12 +127,18 @@ class NamedScope<T> {
   }
 }
 
-type SymEntry = SymLabel;
+type SymEntry = SymLabel | SymVar;
 
 interface SymLabel {
   type: 'label';
   segment: Segment;
   data: EvalValue<LabelAddr>;
+}
+
+interface SymVar {
+  type: 'var';
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data: EvalValue<any>;
 }
 
 interface SymSegment {
@@ -150,6 +156,12 @@ class Scopes {
     this.curSymtab = this.root;
     this.anonScopeCount = 0;
     this.passCount = pass;
+  }
+
+  withAnonScope(body: () => void, parent?: NamedScope<SymEntry>) {
+    const anonLabel = `__anon_scope_${this.anonScopeCount}`;
+    this.anonScopeCount++;
+    this.withLabelScope(anonLabel, body, parent);
   }
 
   withLabelScope(name: string, body: () => void, parent?: NamedScope<SymEntry>) {
@@ -218,6 +230,14 @@ class Scopes {
     // Update to mark the label as "seen" in this pass
     this.curSymtab.updateSymbol(name, prevLabel, this.passCount);
     return false;
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  declareVar(name: string, value: EvalValue<any>): void {
+    this.curSymtab.addSymbol(name, {
+      type: 'var',
+      data: value
+    }, this.passCount)
   }
 
   dumpLabels(codePC: number, segments: [string, Segment][]): { name: string, addr: number, size: number, segmentName: string }[] {
@@ -472,6 +492,40 @@ class Assembler {
               value: sym.data.value.addr,
               completeFirstPass: sym.seen === this.pass
             };
+          case 'var':
+            if (sym.seen < this.pass) {
+              this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
+            }
+            return sym.data;
+        }
+        break;
+      }
+      case 'callfunc': {
+        const callee = this.evalExpr(node.callee);
+        const argValues = node.args.map(expr => this.evalExpr(expr));
+        if (callee.errors) {
+          return mkErrorValue(0); // suppress further errors if the callee is bonkers
+        }
+        if (typeof callee.value !== 'function') {
+          this.addError(`Callee must be a function type.  Got '${formatTypename(callee)}'`, node.loc);
+          return mkErrorValue(0);
+        }
+        if (anyErrors(...argValues)) {
+          return mkErrorValue(0);
+        }
+        try {
+          const complete = callee.completeFirstPass && combineEvalPassInfo(...argValues);
+          return mkEvalValue(callee.value(...argValues.map(v => v.value)), complete);
+        } catch (err) {
+          if (node.callee.type == 'qualified-ident') {
+            this.addError(`Call to '${formatSymbolPath(node.callee)}' failed with an error: ${err.message}`, node.loc);
+          } else {
+            this.addError(`Unexpected error calling function`, node.loc)
+            // Generic error message as callees that are computed
+            // expressions have lost their name once we get here.
+            this.addError(`Plugin call failed with an error: ${err.message}`, node.loc);
+          }
+          return mkErrorValue(0);
         }
         break;
       }
@@ -901,6 +955,14 @@ class Assembler {
     }
   }
 
+  // Enter anonymous block scope
+  withAnonScope(name: string | null, compileScope: () => void, parent?: NamedScope<SymEntry>): void {
+    if (name !== null) {
+      return this.withLabelScope(name, compileScope, parent);
+    }
+    this.scopes.withAnonScope(compileScope, parent);
+  }
+
   // Enter named scope
   withLabelScope(name: string, compileScope: () => void, _parent?: NamedScope<SymEntry>): void {
     this.scopes.withLabelScope(name, compileScope);
@@ -922,6 +984,29 @@ class Assembler {
       }
       case 'setpc': {
         this.handleSetPC(node.pc);
+        break;
+      }
+      case 'for': {
+        const { index, list, body } = node;
+        const lstVal = this.evalExpr(list);
+        if (anyErrors(lstVal)) {
+          return;
+        }
+        const { value: lst } = lstVal;
+        if (!(lst instanceof Array)) {
+          this.addError(`for-loop range must be an array expression (e.g., a range() or an array)`, list.loc);
+          return;
+        }
+        for (let i = 0; i < lst.length; i++) {
+          let scopeName = null;
+          if (_localScopeName !== null) {
+            scopeName = `${_localScopeName}__${i}`
+          }
+          this.withAnonScope(scopeName, () => {
+            this.scopes.declareVar(index.name, mkEvalValue(lst[i], lstVal.completeFirstPass));
+            return this.assembleLines(body);
+          });
+        }
         break;
       }
       default:
@@ -1077,6 +1162,46 @@ class Assembler {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  _requireType(e: any, type: string): (any | never) {
+    if (typeof e == type) {
+      return e;
+    }
+    this.addError(`Expecting a ${type} value, got ${formatTypename(e)}`, e.loc);
+  }
+
+  requireNumber(e: ast.Literal): (number | never) { return this._requireType(e, 'number') as number; }
+
+  registerPlugins() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const range = (...args: any[]) => {
+      let start = 0;
+      let end = undefined;
+      if (args.length == 1) {
+        end = this.requireNumber(args[0]);
+      } else if (args.length == 2) {
+        start = this.requireNumber(args[0]);
+        end = this.requireNumber(args[1]);
+      } else {
+        throw new Error(`Invalid number of args to 'range'.  Expecting 1 or 2 arguments.`)
+      }
+      if (end == start) {
+        return [];
+      }
+      if (end < start) {
+        throw new Error(`range 'end' must be larger or equal to 'start'`)
+      }
+      return Array(end - start).fill(null).map((_, idx) => idx + start);
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const addPlugin = (name: string, handler: any) => {
+      // TODO what about values from plugin calls?? passinfo missing
+      this.scopes.declareVar(name, mkEvalValue(handler, false));
+    }
+
+    addPlugin('range', range);
+  }
+
   dumpLabels() {
     return this.scopes.dumpLabels(this.getPC(), this.segments);
   }
@@ -1100,6 +1225,7 @@ export function assemble(source: string) {
   let pass = 0;
   do {
     asm.startPass(pass);
+    asm.registerPlugins();
     asm.assemble(source);
 
     if (pass > 0 && asm.anyErrors()) {

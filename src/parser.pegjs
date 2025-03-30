@@ -42,6 +42,9 @@ Directive "directive"
   / PSEUDO_FILL numBytes:Expr COMMA fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
+  / PSEUDO_FOR index:IDENTIFIER "in" __ list:Expr LWING body:Lines RWING {
+      return ast.mkFor(index, list, body, loc());
+    }
   / PSEUDO_ALIGN alignBytes:Expr {
       return ast.mkAlign(alignBytes, loc());
     }
@@ -57,10 +60,21 @@ Instruction
 Expr
   = Additive
 
-Additive = first:Primary rest:((PLUS / MINUS / SECT) Primary)* {
+Additive = first:CallOrMemberExpression rest:((PLUS / MINUS / SECT) CallOrMemberExpression)* {
     return rest.reduce(function(memo, curr) {
       return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
     }, first);
+  }
+
+CallOrMemberExpression
+  = CallExpression
+  / MemberExpression
+
+MemberExpression = Primary
+
+CallExpression =
+  callee:MemberExpression LPAR args:ExprList? RPAR {
+    return ast.mkCallFunc(callee, args, loc());
   }
 
 Primary
@@ -76,7 +90,6 @@ alphanum = [a-zA-Z_0-9]
 hexadecimal = [0-9a-f]i+
 binary      = [0-1]+
 decimal     = [+-]? [0-9]+
-ident       = [a-z]i+ [0-9a-z_]i*
 
 A = 'a'i
 B = 'b'i
@@ -98,6 +111,8 @@ _1 = '1'
 _2 = '2'
 
 COMMA = s:',' WSS { return s; }
+LPAR  = s:'(' WSS { return s; }
+RPAR  = s:')' WSS { return s; }
 LWING = s:'{' WSS { return s; }
 RWING = s:'}' WSS { return s; }
 MINUS = s:'-' WSS { return s; }
@@ -108,6 +123,7 @@ STAR  = s:'*' WSS { return s; }
 PSEUDO_ALIGN = "!align" __
 PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
 PSEUDO_WORD  = "!word" __ { return 'word'; }
+PSEUDO_FOR   = "!for" __
 PSEUDO_FILL  = "!fill" __
 
 BIN = v:$binary B         { return parseInt(v,2); }
@@ -119,6 +135,7 @@ STR = '"' c:doubleStringCharacter* '"' { return c.join(''); }
 doubleStringCharacter = !'"' char:. { return char; }
 
 identNoWS = (alpha+ alphanum*) { return text(); }
+ident = sym:identNoWS __       { return sym; }
 
 // Tokens
 
@@ -148,6 +165,9 @@ LITERAL "literal"
 SQIDENTIFIER "identifier" 
   = head:identNoWS tail:('::' identNoWS)* __      { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
   / '::' head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
+
+IDENTIFIER "identifier"
+  = ident:ident { return ast.mkIdent(ident, loc()); }
 
 REGISTER "register"
  = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha __ { return ast.mkRegister(name.toLowerCase(),loc()); }

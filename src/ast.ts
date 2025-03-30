@@ -37,7 +37,8 @@ export type Stmt
   | StmtSetPC
   | StmtAlign
   | StmtData
-  | StmtFill;
+  | StmtFill
+  | StmtFor;
 
 export interface StmtSetPC extends Node {
   type: 'setpc';
@@ -100,17 +101,43 @@ export function mkAlign(alignBytes: Expr, loc: SourceLoc): StmtAlign {
   return { type: 'align', alignBytes, loc }
 }
 
+export interface StmtFor extends Node {
+  type: 'for',
+  index: Ident;
+  list: Expr;
+  body: Line[];
+}
+export function mkFor(index: Ident, list: Expr, body: Line[], loc: SourceLoc): StmtFor {
+  return {
+    type: 'for',
+    index,
+    list,
+    body,
+    loc
+  }
+}
+
 export type Expr
   = Ident
   | ScopeQualifiedIdent
   | Register
   | Literal
   | BinaryOp
+  | CallFunc
   | GetCurPC;
 
-export interface Ident extends Node {
-  type: 'ident';
-  name: string;
+export interface CallFunc extends Node {
+  type: 'callfunc';
+  callee: Expr;
+  args: Expr[];
+}
+export function mkCallFunc(callee: Expr, args: Expr[], loc: SourceLoc): CallFunc {
+  return {
+    type: 'callfunc',
+    callee,
+    args: args == null ? [] : args,
+    loc
+  }
 }
 
 export interface Literal extends Node {
@@ -137,6 +164,14 @@ export interface ScopeQualifiedIdent extends Node {
 }
 export function mkScopeQualifiedIdent(path: string[], absolute: boolean, loc: SourceLoc): ScopeQualifiedIdent {
   return { type: 'qualified-ident', path, absolute, loc };
+}
+
+export interface Ident extends Node {
+  type: 'ident';
+  name: string;
+}
+export function mkIdent(name: string, loc: SourceLoc): Ident {
+  return { type: 'ident', name, loc };
 }
 
 export interface BinaryOp extends Node {
