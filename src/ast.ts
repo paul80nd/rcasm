@@ -38,7 +38,8 @@ export type Stmt
   | StmtAlign
   | StmtData
   | StmtFill
-  | StmtFor;
+  | StmtFor
+  | StmtLet;
 
 export interface StmtSetPC extends Node {
   type: 'setpc';
@@ -116,6 +117,21 @@ export function mkFor(index: Ident, list: Expr, body: Line[], loc: SourceLoc): S
     loc
   }
 }
+
+export interface StmtLet extends Node {
+  type: 'let',
+  name: Ident;
+  value: Expr;
+}
+export function mkLet(name: Ident, value: Expr, loc: SourceLoc): StmtLet {
+  return {
+    type: 'let',
+    name,
+    value,
+    loc
+  }
+}
+
 
 export type Expr
   = Ident

@@ -6,3 +6,8 @@
 !for i in range(10,12) {
     ldi a,i
 }
+
+!let start=1
+!for i in range(start,4) {
+    ldi a,i
+}

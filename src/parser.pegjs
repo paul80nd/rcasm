@@ -45,6 +45,7 @@ Directive "directive"
   / PSEUDO_FOR index:IDENTIFIER "in" __ list:Expr LWING body:Lines RWING {
       return ast.mkFor(index, list, body, loc());
     }
+  / PSEUDO_LET name:IDENTIFIER EQU value:Expr { return ast.mkLet(name, value, loc()); }
   / PSEUDO_ALIGN alignBytes:Expr {
       return ast.mkAlign(alignBytes, loc());
     }
@@ -121,6 +122,7 @@ _2 = '2'
 
 COMMA = s:',' WSS { return s; }
 DIV   = s:'/' WSS { return s; }
+EQU   = s:'=' WSS { return s; }
 MOD   = s:'%' WSS { return s; }
 LPAR  = s:'(' WSS { return s; }
 RPAR  = s:')' WSS { return s; }
@@ -135,6 +137,7 @@ PSEUDO_ALIGN = "!align" __
 PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
 PSEUDO_WORD  = "!word" __ { return 'word'; }
 PSEUDO_FOR   = "!for" __
+PSEUDO_LET   = "!let" __
 PSEUDO_FILL  = "!fill" __
 
 BIN = v:$binary B         { return parseInt(v,2); }

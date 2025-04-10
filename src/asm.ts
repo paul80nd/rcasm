@@ -1012,6 +1012,18 @@ class Assembler {
         }
         break;
       }
+      case 'let': {
+        const name = node.name;
+        const sym = this.scopes.findQualifiedSym([name.name], false);
+        const eres = this.evalExpr(node.value);
+
+        if (sym !== undefined && this.scopes.symbolSeen(name.name)) {
+          this.addError(`Variable '${name.name}' already defined`, node.loc);
+          return;
+        }
+        this.scopes.declareVar(name.name, eres);
+        break;
+      }
       default:
         this.addError(`unknown directive ${node.type}`, node.loc);
         return;

@@ -1,0 +1,1 @@
+2:1: error: Variable 'x' already defined

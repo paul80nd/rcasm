@@ -1,0 +1,1 @@
+2:11: error: Undeclared variable 'state_length'
