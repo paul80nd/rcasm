@@ -1,0 +1,2 @@
+1:8: error: Binary expression operands are expected to be of the same type.  Got: 'string' (left), 'number' (right)
+2:8: error: Binary expression operands are expected to be of the same type.  Got: 'number' (left), 'string' (right)

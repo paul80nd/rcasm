@@ -60,7 +60,16 @@ Instruction
 Expr
   = Additive
 
-Additive = first:CallOrMemberExpression rest:((PLUS / MINUS / SECT) CallOrMemberExpression)* {
+
+Multiplicative = first:CallOrMemberExpression rest:((STAR / DIV / MOD) CallOrMemberExpression)* {
+    return rest.reduce(function(memo, curr) {
+      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+    }, first);
+  }
+  / Primary
+
+
+Additive = first:Multiplicative rest:((PLUS / MINUS / SECT) Multiplicative)* {
     return rest.reduce(function(memo, curr) {
       return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
     }, first);
@@ -111,6 +120,8 @@ _1 = '1'
 _2 = '2'
 
 COMMA = s:',' WSS { return s; }
+DIV   = s:'/' WSS { return s; }
+MOD   = s:'%' WSS { return s; }
 LPAR  = s:'(' WSS { return s; }
 RPAR  = s:')' WSS { return s; }
 LWING = s:'{' WSS { return s; }

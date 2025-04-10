@@ -1,0 +1,1 @@
+1:7: error: Expecting value to be 'number' type, got 'string'

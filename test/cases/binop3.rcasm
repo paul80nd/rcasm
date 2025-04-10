@@ -1,0 +1,9 @@
+; Testing binary operations on label offsetting
+        org 0x1234
+label:  clr a
+        jmp label;
+        jmp label+4/2;
+        jmp label-2*1;
+        ldi m, 10/3;
+        ldi m, 111*3;
+        ldi m, 10%3;
