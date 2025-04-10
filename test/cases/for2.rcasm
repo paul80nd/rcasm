@@ -1,0 +1,5 @@
+!let CNST = 3
+!for k in range(10) {
+    !let v = 0xFF00 + (k * CNST)
+    ldi m, v
+}

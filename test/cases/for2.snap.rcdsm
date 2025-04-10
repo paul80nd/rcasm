@@ -1,0 +1,10 @@
+0000: C0 FF 00     ldi m
+0003: C0 FF 03     ldi m
+0006: C0 FF 06     ldi m
+0009: C0 FF 09     ldi m
+000C: C0 FF 0C     ldi m
+000F: C0 FF 0F     ldi m
+0012: C0 FF 12     ldi m
+0015: C0 FF 15     ldi m
+0018: C0 FF 18     ldi m
+001B: C0 FF 1B     ldi m

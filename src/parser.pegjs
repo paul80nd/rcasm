@@ -58,9 +58,7 @@ Instruction
   / m:MNEMONIC o1:Expr               { return ast.mkInsn(m,o1,null,loc()); }
   / m:MNEMONIC                       { return ast.mkInsn(m,null,null,loc()); }
 
-Expr
-  = Additive
-
+Expr = LastExpr
 
 Multiplicative = first:CallOrMemberExpression rest:((STAR / DIV / MOD) CallOrMemberExpression)* {
     return rest.reduce(function(memo, curr) {
@@ -76,6 +74,8 @@ Additive = first:Multiplicative rest:((PLUS / MINUS / SECT) Multiplicative)* {
     }, first);
   }
 
+LastExpr = Additive
+
 CallOrMemberExpression
   = CallExpression
   / MemberExpression
@@ -87,8 +87,12 @@ CallExpression =
     return ast.mkCallFunc(callee, args, loc());
   }
 
-Primary
-  = (LITERAL / REGISTER / SQIDENTIFIER / CURRENTPC)
+Primary 
+  = LITERAL 
+  / REGISTER 
+  / SQIDENTIFIER 
+  / CURRENTPC
+  / LPAR e:LastExpr RPAR { return e; }
 
 // ----- G.2 Lexical Scanner -----
 
