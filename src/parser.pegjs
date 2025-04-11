@@ -54,6 +54,9 @@ Directive "directive"
       return ast.mkFor(index, list, body, loc());
     }
   / PSEUDO_LET name:IDENTIFIER EQU value:Expr { return ast.mkLet(name, value, loc()); }
+  / PSEUDO_ERROR error:STRING {
+      return ast.mkError(error, loc());
+    }
   / PSEUDO_ALIGN alignBytes:Expr {
       return ast.mkAlign(alignBytes, loc());
     }
@@ -178,6 +181,7 @@ PSEUDO_LET   = "!let" __
 PSEUDO_IF    = "!if" __
 PSEUDO_ELSE  = "else" __
 PSEUDO_ELIF  = "elif" __
+PSEUDO_ERROR = "!error" __
 PSEUDO_FILL  = "!fill" __
 
 BIN = v:$binary B         { return parseInt(v,2); }
@@ -185,6 +189,7 @@ HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
 DEC = v:$decimal D?       { return parseInt(v); } 
 
 STR = '"' c:doubleStringCharacter* '"' { return c.join(''); }
+STRING = '"' c:doubleStringCharacter* '"' __ { return ast.mkLiteral(c.join(''), loc()); }
 
 doubleStringCharacter = !'"' char:. { return char; }
 

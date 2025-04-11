@@ -39,6 +39,7 @@ export type Stmt
   | StmtData
   | StmtFill
   | StmtIfElse
+  | StmtError
   | StmtFor
   | StmtLet;
 
@@ -113,6 +114,18 @@ export function mkIfElse(cases: [Expr, Line[]][], elseBranch: Line[], loc: Sourc
     type: 'if',
     cases,
     elseBranch: elseBranch !== null ? elseBranch : [],
+    loc
+  }
+}
+
+export interface StmtError extends Node {
+  type: 'error';
+  error: Literal;
+}
+export function mkError(error: Literal, loc: SourceLoc): StmtError {
+  return {
+    type: 'error',
+    error,
     loc
   }
 }

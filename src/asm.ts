@@ -432,6 +432,10 @@ class Assembler {
     return this.evalExprType(node, 'number', msg);
   }
 
+  evalExprToString(node: ast.Expr, msg: string): EvalValue<string> {
+    return this.evalExprType(node, 'string', msg);
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   evalExpr(node: ast.Expr): EvalValue<any> {
     switch (node.type) {
@@ -548,7 +552,7 @@ class Assembler {
       default:
         break;
     }
-    throw new Error(`should be unreachable on ${node}`);
+    throw new Error(`should be unreachable on ${(node as ast.Expr).type}`);
     return mkErrorValue(0); // TODO is this even reachable?
   }
 
@@ -997,6 +1001,14 @@ class Assembler {
       }
       case 'setpc': {
         this.handleSetPC(node.pc);
+        break;
+      }
+      case 'error': {
+        const msg = this.evalExprToString(node.error, 'error message');
+        if (!anyErrors(msg)) {
+          this.addError(msg.value, node.loc);
+          return;
+        }
         break;
       }
       case 'if': {
