@@ -1,0 +1,14 @@
+!let foo = "foo"
+!let bar = "bar"
+
+!if (foo + bar == "foobar") {
+    ldi a,1
+} else {
+    ldi a,0
+}
+
+!if (foo >= bar) {
+    ldi a,2
+} else {
+    ldi a,0
+}

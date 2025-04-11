@@ -451,7 +451,7 @@ class Assembler {
         }
         // Allow only a subset of operators for strings
         if (typeof left.value == 'string') {
-          const okOps = ['+']; //, '==', '<', '<=', '>', '>='];
+          const okOps = ['+', '==', '<', '<=', '>', '>='];
           if (okOps.indexOf(node.op) < 0) {
             this.addError(`'${node.op}' operator is not supported for strings.  Valid operators for strings are: ${okOps.join(', ')}`, node.loc);
             return mkErrorValue(0);
@@ -464,6 +464,12 @@ class Assembler {
           case '/': return runBinop(left, right, (a, b) => a / b)
           case '%': return runBinop(left, right, (a, b) => a % b)
           case '§': return runBinop(left, right, (a, b) => ((a & 0xFF) << 8) | (b & 0xFF))
+          case '==': return runBinop(left, right, (a, b) => a == b)
+          case '!=': return runBinop(left, right, (a, b) => a != b)
+          case '<': return runBinop(left, right, (a, b) => a < b)
+          case '<=': return runBinop(left, right, (a, b) => a <= b)
+          case '>': return runBinop(left, right, (a, b) => a > b)
+          case '>=': return runBinop(left, right, (a, b) => a >= b)
           default:
             throw new Error(`Unhandled binary operator ${node.op}`);
         }

@@ -1,0 +1,11 @@
+!for i in range(4) {
+    !if (i == 0) {
+        ldi a,0
+    } elif (i == 1) {
+        ldi a,1
+    } elif (i == 2) {
+        ldi a,2
+    } else {
+        ldi a,3
+    }
+}

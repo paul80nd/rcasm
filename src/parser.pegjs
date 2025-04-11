@@ -89,7 +89,19 @@ Additive = first:Multiplicative rest:((PLUS / MINUS / SECT) Multiplicative)* {
     }, first);
   }
 
-LastExpr = Additive
+Relational = first:Additive rest:((LE / GE / LT / GT) Additive)* {
+    return rest.reduce(function(memo, curr) {
+      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+    }, first);
+  }
+
+Equality = first:Relational rest:((EQUEQU / BANGEQU) Relational)* {
+    return rest.reduce(function(memo, curr) {
+      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+    }, first);
+  }
+
+LastExpr = Equality
 
 CallOrMemberExpression
   = CallExpression
@@ -139,18 +151,24 @@ _0 = '0'
 _1 = '1'
 _2 = '2'
 
-COMMA = s:',' WSS { return s; }
-DIV   = s:'/' WSS { return s; }
-EQU   = s:'=' WSS { return s; }
-MOD   = s:'%' WSS { return s; }
-LPAR  = s:'(' WSS { return s; }
-RPAR  = s:')' WSS { return s; }
-LWING = s:'{' WSS { return s; }
-RWING = s:'}' WSS { return s; }
-MINUS = s:'-' WSS { return s; }
-PLUS  = s:'+' WSS { return s; }
-SECT  = s:'§' WSS { return s; }
-STAR  = s:'*' WSS { return s; }
+COMMA   = s:','        WSS { return s; }
+DIV     = s:'/'        WSS { return s; }
+EQU     = s:'='        WSS { return s; }
+MOD     = s:'%'        WSS { return s; }
+LT      = s:'<'  ![=]  WSS { return s; }
+GT      = s:'>'  ![=]  WSS { return s; }
+LE      = s:'<='       WSS { return s; }
+GE      = s:'>='       WSS { return s; }
+EQUEQU  = s:'=='       WSS { return s; }
+BANGEQU = s:'!='       WSS { return s; }
+LPAR    = s:'('        WSS { return s; }
+RPAR    = s:')'        WSS { return s; }
+LWING   = s:'{'        WSS { return s; }
+RWING   = s:'}'        WSS { return s; }
+MINUS   = s:'-'        WSS { return s; }
+PLUS    = s:'+'        WSS { return s; }
+SECT    = s:'§'        WSS { return s; }
+STAR    = s:'*'        WSS { return s; }
 
 PSEUDO_ALIGN = "!align" __
 PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
