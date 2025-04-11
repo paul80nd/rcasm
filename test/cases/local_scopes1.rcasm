@@ -1,0 +1,13 @@
+!let aa = 0
+
+!if (aa == 0) {
+    !let xx = 0
+    ldi a,xx
+}
+
+!if (aa == 0) {
+    !let xx = 1
+    ldi a,xx
+}
+
+    ldi a,2

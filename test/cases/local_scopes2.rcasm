@@ -1,0 +1,9 @@
+!for i in range(2) {
+    !let xx = 1
+    ldi a, i + xx
+}
+
+!for i in range(2) {
+    !let xx = 3
+    ldi a, i + xx
+}

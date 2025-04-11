@@ -1,0 +1,14 @@
+!let addr = 0x080d
+!if (addr >= 10000) {
+    ldi a,1
+}
+!if (addr >= 1000) {
+    ldi a,2
+}
+!if (addr >= 100) {
+    ldi a,3
+}
+!if (addr >= 10) {
+    ldi a,4
+}
+    ldi a,5
