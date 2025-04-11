@@ -1,0 +1,9 @@
+!if (0) {
+    ldi a,1
+} elif (0) {
+    ldi a,2
+} elif (1) {
+    ldi a,3      ; output ldi a,3
+} else {
+    ldi a,4
+}

@@ -1,0 +1,13 @@
+    ldi a,1
+
+!if (0) {
+    rts
+} else {
+    ldi a,3
+}
+
+!if (1) {
+    rts
+} else {
+    ldi a,4
+}

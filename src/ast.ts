@@ -38,6 +38,7 @@ export type Stmt
   | StmtAlign
   | StmtData
   | StmtFill
+  | StmtIfElse
   | StmtFor
   | StmtLet;
 
@@ -100,6 +101,20 @@ export interface StmtAlign extends Node {
 
 export function mkAlign(alignBytes: Expr, loc: SourceLoc): StmtAlign {
   return { type: 'align', alignBytes, loc }
+}
+
+export interface StmtIfElse extends Node {
+  type: 'if';
+  cases: [Expr, Line[]][];
+  elseBranch: Line[];
+}
+export function mkIfElse(cases: [Expr, Line[]][], elseBranch: Line[], loc: SourceLoc): StmtIfElse {
+  return {
+    type: 'if',
+    cases,
+    elseBranch: elseBranch !== null ? elseBranch : [],
+    loc
+  }
 }
 
 export interface StmtFor extends Node {

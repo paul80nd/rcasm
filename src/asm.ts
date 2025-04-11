@@ -295,6 +295,10 @@ class Scopes {
   }
 }
 
+function isTrueVal(cond: number | boolean): boolean {
+  return (cond === true || cond != 0);
+}
+
 // Format "typeof foo" for error messages.  Want 'object' type
 // to return 'array' if it's an Array instance.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -987,6 +991,23 @@ class Assembler {
       }
       case 'setpc': {
         this.handleSetPC(node.pc);
+        break;
+      }
+      case 'if': {
+        const { cases, elseBranch } = node
+        for (const ci in cases) {
+          const [condExpr, body] = cases[ci];
+          const condition = this.evalExpr(condExpr);
+          // TODO condition.value type must be numeric/boolean
+          if (!anyErrors(condition) && isTrueVal(condition.value)) {
+            return this.withAnonScope(_localScopeName, () => {
+              this.assembleLines(body);
+            });
+          }
+        }
+        return this.withAnonScope(_localScopeName, () => {
+          this.assembleLines(elseBranch);
+        })
         break;
       }
       case 'for': {

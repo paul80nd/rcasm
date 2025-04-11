@@ -42,6 +42,14 @@ Directive "directive"
   / PSEUDO_FILL numBytes:Expr COMMA fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
+  / PSEUDO_IF LPAR condition:Expr RPAR LWING trueBranch:Lines RWING
+    elifs:Elif*
+    elseBody:ElseBody? {
+      const conds = [condition, ...elifs.map(e => e.condition)]
+      const trueBodies = [trueBranch, ...elifs.map(e => e.trueBranch)]
+      const cases = conds.map((c,i) => [c, trueBodies[i]])
+      return ast.mkIfElse(cases, elseBody, loc());
+    }
   / PSEUDO_FOR index:IDENTIFIER "in" __ list:Expr LWING body:Lines RWING {
       return ast.mkFor(index, list, body, loc());
     }
@@ -50,6 +58,13 @@ Directive "directive"
       return ast.mkAlign(alignBytes, loc());
     }
 
+Elif = PSEUDO_ELIF LPAR condition:Expr RPAR LWING trueBranch:Lines RWING {
+  return { condition, trueBranch };
+}
+
+ElseBody = PSEUDO_ELSE LWING elseBody:Lines RWING {
+  return elseBody;
+}
 
 ExprList = head:Expr tail:(COMMA Expr)* { return buildList(head, tail, 1); }
 
@@ -142,6 +157,9 @@ PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
 PSEUDO_WORD  = "!word" __ { return 'word'; }
 PSEUDO_FOR   = "!for" __
 PSEUDO_LET   = "!let" __
+PSEUDO_IF    = "!if" __
+PSEUDO_ELSE  = "else" __
+PSEUDO_ELIF  = "elif" __
 PSEUDO_FILL  = "!fill" __
 
 BIN = v:$binary B         { return parseInt(v,2); }
