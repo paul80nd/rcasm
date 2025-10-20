@@ -39,7 +39,7 @@
     "@typescript-eslint/parser": "8.46.2",
     "eslint": "9.38.0",
     "glob": "11.0.3",
-    "mocha": "11.7.2",
+    "mocha": "11.7.4",
     "rimraf": "6.0.1",
     "typescript": "5.8.3"
   }
