@@ -596,6 +596,24 @@ class Assembler {
     this.emit(opcode);
   }
 
+  assembleDivideInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
+    // Single Form: xxx [dest]
+    const opc = mne.ops[0];
+    if (stmt.p2) { this.addWarning(`Parameter not required`, stmt.p2.loc); }
+
+    // Base opcode
+    let opcode = opc.op;
+
+    // Optional first parameter
+    if (stmt.p1 && opc.p1) {
+      const tgt = this.checkRegister(stmt.p1, opc.p1);
+      if (tgt === undefined) { return; }
+      opcode |= opc.p1.op(tgt);
+    }
+
+    this.emit(opcode);
+  }
+
   assembleClrInstr(mne: opc.Mnemonic, stmt: ast.StmtInsn) {
     // Single Form: xxx dest (with 8-bit and 16-bit variants)
     if (!stmt.p1) {
@@ -1187,6 +1205,9 @@ class Assembler {
             break;
           case opc.MnemonicType.Goto:
             this.assembleBranch(mne, stmt);
+            break;
+        case opc.MnemonicType.Divide:
+            this.assembleDivideInstr(mne, stmt);
             break;
           default:
             this.addError(`Couldn't encode instruction '${stmt.mnemonic} '`, line.loc);

@@ -201,3 +201,18 @@ mov16s:
     mov pc,xy
     mov pc,j
     mov pc,as
+
+division:
+
+    div
+    div a
+    div d
+    mod
+    mod a
+    mod d
+    dvr
+    dvr a
+    dvr d
+    mdr
+    mdr a
+    mdr d

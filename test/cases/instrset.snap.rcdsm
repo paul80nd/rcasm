@@ -152,3 +152,15 @@
 00C1: A5           rts
 00C2: A6           mov pc,j
 00C3: A7           mov pc,as
+00C4: B8           div
+00C5: B8           div
+00C6: B9           div d
+00C7: BA           mod
+00C8: BA           mod
+00C9: BB           mod d
+00CA: BC           dvr
+00CB: BC           dvr
+00CC: BD           dvr d
+00CD: BE           mdr
+00CE: BE           mdr
+00CF: BF           mdr d

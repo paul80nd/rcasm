@@ -4,6 +4,11 @@ const aluDests: { [index: string]: number } = {
   'd': 0x1
 };
 
+const divDests: { [index: string]: number } = {
+  'a': 0x0,
+  'd': 0x1
+};
+
 const ldsDests: { [index: string]: number } = {
   'a': 0x0,
   'd': 0x1
@@ -73,7 +78,8 @@ export enum MnemonicType {
   LitOpc,
   Move,
   Set,
-  LoadStore
+  LoadStore,
+  Divide
 }
 
 export interface Mnemonic {
@@ -128,6 +134,12 @@ export const mnemonics: { [index: string]: Mnemonic } = {
   // INCXY 10110000
   'ixy': { mt: MnemonicType.Direct, ops: [{ op: 0xB0, p1: null, p2: null }] },
 
+  // INCYX:DIVIDER 10111rod
+  'div': { mt: MnemonicType.Divide, ops: [{ op: 0xB8 | 0x00, p1: { cs: divDests, op: p => p }, p2: null }] },
+  'mod': { mt: MnemonicType.Divide, ops: [{ op: 0xB8 | 0x02, p1: { cs: divDests, op: p => p }, p2: null }] },
+  'dvr': { mt: MnemonicType.Divide, ops: [{ op: 0xB8 | 0x04, p1: { cs: divDests, op: p => p }, p2: null }] },
+  'mdr': { mt: MnemonicType.Divide, ops: [{ op: 0xB8 | 0x06, p1: { cs: divDests, op: p => p }, p2: null }] },
+
   // GOTO 11dscznx
   'jmp': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x26, p1: null, p2: null }] },
   'jsr': { mt: MnemonicType.Goto, ops: [{ op: 0xC0 | 0x27, p1: null, p2: null }] },
@@ -156,7 +168,7 @@ export const opcodes_reverse_map: (string | null)[][] = [
   /* 8 */['clr a', 'add', 'inc', 'and', 'orr', 'eor', 'not', 'rol', 'clr d', 'add d', 'inc d', 'and d', 'orr d', 'eor d', 'not d', 'rol d'],
   /* 9 */['ldr a', 'ldr b', 'ldr c', 'ldr d', null, null, null, null, 'str a', 'str b', 'str c', 'str d', null, null, null, null],
   /* A */['mov xy,m', 'clr xy', 'mov xy,j', 'mov xy,as', 'mov pc,m', 'rts', 'mov pc,j', 'mov pc,as', null, null, null, null, 'lds a', 'lds d', 'hlt', 'hlr'],
-  /* B */['ixy', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
+  /* B */['ixy', null, null, null, null, null, null, null, 'div', 'div d', 'mod', 'mod d', 'dvr', 'dvr d', 'mdr', 'mdr d'],
   /* C */['ldi m', null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* D */[null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null],
   /* E */['ldi j', null, 'bne', null, 'beq', null, 'jmp', 'jsr', 'bcs', null, null, null, null, null, null, null],
