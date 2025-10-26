@@ -1,8 +1,6 @@
 // Direct copy of https://github.com/nurpax/c64jasm/blob/master/src/debugInfo.ts minus multiple file support
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const FastBitSet = require('fastbitset');
-
+import { TypedFastBitSet } from 'typedfastbitset';
 import { SourceLoc } from './ast';
 import { Segment } from './segment';
 
@@ -17,7 +15,9 @@ type LocPCEntry = { loc: LineLoc, pc: number, segmentId: number };
 export class DebugInfoTracker {
   lineStack: LocPCEntry[] = [];
   pcToLocs: { [pc: number]: LineLoc[] } = {};
-  insnBitset = new FastBitSet();
+  insnBitset = new TypedFastBitSet();
+  dataBitset = new TypedFastBitSet();
+  dataLengths: { [pc: number]: { length: number } } = {}
 
   startLine(loc: SourceLoc, codePC: number, segment: Segment) {
     const l = {
@@ -51,15 +51,34 @@ export class DebugInfoTracker {
     }
   }
 
+  markAsData(start: number, end: number) {
+    for (let i = start; i < end; i++) {
+      this.dataBitset.add(i);
+    }
+    this.dataLengths[start] = { length: end - start };
+  }
+
   info() {
     const insnBitset = this.insnBitset.clone();
     const isInstruction = (addr: number) => {
       return insnBitset.has(addr);
     };
 
+    const dataBitset = this.dataBitset.clone();
+    const isData = (addr: number) => {
+      return dataBitset.has(addr);
+    }
+
+    const dataLengths = Object.assign({}, this.dataLengths);
+    const dataLength = (addr: number) => {
+      return dataLengths[addr]?.length;
+    }
+
     return {
       pcToLocs: this.pcToLocs,
-      isInstruction
+      isInstruction,
+      isData,
+      dataLength
     };
   }
 }

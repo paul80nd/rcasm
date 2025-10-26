@@ -1,0 +1,19 @@
+; disasm: debuginfo
+; Testing that diassembly starts each directive on a new line with max 4 bytes per line
+
+        org 0x07
+
+pi:     !fill 9,0xaa    ; final result of Pi [9 byte Big Endian Q4.68] (area marked with 0xaa for visibility)
+psum:   !fill 10,0      ; intermediate sum of Pi [10 byte Little Endian Q4.76]
+
+        !align 16       ; expected final psum value (used purely for sight check - can be deleted without impact)
+psexp:  !byte 0x39, 0x31, 0x8d, 0x30, 0x5a, 0x88, 0xa8, 0xf6, 0x43, 0x32
+
+        !align 16
+fra:    !fill 11,0      ; first BBP fraction and iteration accumulator [max 10 byte LE + 1 overflow]
+        !align 16
+frb:    !fill 10,0      ; second BBP fraction
+        !align 16
+frc:    !fill 10,0      ; third BBP fraction
+        !align 16
+frd:    !fill 10,0      ; fourth BBP fraction

@@ -24,6 +24,8 @@ suite('rcasm - Snapshots', () => {
           const opts = match[1].split(' ');
           if (opts.includes('debuginfo')) {
             disasmOptions.isInstruction = debugInfo?.info().isInstruction;
+            disasmOptions.isData = debugInfo?.info().isData;
+            disasmOptions.dataLength = debugInfo?.info().dataLength;
           }
         }
       }

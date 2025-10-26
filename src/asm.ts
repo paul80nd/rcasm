@@ -1004,13 +1004,27 @@ class Assembler {
   }
 
   checkDirectives(node: ast.Stmt, _localScopeName: string | null): void {
+    // Mark the emitted output address range as
+    // containing machine code data blocks. This
+    // is used for smarter disassembly.
+    const withMarkAsData = (f: () => void) => {
+      const startPC = this.getPC();
+      f();
+      const endPC = this.getPC();
+      this.debugInfo.markAsData(startPC, endPC);
+    };
+
     switch (node.type) {
       case 'data': {
-        this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);
+        withMarkAsData(() => {
+          this.emitData(node.values, node.dataSize === ast.DataSize.Byte ? 8 : 16);
+        });
         break;
       }
       case 'fill': {
-        this.fillBytes(node);
+        withMarkAsData(() => {
+          this.fillBytes(node);
+        });
         break;
       }
       case 'align': {
@@ -1206,7 +1220,7 @@ class Assembler {
           case opc.MnemonicType.Goto:
             this.assembleBranch(mne, stmt);
             break;
-        case opc.MnemonicType.Divide:
+          case opc.MnemonicType.Divide:
             this.assembleDivideInstr(mne, stmt);
             break;
           default:

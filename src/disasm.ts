@@ -2,6 +2,8 @@ import { opcodes_reverse_map, opcodes_reverse_class } from './opcodes';
 
 export interface DisasmOptions {
   isInstruction?: (addr: number) => boolean;
+  isData?: (addr: number) => boolean;
+  dataLength?: (addr: number) => number;
 }
 
 function toHex8(v: number): string {
@@ -96,6 +98,28 @@ class Disassembler {
     this.print(addr, [op, hi, lo], decl);
   }
 
+  disData(op: number, length: number) {
+    this.flushBytes();
+
+    // collect data bytes
+    let pc = this.curAddr;
+    const bytes: number[] = [];
+    bytes.push(op);
+    if (length > 1) {
+      for (let i = 2; i <= length; i++) {
+        bytes.push(this.byte());
+      }
+    }
+
+    // output bytes
+    const chunks = chunkArray(bytes, this.outputBytesPerLine);
+    for (let i = 0; i < chunks.length; i++, pc += this.outputBytesPerLine) {
+      const bytes = chunks[i];
+      const bstr = bytes.map(b => toHex8(b)).join(' ');
+      this.output.push(`${toHex16(pc)}: ${bstr}`);
+    }
+  }
+
   disUnknown(op: number) {
     // Delay the string output of raw bytes so
     // that we can output multiple bytes per line
@@ -110,8 +134,13 @@ class Disassembler {
   disassemble() {
     const len = this.buf.byteLength;
     let isInsn = (_addr: number) => true;
+    let isData = (_addr: number) => false;
+    const dataLength = this.disasmOptions?.dataLength;
     if (this.disasmOptions && this.disasmOptions.isInstruction) {
       isInsn = this.disasmOptions.isInstruction;
+    }
+    if (this.disasmOptions && this.disasmOptions.isData) {
+      isData = this.disasmOptions.isData;
     }
 
     let oldOffs = this.curOffs;
@@ -131,7 +160,16 @@ class Disassembler {
           this.disSingle(decl, op);
           continue;
         }
-      } else {
+      }
+      else if (isData(this.curAddr) && dataLength) {
+        const dl = dataLength(this.curAddr);
+        if (dl > 0) {
+          this.disData(op, dl);
+        } else {
+          this.disUnknown(op);
+        }
+      }
+      else {
         this.disUnknown(op);
       }
     }
