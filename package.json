@@ -1,32 +1,35 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.17.0",
+  "version": "1.18.0",
   "description": "Relay Computer Assembler",
-  "main": "./lib/umd/src/index.js",
-  "typings": "./lib/umd/src/index",
-  "module": "./lib/esm/src/index.js",
+  "main": "./lib/umd/index.js",
+  "typings": "./lib/umd/index",
+  "module": "./lib/esm/index.js",
   "files": [
-    "/lib/esm/src",
-    "/lib/umd/src"
+    "/lib/esm",
+    "/lib/umd"
   ],
   "author": "Paul Law",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/paul80nd/rcasm.git"
+    "url": "git+https://github.com/paul80nd/rcasm.git"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "prepublishOnly": "npm run clean && npm run compile && npm run compile-esm && npm run gen && npm run gen-esm && npm run test",
+    "prepublishOnly": "npm run clean && npm run compile && npm run compile-esm && npm run compile-tst && npm run gen && npm run test",
     "compile": "tsc -p . && npm run lint",
     "compile-esm": "tsc -p ./tsconfig.esm.json",
+    "compile-tst": "tsc -p ./tsconfig.test.json",
     "clean": "rimraf lib",
-    "gen": "npx pegjs -o lib/umd/src/g_parser.js src/parser.pegjs",
-    "gen-esm": "npx pegjs -o lib/esm/src/g_parser.js src/parser.pegjs",
-    "test": "npm run compile && mocha ./lib/umd/test/*.js --parallel",
-    "lint": "eslint src/**/*.ts",
+    "gen": "npm run gen-umd && npm run gen-esm && npm run gen-tst",
+    "gen-umd": "npx pegjs -o lib/umd/g_parser.js src/parser.pegjs",
+    "gen-esm": "npx pegjs -o lib/esm/g_parser.js src/parser.pegjs",
+    "gen-tst": "npx pegjs -o lib/tst/src/g_parser.js src/parser.pegjs",
+    "test": "npm run compile-tst && mocha --parallel",
+    "lint": "eslint **/*.ts",
     "watch": "tsc --watch -p ."
   },
   "dependencies": {
@@ -34,13 +37,13 @@
   },
   "devDependencies": {
     "@types/mocha": "10.0.10",
-    "@types/node": "22.14.00",
-    "@typescript-eslint/eslint-plugin": "8.46.2",
-    "@typescript-eslint/parser": "8.46.2",
-    "eslint": "9.38.0",
+    "@types/node": "24.10.00",
+    "@typescript-eslint/eslint-plugin": "8.46.3",
+    "@typescript-eslint/parser": "8.46.3",
+    "eslint": "9.39.1",
     "glob": "11.0.3",
     "mocha": "11.7.4",
-    "rimraf": "6.0.1",
-    "typescript": "5.8.3"
+    "rimraf": "6.1.0",
+    "typescript": "5.9.3"
   }
 }
