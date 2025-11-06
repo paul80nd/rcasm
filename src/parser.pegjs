@@ -20,29 +20,29 @@ Lines
   = head:LineWithComment tail:(EOL LineWithComment)* { return buildList(head, tail, 1); }
 
 LineWithComment
-  = __ line:Line COMMENT? { return line }
+  = _ line:Line _ COMMENT? { return line }
 
 Line
-  = l:LABEL LWING sl:Lines RWING { return ast.mkAsmLine(l,null,sl,loc()); }
-  / l:LABEL s:Statement          { return ast.mkAsmLine(l,s,null,loc()); }
-  / l:LABEL                      { return ast.mkAsmLine(l,null,null,loc()); }
-  / o:ORG                        { return ast.mkAsmLine(null,o,null,loc()); }
-  / s:Statement                  { return ast.mkAsmLine(null,s,null,loc()); }
-  / __                           { return ast.mkAsmLine(null,null,null,loc()); }
+  = l:LABEL _ LWING _ sl:Lines _ RWING { return ast.mkAsmLine(l,null,sl,loc()); }
+  / l:LABEL _ s:Statement              { return ast.mkAsmLine(l,s,null,loc()); }
+  / l:LABEL                            { return ast.mkAsmLine(l,null,null,loc()); }
+  / o:ORG                              { return ast.mkAsmLine(null,o,null,loc()); }
+  / s:Statement                        { return ast.mkAsmLine(null,s,null,loc()); }
+  / _                                  { return ast.mkAsmLine(null,null,null,loc()); }
 
 Statement
   = drct:Directive   { return drct; }
   / insn:Instruction { return insn; }
 
 Directive "directive"
-  = size:(PSEUDO_BYTE / PSEUDO_WORD) values:ExprList  {
+  = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
       const dataSize = size == 'byte' ? ast.DataSize.Byte : ast.DataSize.Word;
       return ast.mkData(dataSize, values, loc());
     }
-  / PSEUDO_FILL numBytes:Expr COMMA fillValue:Expr {
+  / PSEUDO_FILL __ numBytes:Expr _ COMMA _ fillValue:Expr {
       return ast.mkFill(numBytes, fillValue, loc());
     }
-  / PSEUDO_IF LPAR condition:Expr RPAR LWING trueBranch:Lines RWING
+  / PSEUDO_IF __ LPAR _ condition:Expr _ RPAR _ LWING _ trueBranch:Lines _ RWING
     elifs:Elif*
     elseBody:ElseBody? {
       const conds = [condition, ...elifs.map(e => e.condition)]
@@ -50,57 +50,57 @@ Directive "directive"
       const cases = conds.map((c,i) => [c, trueBodies[i]])
       return ast.mkIfElse(cases, elseBody, loc());
     }
-  / PSEUDO_FOR index:IDENTIFIER "in" __ list:Expr LWING body:Lines RWING {
+  / PSEUDO_FOR __ index:IDENTIFIER __ "in" __ list:Expr _ LWING _ body:Lines _ RWING {
       return ast.mkFor(index, list, body, loc());
     }
-  / PSEUDO_LET name:IDENTIFIER EQU value:Expr { return ast.mkLet(name, value, loc()); }
-  / PSEUDO_ERROR error:STRING {
+  / PSEUDO_LET __ name:IDENTIFIER _ EQU _ value:Expr { return ast.mkLet(name, value, loc()); }
+  / PSEUDO_ERROR __ error:STRING {
       return ast.mkError(error, loc());
     }
-  / PSEUDO_ALIGN alignBytes:Expr {
+  / PSEUDO_ALIGN __ alignBytes:Expr {
       return ast.mkAlign(alignBytes, loc());
     }
 
-Elif = PSEUDO_ELIF LPAR condition:Expr RPAR LWING trueBranch:Lines RWING {
+Elif = _ PSEUDO_ELIF _ LPAR _ condition:Expr _ RPAR _ LWING _ trueBranch:Lines _ RWING {
   return { condition, trueBranch };
 }
 
-ElseBody = PSEUDO_ELSE LWING elseBody:Lines RWING {
+ElseBody = _ PSEUDO_ELSE _ LWING _ elseBody:Lines _ RWING {
   return elseBody;
 }
 
-ExprList = head:Expr tail:(COMMA Expr)* { return buildList(head, tail, 1); }
+ExprList = head:Expr tail:(_ COMMA _ Expr)* { return buildList(head, tail, 3); }
 
 Instruction
-  = m:MNEMONIC o1:Expr COMMA o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
-  / m:MNEMONIC o1:Expr               { return ast.mkInsn(m,o1,null,loc()); }
-  / m:MNEMONIC                       { return ast.mkInsn(m,null,null,loc()); }
+  = m:MNEMONIC __ o1:Expr _ COMMA _ o2:Expr { return ast.mkInsn(m,o1,o2,loc()); }
+  / m:MNEMONIC __ o1:Expr                   { return ast.mkInsn(m,o1,null,loc()); }
+  / m:MNEMONIC                              { return ast.mkInsn(m,null,null,loc()); }
 
 Expr = LastExpr
 
-Multiplicative = first:CallOrMemberExpression rest:((STAR / DIV / MOD) CallOrMemberExpression)* {
+Multiplicative = first:CallOrMemberExpression rest:(_ (STAR / DIV / MOD) _ CallOrMemberExpression)* {
     return rest.reduce(function(memo, curr) {
-      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+      return ast.mkBinaryOp(curr[1], memo, curr[3], loc());
     }, first);
   }
   / Primary
 
 
-Additive = first:Multiplicative rest:((PLUS / MINUS / SECT) Multiplicative)* {
+Additive = first:Multiplicative rest:(_ (PLUS / MINUS / SECT) _ Multiplicative)* {
     return rest.reduce(function(memo, curr) {
-      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+      return ast.mkBinaryOp(curr[1], memo, curr[3], loc());
     }, first);
   }
 
-Relational = first:Additive rest:((LE / GE / LT / GT) Additive)* {
+Relational = first:Additive rest:(_ (LE / GE / LT / GT) _ Additive)* {
     return rest.reduce(function(memo, curr) {
-      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+      return ast.mkBinaryOp(curr[1], memo, curr[3], loc());
     }, first);
   }
 
-Equality = first:Relational rest:((EQUEQU / BANGEQU) Relational)* {
+Equality = first:Relational rest:(_ (EQUEQU / BANGEQU) _ Relational)* {
     return rest.reduce(function(memo, curr) {
-      return ast.mkBinaryOp(curr[0], memo, curr[1], loc());
+      return ast.mkBinaryOp(curr[1], memo, curr[3], loc());
     }, first);
   }
 
@@ -113,7 +113,7 @@ CallOrMemberExpression
 MemberExpression = Primary
 
 CallExpression =
-  callee:MemberExpression LPAR args:ExprList? RPAR {
+  callee:MemberExpression _ LPAR _ args:ExprList? _ RPAR {
     return ast.mkCallFunc(callee, args, loc());
   }
 
@@ -122,7 +122,7 @@ Primary
   / REGISTER 
   / SQIDENTIFIER 
   / CURRENTPC
-  / LPAR e:LastExpr RPAR { return e; }
+  / LPAR _ e:LastExpr _ RPAR { return e; }
 
 // ----- G.2 Lexical Scanner -----
 
@@ -139,14 +139,21 @@ A = 'a'i
 B = 'b'i
 C = 'c'i
 D = 'd'i
+E = 'e'i
+F = 'f'i
 G = 'g'i
 H = 'h'i
+I = 'i'i
 J = 'j'i
+L = 'l'i
 M = 'm'i
+N = 'n'i
 O = 'o'i
 P = 'p'i
 R = 'r'i
 S = 's'i
+T = 't'i
+W = 'w'i
 X = 'x'i
 Y = 'y'i
 
@@ -154,53 +161,54 @@ _0 = '0'
 _1 = '1'
 _2 = '2'
 
-COMMA   = s:','        WSS { return s; }
-DIV     = s:'/'        WSS { return s; }
-EQU     = s:'='        WSS { return s; }
-MOD     = s:'%'        WSS { return s; }
-LT      = s:'<'  ![=]  WSS { return s; }
-GT      = s:'>'  ![=]  WSS { return s; }
-LE      = s:'<='       WSS { return s; }
-GE      = s:'>='       WSS { return s; }
-EQUEQU  = s:'=='       WSS { return s; }
-BANGEQU = s:'!='       WSS { return s; }
-LPAR    = s:'('        WSS { return s; }
-RPAR    = s:')'        WSS { return s; }
-LWING   = s:'{'        WSS { return s; }
-RWING   = s:'}'        WSS { return s; }
-MINUS   = s:'-'        WSS { return s; }
-PLUS    = s:'+'        WSS { return s; }
-SECT    = s:'§'        WSS { return s; }
-STAR    = s:'*'        WSS { return s; }
+COMMA   = s:','       { return s; }
+DIV     = s:'/'       { return s; }
+EQU     = s:'='       { return s; }
+MOD     = s:'%'       { return s; }
+LT      = s:'<'  ![=] { return s; }
+GT      = s:'>'  ![=] { return s; }
+LE      = s:'<='      { return s; }
+GE      = s:'>='      { return s; }
+EQUEQU  = s:'=='      { return s; }
+BANGEQU = s:'!='      { return s; }
+BANG    = s:'!'  ![=] { return s; }
+LPAR    = s:'('       { return s; }
+RPAR    = s:')'       { return s; }
+LWING   = s:'{'       { return s; }
+RWING   = s:'}'       { return s; }
+MINUS   = s:'-'       { return s; }
+PLUS    = s:'+'       { return s; }
+SECT    = s:'§'       { return s; }
+STAR    = s:'*'       { return s; }
 
-PSEUDO_ALIGN = "!align" __
-PSEUDO_BYTE  = "!byte" __ { return 'byte'; }
-PSEUDO_WORD  = "!word" __ { return 'word'; }
-PSEUDO_FOR   = "!for" __
-PSEUDO_LET   = "!let" __
-PSEUDO_IF    = "!if" __
-PSEUDO_ELSE  = "else" __
-PSEUDO_ELIF  = "elif" __
-PSEUDO_ERROR = "!error" __
-PSEUDO_FILL  = "!fill" __
+PSEUDO_ALIGN = BANG A L I G N
+PSEUDO_BYTE  = BANG B Y T E { return 'byte'; }
+PSEUDO_WORD  = BANG W O R D { return 'word'; }
+PSEUDO_FOR   = BANG F O R
+PSEUDO_LET   = BANG L E T
+PSEUDO_IF    = BANG I F
+PSEUDO_ELSE  = E L S E
+PSEUDO_ELIF  = E L I F
+PSEUDO_ERROR = BANG E R R O R
+PSEUDO_FILL  = BANG F I L L
 
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }
 DEC = v:$decimal D?       { return parseInt(v); } 
 
 STR = '"' c:doubleStringCharacter* '"' { return c.join(''); }
-STRING = '"' c:doubleStringCharacter* '"' __ { return ast.mkLiteral(c.join(''), loc()); }
+STRING = '"' c:doubleStringCharacter* '"' { return ast.mkLiteral(c.join(''), loc()); }
 
 doubleStringCharacter = !'"' char:. { return char; }
 
 identNoWS = (alpha+ alphanum*) { return text(); }
-ident = sym:identNoWS __       { return sym; }
+ident = sym:identNoWS          { return sym; }
 
 // Tokens
 
-__ = WSS
-WSS "whitespace" = WS*
-WS  "whitespace"
+__ "whitespace" = ws+
+_  "whitespace" = ws*
+ws "whitespace"
   = '\t'      // tab
   / '\v'      // vertical tab
   / '\f'      // form feed
@@ -211,24 +219,24 @@ WS  "whitespace"
 EOL        "end of line" = [\n\r]
 COMMENT    "comment"     = (';' (!EOL .)*)
 
-LABEL      "label"       = lbl:identNoWS ':' __  { return ast.mkLabel(lbl,loc()); }
-ORG        "ORG"         = O R G __ v:LITERAL __ { return ast.mkSetPC(v, loc()); }
-MNEMONIC   "mnemonic"    = mne:identNoWS __      { return mne; }
+LABEL      "label"       = lbl:identNoWS ':'  { return ast.mkLabel(lbl,loc()); }
+ORG        "ORG"         = O R G __ v:LITERAL { return ast.mkSetPC(v, loc()); }
+MNEMONIC   "mnemonic"    = mne:identNoWS      { return mne; }
 
 LITERAL "literal"
-  = v:BIN __ { return ast.mkLiteral(v, 'b', loc()); }
-  / v:HEX __ { return ast.mkLiteral(v, 'h', loc()); }
-  / v:DEC __ { return ast.mkLiteral(v, 'd', loc()); }
-  / s:STR __ { return ast.mkLiteral(s, 's', loc()); }
+  = v:BIN { return ast.mkLiteral(v, 'b', loc()); }
+  / v:HEX { return ast.mkLiteral(v, 'h', loc()); }
+  / v:DEC { return ast.mkLiteral(v, 'd', loc()); }
+  / s:STR { return ast.mkLiteral(s, 's', loc()); }
 
 SQIDENTIFIER "identifier" 
-  = head:identNoWS tail:('::' identNoWS)* __      { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
-  / '::' head:identNoWS tail:('::' identNoWS)* __ { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
+  = head:identNoWS tail:('::' identNoWS)*      { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), false, loc()); }
+  / '::' head:identNoWS tail:('::' identNoWS)* { return ast.mkScopeQualifiedIdent(buildList(head, tail, 1), true, loc()); }
 
 IDENTIFIER "identifier"
   = ident:ident { return ast.mkIdent(ident, loc()); }
 
 REGISTER "register"
- = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha __ { return ast.mkRegister(name.toLowerCase(),loc()); }
+ = name:$( A S / A / B / C / D / M _2 / M _1 / M / P C / X Y / X / Y / J _1 / J _2 / J ) !alpha { return ast.mkRegister(name.toLowerCase(),loc()); }
 
 CURRENTPC "current-pc" = STAR { return ast.mkGetCurPC(loc()); }

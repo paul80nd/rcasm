@@ -97,7 +97,7 @@ suite('rcasm - Parser', () => {
 
   test('Label Stmt', function () {
     const result = parse('xyz: inc');
-    assertLabel(result[0], 'xyz', 1, 6);
+    assertLabel(result[0], 'xyz', 1, 5);
   });
 
   test('Instructions', function () {
@@ -111,7 +111,7 @@ suite('rcasm - Parser', () => {
     assertInstruction('mov pc,as ; comment', 'mov', 'pc', 'as');
     assertInstruction('loop: mov a,d', 'mov', 'a', 'd');
     assertInstruction('loop: mov a,d ; comment', 'mov', 'a', 'd');
-    assertError('loop2: loop3:', 'Expected "(", comment, current-pc, end of input, end of line, identifier, literal, or register but ":" found.', 12);
+    assertError('loop2: loop3:', 'Expected comment, end of input, end of line, or whitespace but ":" found.', 12);
     assertError('loop2: 45', 'Expected "{", comment, directive, end of input, end of line, or mnemonic but "4" found.', 7);
   });
 
