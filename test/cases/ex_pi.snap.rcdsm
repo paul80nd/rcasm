@@ -1,0 +1,794 @@
+0000: E6 00 9A     jmp
+0003: 00           clr a
+0004: 00           clr a
+0005: 00           clr a
+0006: 00           clr a
+0007: AA
+0008: AA
+0009: AA
+000A: AA
+000B: AA
+000C: AA
+000D: AA
+000E: AA
+000F: AA
+0010: 00           clr a
+0011: 00           clr a
+0012: 00           clr a
+0013: 00           clr a
+0014: 00           clr a
+0015: 00           clr a
+0016: 00           clr a
+0017: 00           clr a
+0018: 00           clr a
+0019: 00           clr a
+001A: 00           clr a
+001B: 00           clr a
+001C: 00           clr a
+001D: 00           clr a
+001E: 00           clr a
+001F: 00           clr a
+0020: 39           mov y,b
+0021: 31           mov x,b
+0022: 8D           eor d
+0023: 30           mov x,a
+0024: 5A           ldi a,-6
+0025: 88           clr d
+0026: A8
+0027: F6
+0028: 43           ldi a,3
+0029: 32           mov x,c
+002A: 00           clr a
+002B: 00           clr a
+002C: 00           clr a
+002D: 00           clr a
+002E: 00           clr a
+002F: 00           clr a
+0030: 00           clr a
+0031: 00           clr a
+0032: 00           clr a
+0033: 00           clr a
+0034: 00           clr a
+0035: 00           clr a
+0036: 00           clr a
+0037: 00           clr a
+0038: 00           clr a
+0039: 00           clr a
+003A: 00           clr a
+003B: 00           clr a
+003C: 00           clr a
+003D: 00           clr a
+003E: 00           clr a
+003F: 00           clr a
+0040: 00           clr a
+0041: 00           clr a
+0042: 00           clr a
+0043: 00           clr a
+0044: 00           clr a
+0045: 00           clr a
+0046: 00           clr a
+0047: 00           clr a
+0048: 00           clr a
+0049: 00           clr a
+004A: 00           clr a
+004B: 00           clr a
+004C: 00           clr a
+004D: 00           clr a
+004E: 00           clr a
+004F: 00           clr a
+0050: 00           clr a
+0051: 00           clr a
+0052: 00           clr a
+0053: 00           clr a
+0054: 00           clr a
+0055: 00           clr a
+0056: 00           clr a
+0057: 00           clr a
+0058: 00           clr a
+0059: 00           clr a
+005A: 00           clr a
+005B: 00           clr a
+005C: 00           clr a
+005D: 00           clr a
+005E: 00           clr a
+005F: 00           clr a
+0060: 00           clr a
+0061: 00           clr a
+0062: 00           clr a
+0063: 00           clr a
+0064: 00           clr a
+0065: 00           clr a
+0066: 00           clr a
+0067: 00           clr a
+0068: 00           clr a
+0069: 00           clr a
+006A: 00           clr a
+006B: 09           clr b
+006C: 01           mov a,b
+006D: 08           mov b,a
+006E: 09           clr b
+006F: 00           clr a
+0070: 10           mov c,a
+0071: 08           mov b,a
+0072: 01           mov a,b
+0073: 18           mov d,a
+0074: 08           mov b,a
+0075: 00           clr a
+0076: 20           mov m1,a
+0077: 07           mov a,y
+0078: 01           mov a,b
+0079: 28           mov m2,a
+007A: 07           mov a,y
+007B: 00           clr a
+007C: 30           mov x,a
+007D: 06           mov a,x
+007E: 01           mov a,b
+007F: 38           mov y,a
+0080: 06           mov a,x
+0081: 00           clr a
+0082: 40           ldi a,0
+0083: 05           mov a,m2
+0084: 01           mov a,b
+0085: 48           ldi a,8
+0086: 05           mov a,m2
+0087: 00           clr a
+0088: 50           ldi a,-16
+0089: 04           mov a,m1
+008A: 01           mov a,b
+008B: 58           ldi a,-8
+008C: 04           mov a,m1
+008D: 00           clr a
+008E: 60           ldi b,0
+008F: 03           mov a,d
+0090: 01           mov a,b
+0091: 68           ldi b,8
+0092: 03           mov a,d
+0093: 00           clr a
+0094: 70           ldi b,-16
+0095: 02           mov a,c
+0096: 01           mov a,b
+0097: 78           ldi b,-8
+0098: 02           mov a,c
+0099: 00           clr a
+009A: C0 00 40     ldi m
+009D: 0D           mov b,m2
+009E: C0 00 39     ldi m
+00A1: 99           str b
+00A2: C0 00 49     ldi m
+00A5: 68           ldi b,8
+00A6: 99           str b
+00A7: C0 50 6A     ldi m
+00AA: E7 04 A0     jsr
+00AD: C0 60 6A     ldi m
+00B0: E7 04 9B     jsr
+00B3: C0 40 30     ldi m
+00B6: 6A           ldi b,10
+00B7: E7 04 56     jsr
+00BA: C0 50 30     ldi m
+00BD: 6A           ldi b,10
+00BE: E7 04 56     jsr
+00C1: C0 60 30     ldi m
+00C4: 6A           ldi b,10
+00C5: E7 04 56     jsr
+00C8: C0 30 10     ldi m
+00CB: 6A           ldi b,10
+00CC: E7 04 26     jsr
+00CF: C0 30 6D     ldi m
+00D2: E7 04 AA     jsr
+00D5: C0 40 6D     ldi m
+00D8: E7 04 A5     jsr
+00DB: C0 50 6D     ldi m
+00DE: E7 04 A0     jsr
+00E1: C0 60 6D     ldi m
+00E4: E7 04 9B     jsr
+00E7: C0 40 30     ldi m
+00EA: 69           ldi b,9
+00EB: E7 04 56     jsr
+00EE: C0 50 30     ldi m
+00F1: 69           ldi b,9
+00F2: E7 04 56     jsr
+00F5: C0 60 30     ldi m
+00F8: 69           ldi b,9
+00F9: E7 04 56     jsr
+00FC: C0 30 10     ldi m
+00FF: 69           ldi b,9
+0100: E7 04 26     jsr
+0103: C0 30 70     ldi m
+0106: E7 04 AA     jsr
+0109: C0 40 70     ldi m
+010C: E7 04 A5     jsr
+010F: C0 50 70     ldi m
+0112: E7 04 A0     jsr
+0115: C0 60 70     ldi m
+0118: E7 04 9B     jsr
+011B: C0 40 30     ldi m
+011E: 69           ldi b,9
+011F: E7 04 56     jsr
+0122: C0 50 30     ldi m
+0125: 69           ldi b,9
+0126: E7 04 56     jsr
+0129: C0 60 30     ldi m
+012C: 69           ldi b,9
+012D: E7 04 56     jsr
+0130: C0 30 10     ldi m
+0133: 69           ldi b,9
+0134: E7 04 26     jsr
+0137: C0 30 73     ldi m
+013A: E7 04 AA     jsr
+013D: C0 40 73     ldi m
+0140: E7 04 A5     jsr
+0143: C0 50 73     ldi m
+0146: E7 04 A0     jsr
+0149: C0 60 73     ldi m
+014C: E7 04 9B     jsr
+014F: C0 40 30     ldi m
+0152: 68           ldi b,8
+0153: E7 04 56     jsr
+0156: C0 50 30     ldi m
+0159: 68           ldi b,8
+015A: E7 04 56     jsr
+015D: C0 60 30     ldi m
+0160: 68           ldi b,8
+0161: E7 04 56     jsr
+0164: C0 30 10     ldi m
+0167: 68           ldi b,8
+0168: E7 04 26     jsr
+016B: C0 30 76     ldi m
+016E: E7 04 AA     jsr
+0171: C0 40 76     ldi m
+0174: E7 04 A5     jsr
+0177: C0 50 76     ldi m
+017A: E7 04 A0     jsr
+017D: C0 60 76     ldi m
+0180: E7 04 9B     jsr
+0183: C0 40 30     ldi m
+0186: 68           ldi b,8
+0187: E7 04 56     jsr
+018A: C0 50 30     ldi m
+018D: 68           ldi b,8
+018E: E7 04 56     jsr
+0191: C0 60 30     ldi m
+0194: 68           ldi b,8
+0195: E7 04 56     jsr
+0198: C0 30 10     ldi m
+019B: 68           ldi b,8
+019C: E7 04 26     jsr
+019F: C0 30 79     ldi m
+01A2: E7 04 AA     jsr
+01A5: C0 40 79     ldi m
+01A8: E7 04 A5     jsr
+01AB: C0 50 79     ldi m
+01AE: E7 04 A0     jsr
+01B1: C0 60 79     ldi m
+01B4: E7 04 9B     jsr
+01B7: C0 40 30     ldi m
+01BA: 67           ldi b,7
+01BB: E7 04 56     jsr
+01BE: C0 50 30     ldi m
+01C1: 67           ldi b,7
+01C2: E7 04 56     jsr
+01C5: C0 60 30     ldi m
+01C8: 67           ldi b,7
+01C9: E7 04 56     jsr
+01CC: C0 30 10     ldi m
+01CF: 67           ldi b,7
+01D0: E7 04 26     jsr
+01D3: C0 30 7C     ldi m
+01D6: E7 04 AA     jsr
+01D9: C0 40 7C     ldi m
+01DC: E7 04 A5     jsr
+01DF: C0 50 7C     ldi m
+01E2: E7 04 A0     jsr
+01E5: C0 60 7C     ldi m
+01E8: E7 04 9B     jsr
+01EB: C0 40 30     ldi m
+01EE: 67           ldi b,7
+01EF: E7 04 56     jsr
+01F2: C0 50 30     ldi m
+01F5: 67           ldi b,7
+01F6: E7 04 56     jsr
+01F9: C0 60 30     ldi m
+01FC: 67           ldi b,7
+01FD: E7 04 56     jsr
+0200: C0 30 10     ldi m
+0203: 67           ldi b,7
+0204: E7 04 26     jsr
+0207: C0 30 7F     ldi m
+020A: E7 04 AA     jsr
+020D: C0 40 7F     ldi m
+0210: E7 04 A5     jsr
+0213: C0 50 7F     ldi m
+0216: E7 04 A0     jsr
+0219: C0 60 7F     ldi m
+021C: E7 04 9B     jsr
+021F: C0 40 30     ldi m
+0222: 66           ldi b,6
+0223: E7 04 56     jsr
+0226: C0 50 30     ldi m
+0229: 66           ldi b,6
+022A: E7 04 56     jsr
+022D: C0 60 30     ldi m
+0230: 66           ldi b,6
+0231: E7 04 56     jsr
+0234: C0 30 10     ldi m
+0237: 66           ldi b,6
+0238: E7 04 26     jsr
+023B: C0 30 82     ldi m
+023E: E7 04 AA     jsr
+0241: C0 40 82     ldi m
+0244: E7 04 A5     jsr
+0247: C0 50 82     ldi m
+024A: E7 04 A0     jsr
+024D: C0 60 82     ldi m
+0250: E7 04 9B     jsr
+0253: C0 40 30     ldi m
+0256: 66           ldi b,6
+0257: E7 04 56     jsr
+025A: C0 50 30     ldi m
+025D: 66           ldi b,6
+025E: E7 04 56     jsr
+0261: C0 60 30     ldi m
+0264: 66           ldi b,6
+0265: E7 04 56     jsr
+0268: C0 30 10     ldi m
+026B: 66           ldi b,6
+026C: E7 04 26     jsr
+026F: C0 30 85     ldi m
+0272: E7 04 AA     jsr
+0275: C0 40 85     ldi m
+0278: E7 04 A5     jsr
+027B: C0 50 85     ldi m
+027E: E7 04 A0     jsr
+0281: C0 60 85     ldi m
+0284: E7 04 9B     jsr
+0287: C0 40 30     ldi m
+028A: 65           ldi b,5
+028B: E7 04 56     jsr
+028E: C0 50 30     ldi m
+0291: 65           ldi b,5
+0292: E7 04 56     jsr
+0295: C0 60 30     ldi m
+0298: 65           ldi b,5
+0299: E7 04 56     jsr
+029C: C0 30 10     ldi m
+029F: 65           ldi b,5
+02A0: E7 04 26     jsr
+02A3: C0 30 88     ldi m
+02A6: E7 04 AA     jsr
+02A9: C0 40 88     ldi m
+02AC: E7 04 A5     jsr
+02AF: C0 50 88     ldi m
+02B2: E7 04 A0     jsr
+02B5: C0 60 88     ldi m
+02B8: E7 04 9B     jsr
+02BB: C0 40 30     ldi m
+02BE: 65           ldi b,5
+02BF: E7 04 56     jsr
+02C2: C0 50 30     ldi m
+02C5: 65           ldi b,5
+02C6: E7 04 56     jsr
+02C9: C0 60 30     ldi m
+02CC: 65           ldi b,5
+02CD: E7 04 56     jsr
+02D0: C0 30 10     ldi m
+02D3: 65           ldi b,5
+02D4: E7 04 26     jsr
+02D7: C0 30 8B     ldi m
+02DA: E7 04 AA     jsr
+02DD: C0 40 8B     ldi m
+02E0: E7 04 A5     jsr
+02E3: C0 50 8B     ldi m
+02E6: E7 04 A0     jsr
+02E9: C0 60 8B     ldi m
+02EC: E7 04 9B     jsr
+02EF: C0 40 30     ldi m
+02F2: 64           ldi b,4
+02F3: E7 04 56     jsr
+02F6: C0 50 30     ldi m
+02F9: 64           ldi b,4
+02FA: E7 04 56     jsr
+02FD: C0 60 30     ldi m
+0300: 64           ldi b,4
+0301: E7 04 56     jsr
+0304: C0 30 10     ldi m
+0307: 64           ldi b,4
+0308: E7 04 26     jsr
+030B: C0 30 8E     ldi m
+030E: E7 04 AA     jsr
+0311: C0 40 8E     ldi m
+0314: E7 04 A5     jsr
+0317: C0 50 8E     ldi m
+031A: E7 04 A0     jsr
+031D: C0 60 8E     ldi m
+0320: E7 04 9B     jsr
+0323: C0 40 30     ldi m
+0326: 64           ldi b,4
+0327: E7 04 56     jsr
+032A: C0 50 30     ldi m
+032D: 64           ldi b,4
+032E: E7 04 56     jsr
+0331: C0 60 30     ldi m
+0334: 64           ldi b,4
+0335: E7 04 56     jsr
+0338: C0 30 10     ldi m
+033B: 64           ldi b,4
+033C: E7 04 26     jsr
+033F: C0 30 91     ldi m
+0342: E7 04 AA     jsr
+0345: C0 40 91     ldi m
+0348: E7 04 A5     jsr
+034B: C0 50 91     ldi m
+034E: E7 04 A0     jsr
+0351: C0 60 91     ldi m
+0354: E7 04 9B     jsr
+0357: C0 40 30     ldi m
+035A: 63           ldi b,3
+035B: E7 04 56     jsr
+035E: C0 50 30     ldi m
+0361: 63           ldi b,3
+0362: E7 04 56     jsr
+0365: C0 60 30     ldi m
+0368: 63           ldi b,3
+0369: E7 04 56     jsr
+036C: C0 30 10     ldi m
+036F: 63           ldi b,3
+0370: E7 04 26     jsr
+0373: C0 30 94     ldi m
+0376: E7 04 AA     jsr
+0379: C0 40 94     ldi m
+037C: E7 04 A5     jsr
+037F: C0 50 94     ldi m
+0382: E7 04 A0     jsr
+0385: C0 60 94     ldi m
+0388: E7 04 9B     jsr
+038B: C0 40 30     ldi m
+038E: 63           ldi b,3
+038F: E7 04 56     jsr
+0392: C0 50 30     ldi m
+0395: 63           ldi b,3
+0396: E7 04 56     jsr
+0399: C0 60 30     ldi m
+039C: 63           ldi b,3
+039D: E7 04 56     jsr
+03A0: C0 30 10     ldi m
+03A3: 63           ldi b,3
+03A4: E7 04 26     jsr
+03A7: C0 30 97     ldi m
+03AA: E7 04 AA     jsr
+03AD: C0 40 97     ldi m
+03B0: E7 04 A5     jsr
+03B3: C0 50 97     ldi m
+03B6: E7 04 A0     jsr
+03B9: C0 60 97     ldi m
+03BC: E7 04 9B     jsr
+03BF: C0 40 30     ldi m
+03C2: 62           ldi b,2
+03C3: E7 04 56     jsr
+03C6: C0 50 30     ldi m
+03C9: 62           ldi b,2
+03CA: E7 04 56     jsr
+03CD: C0 60 30     ldi m
+03D0: 62           ldi b,2
+03D1: E7 04 56     jsr
+03D4: C0 30 10     ldi m
+03D7: 62           ldi b,2
+03D8: E7 04 26     jsr
+03DB: C0 07 11     ldi m
+03DE: 69           ldi b,9
+03DF: E7 03 ED     jsr
+03E2: C0 00 07     ldi m
+03E5: 69           ldi b,9
+03E6: E7 04 05     jsr
+03E9: C0 00 07     ldi m
+03EC: AE           hlt
+03ED: 86           not
+03EE: 08           mov b,a
+03EF: 8A           inc d
+03F0: 0C           mov b,m1
+03F1: 24           clr m1
+03F2: 90           ldr a
+03F3: 15           mov c,m2
+03F4: 29           mov m2,b
+03F5: 98           str a
+03F6: 0B           mov b,d
+03F7: 8A           inc d
+03F8: E4 04 04     beq
+03FB: 0A           mov b,c
+03FC: 82           inc
+03FD: 0D           mov b,m2
+03FE: 28           mov m2,a
+03FF: 82           inc
+0400: 08           mov b,a
+0401: E6 03 F2     jmp
+0404: A5           rts
+0405: 05           mov a,m2
+0406: 15           mov c,m2
+0407: 89           add d
+0408: 7F           ldi b,-1
+0409: 13           mov c,d
+040A: 89           add d
+040B: 91           ldr b
+040C: 2B           mov m2,d
+040D: 92           ldr c
+040E: 99           str b
+040F: 28           mov m2,a
+0410: 9A           str c
+0411: 08           mov b,a
+0412: 82           inc
+0413: 7F           ldi b,-1
+0414: 13           mov c,d
+0415: 89           add d
+0416: 13           mov c,d
+0417: 08           mov b,a
+0418: 8E           not d
+0419: 0B           mov b,d
+041A: 8A           inc d
+041B: 0B           mov b,d
+041C: 89           add d
+041D: 1A           mov d,c
+041E: F4 04 25     ble
+0421: 28           mov m2,a
+0422: E6 04 0B     jmp
+0425: A5           rts
+0426: 16           mov c,x
+0427: 1F           mov d,y
+0428: A0           mov xy,m
+0429: C0 04 48     ldi m
+042C: 9A           str c
+042D: C0 04 49     ldi m
+0430: 9B           str d
+0431: 16           mov c,x
+0432: 89           add d
+0433: 24           clr m1
+0434: 2E           mov m2,x
+0435: 92           ldr c
+0436: 2F           mov m2,y
+0437: 91           ldr b
+0438: 81           add
+0439: 98           str a
+043A: E8 04 4A     bcs
+043D: B0           ixy
+043E: 0E           mov b,x
+043F: 82           inc
+0440: 30           mov x,a
+0441: 13           mov c,d
+0442: 08           mov b,a
+0443: 85           eor
+0444: E2 04 34     bne
+0447: E6 04 47     jmp
+044A: 0D           mov b,m2
+044B: 82           inc
+044C: 28           mov m2,a
+044D: 91           ldr b
+044E: 82           inc
+044F: 98           str a
+0450: E8 04 4A     bcs
+0453: E6 04 3D     jmp
+0456: 16           mov c,x
+0457: 1F           mov d,y
+0458: A0           mov xy,m
+0459: C0 04 81     ldi m
+045C: 9A           str c
+045D: C0 04 82     ldi m
+0460: 9B           str d
+0461: 16           mov c,x
+0462: 89           add d
+0463: 24           clr m1
+0464: 2F           mov m2,y
+0465: 91           ldr b
+0466: 82           inc
+0467: 98           str a
+0468: E8 04 83     bcs
+046B: 2E           mov m2,x
+046C: 91           ldr b
+046D: 86           not
+046E: 10           mov c,a
+046F: 2F           mov m2,y
+0470: 91           ldr b
+0471: 81           add
+0472: 98           str a
+0473: E8 04 8F     bcs
+0476: B0           ixy
+0477: 0E           mov b,x
+0478: 82           inc
+0479: 30           mov x,a
+047A: 13           mov c,d
+047B: 08           mov b,a
+047C: 85           eor
+047D: E2 04 6B     bne
+0480: E6 04 80     jmp
+0483: 0D           mov b,m2
+0484: 82           inc
+0485: 28           mov m2,a
+0486: 91           ldr b
+0487: 82           inc
+0488: 98           str a
+0489: E8 04 83     bcs
+048C: E6 04 6B     jmp
+048F: 0D           mov b,m2
+0490: 82           inc
+0491: 28           mov m2,a
+0492: 91           ldr b
+0493: 82           inc
+0494: 98           str a
+0495: E8 04 8F     bcs
+0498: E6 04 76     jmp
+049B: 41           ldi a,1
+049C: 65           ldi b,5
+049D: E6 04 AC     jmp
+04A0: 41           ldi a,1
+04A1: 64           ldi b,4
+04A2: E6 04 AC     jmp
+04A5: 42           ldi a,2
+04A6: 63           ldi b,3
+04A7: E6 04 AC     jmp
+04AA: 44           ldi a,4
+04AB: 60           ldi b,0
+04AC: 16           mov c,x
+04AD: 1F           mov d,y
+04AE: A0           mov xy,m
+04AF: C0 05 7B     ldi m
+04B2: 9A           str c
+04B3: C0 05 7C     ldi m
+04B6: 9B           str d
+04B7: 2F           mov m2,y
+04B8: 24           clr m1
+04B9: 92           ldr c
+04BA: 89           add d
+04BB: 0B           mov b,d
+04BC: 8E           not d
+04BD: 16           mov c,x
+04BE: 33           mov x,d
+04BF: B0           ixy
+04C0: 2F           mov m2,y
+04C1: 91           ldr b
+04C2: B0           ixy
+04C3: 2F           mov m2,y
+04C4: 3A           mov y,c
+04C5: 89           add d
+04C6: 92           ldr c
+04C7: 2B           mov m2,d
+04C8: 61           ldi b,1
+04C9: 8D           eor d
+04CA: 1B           clr d
+04CB: E4 05 26     beq
+04CE: E6 05 76     jmp
+04D1: 15           mov c,m2
+04D2: 7F           ldi b,-1
+04D3: 89           add d
+04D4: 2B           mov m2,d
+04D5: 1B           clr d
+04D6: 08           mov b,a
+04D7: 10           mov c,a
+04D8: 81           add
+04D9: 08           mov b,a
+04DA: 16           mov c,x
+04DB: 81           add
+04DC: F0 04 E4     blt
+04DF: 61           ldi b,1
+04E0: 11           mov c,b
+04E1: E6 04 E6     jmp
+04E4: 01           mov a,b
+04E5: 12           clr c
+04E6: 0B           mov b,d
+04E7: 8F           rol d
+04E8: 0B           mov b,d
+04E9: 89           add d
+04EA: 08           mov b,a
+04EB: 10           mov c,a
+04EC: 81           add
+04ED: 08           mov b,a
+04EE: 16           mov c,x
+04EF: 81           add
+04F0: F0 04 F8     blt
+04F3: 61           ldi b,1
+04F4: 11           mov c,b
+04F5: E6 04 FA     jmp
+04F8: 01           mov a,b
+04F9: 12           clr c
+04FA: 0B           mov b,d
+04FB: 8F           rol d
+04FC: 0B           mov b,d
+04FD: 89           add d
+04FE: 08           mov b,a
+04FF: 10           mov c,a
+0500: 81           add
+0501: 08           mov b,a
+0502: 16           mov c,x
+0503: 81           add
+0504: F0 05 0C     blt
+0507: 61           ldi b,1
+0508: 11           mov c,b
+0509: E6 05 0E     jmp
+050C: 01           mov a,b
+050D: 12           clr c
+050E: 0B           mov b,d
+050F: 8F           rol d
+0510: 0B           mov b,d
+0511: 89           add d
+0512: 08           mov b,a
+0513: 10           mov c,a
+0514: 81           add
+0515: 08           mov b,a
+0516: 16           mov c,x
+0517: 81           add
+0518: F0 05 20     blt
+051B: 61           ldi b,1
+051C: 11           mov c,b
+051D: E6 05 22     jmp
+0520: 01           mov a,b
+0521: 12           clr c
+0522: 0B           mov b,d
+0523: 8F           rol d
+0524: 0B           mov b,d
+0525: 89           add d
+0526: 08           mov b,a
+0527: 10           mov c,a
+0528: 81           add
+0529: 08           mov b,a
+052A: 16           mov c,x
+052B: 81           add
+052C: F0 05 34     blt
+052F: 61           ldi b,1
+0530: 11           mov c,b
+0531: E6 05 36     jmp
+0534: 01           mov a,b
+0535: 12           clr c
+0536: 0B           mov b,d
+0537: 8F           rol d
+0538: 0B           mov b,d
+0539: 89           add d
+053A: 08           mov b,a
+053B: 10           mov c,a
+053C: 81           add
+053D: 08           mov b,a
+053E: 16           mov c,x
+053F: 81           add
+0540: F0 05 48     blt
+0543: 61           ldi b,1
+0544: 11           mov c,b
+0545: E6 05 4A     jmp
+0548: 01           mov a,b
+0549: 12           clr c
+054A: 0B           mov b,d
+054B: 8F           rol d
+054C: 0B           mov b,d
+054D: 89           add d
+054E: 08           mov b,a
+054F: 10           mov c,a
+0550: 81           add
+0551: 08           mov b,a
+0552: 16           mov c,x
+0553: 81           add
+0554: F0 05 5C     blt
+0557: 61           ldi b,1
+0558: 11           mov c,b
+0559: E6 05 5E     jmp
+055C: 01           mov a,b
+055D: 12           clr c
+055E: 0B           mov b,d
+055F: 8F           rol d
+0560: 0B           mov b,d
+0561: 89           add d
+0562: 08           mov b,a
+0563: 10           mov c,a
+0564: 81           add
+0565: 08           mov b,a
+0566: 16           mov c,x
+0567: 81           add
+0568: F0 05 70     blt
+056B: 61           ldi b,1
+056C: 11           mov c,b
+056D: E6 05 72     jmp
+0570: 01           mov a,b
+0571: 12           clr c
+0572: 0B           mov b,d
+0573: 8F           rol d
+0574: 0B           mov b,d
+0575: 89           add d
+0576: 9B           str d
+0577: 0D           mov b,m2
+0578: 17           mov c,y
+0579: 8D           eor d
+057A: E4 05 7A     beq
+057D: E6 04 D1     jmp
