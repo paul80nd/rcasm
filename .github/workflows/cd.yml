@@ -16,9 +16,7 @@ jobs:
         with:
           node-version: 22
       - run: npm ci
-      - run: npm run compile --if-present
-      - run: npm run gen --if-present
-      - run: npm test
+      - run: npm run prepublishOnly
 
   publish-gpr:
     needs: build
