@@ -1,6 +1,6 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.18.2",
+  "version": "1.19.0",
   "description": "Relay Computer Assembler",
   "main": "./lib/umd/index.js",
   "typings": "./lib/umd/index",
@@ -19,15 +19,12 @@
     "registry": "https://npm.pkg.github.com/"
   },
   "scripts": {
-    "prepublishOnly": "npm run clean && npm run compile && npm run compile-esm && npm run compile-tst && npm run gen && npm run test",
+    "prepublishOnly": "npm run clean && npm run compile && npm run compile-esm && npm run compile-tst && npm run test",
     "compile": "tsc -p . && npm run lint",
     "compile-esm": "tsc -p ./tsconfig.esm.json",
     "compile-tst": "tsc -p ./tsconfig.test.json",
     "clean": "rimraf lib",
-    "gen": "npm run gen-umd && npm run gen-esm && npm run gen-tst",
-    "gen-umd": "npx pegjs -o lib/umd/g_parser.js src/parser.pegjs",
-    "gen-esm": "npx pegjs -o lib/esm/g_parser.js src/parser.pegjs",
-    "gen-tst": "npx pegjs -o lib/tst/src/g_parser.js src/parser.pegjs",
+    "gen": "npx peggy -o src/g_parser.js --format es src/parser.pegjs",
     "test": "npm run compile-tst && mocha --parallel",
     "lint": "eslint **/*.ts",
     "watch": "tsc --watch -p ."
@@ -43,6 +40,7 @@
     "eslint": "9.39.1",
     "glob": "13.0.0",
     "mocha": "11.7.5",
+    "peggy": "5.0.6",
     "rimraf": "6.1.2",
     "typescript": "5.9.3"
   }

@@ -7,9 +7,7 @@ import * as ast from './ast';
 import { SourceLoc } from './ast';
 import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
-
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const parser = require('./g_parser');
+import { parse } from './g_parser';
 
 interface Error {
   loc: SourceLoc,
@@ -1234,7 +1232,7 @@ class Assembler {
 
   assemble(source: string): void {
     try {
-      const program = <ast.Program>parser.parse(source.toString());
+      const program = <ast.Program>parse(source.toString());
       if (program !== undefined && program.lines) {
         this.assembleLines(program.lines);
       }
@@ -1302,7 +1300,7 @@ class Assembler {
 
 export function parseOnly(source: string): ast.Program | undefined {
   try {
-    return <ast.Program>parser.parse(source.toString());
+    return <ast.Program>parse(source.toString());
   } catch {
     return;
   }
