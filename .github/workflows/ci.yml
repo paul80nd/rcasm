@@ -32,6 +32,5 @@ jobs:
     - run: npm run compile
     - run: npm run compile-esm
     - run: npm run compile-tst 
-    - run: npm run gen
     - run: npm test
    
