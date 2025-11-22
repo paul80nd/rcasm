@@ -3,11 +3,10 @@
 import * as assert from 'assert';
 import * as ast from '../src/ast';
 
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const parser = require('../src/g_parser');
+import { parse } from '../src/g_parser';
 
-export function parse(source: string): ast.Line[] {
-  const program = <ast.Program>parser.parse(source);
+export function parseTest(source: string): ast.Line[] {
+  const program = <ast.Program>parse(source);
   if (!program || !program.lines) { assert.fail('no program or no lines'); }
   return program.lines;
 }
@@ -27,7 +26,7 @@ export function assertLabel(node: ast.Line, label: string, from: number, to: num
 }
 
 export function assertInstruction(code: string, mnemonic: string, op1: number | string | null, op2: number | string | null, debug = false) {
-  const result = parse(code);
+  const result = parseTest(code);
   if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.length, 1);
   if (result[0].stmt?.type !== 'insn') { assert.fail('expected instruction'); }
@@ -45,7 +44,7 @@ export function assertInstruction(code: string, mnemonic: string, op1: number | 
 }
 
 export function assertData(code: string, dataSize: ast.DataSize, debug = false) {
-  const result = parse(code);
+  const result = parseTest(code);
   if (debug) { console.log(JSON.stringify(result)); }
   assert.equal(result.length, 1);
   if (result[0].stmt?.type !== 'data') { assert.fail('expected data'); }
@@ -55,7 +54,7 @@ export function assertData(code: string, dataSize: ast.DataSize, debug = false) 
 
 export function assertError(code: string, message: string, offset: number) {
   try {
-    parse(code);
+    parseTest(code);
     assert.fail('no error thrown');
   } catch (err) {
     if ('name' in err && err.name === 'SyntaxError') {
@@ -70,18 +69,18 @@ export function assertError(code: string, message: string, offset: number) {
 suite('rcasm - Parser', () => {
 
   test('Empty Orchestra', function () {
-    const result = parse('');
+    const result = parseTest('');
     assertNoop(result[0]);
   });
 
   test('No-ops', function () {
-    const result = parse('    \n   ');
+    const result = parseTest('    \n   ');
     assertNoop(result[0]);
     assertNoop(result[1]);
   });
 
   test('Comments Only', function () {
-    const result = parse('; comment\n; comment2');
+    const result = parseTest('; comment\n; comment2');
     assert.equal(result.length, 2);
     assertNoop(result[0]);
     assertNoLabel(result[0]);
@@ -90,13 +89,13 @@ suite('rcasm - Parser', () => {
   });
 
   test('Label No Stmt', function () {
-    const result = parse('xyz:');
+    const result = parseTest('xyz:');
     assertLabel(result[0], 'xyz', 1, 5);
     assertNoop(result[0]);
   });
 
   test('Label Stmt', function () {
-    const result = parse('xyz: inc');
+    const result = parseTest('xyz: inc');
     assertLabel(result[0], 'xyz', 1, 5);
   });
 
@@ -121,7 +120,7 @@ suite('rcasm - Parser', () => {
   });
 
   test('Program Loc', function () {
-    const program = <ast.Program>parser.parse('test: inc\n   and d \n mov a,d ;end');
+    const program = <ast.Program>parse('test: inc\n   and d \n mov a,d ;end');
     if (!program || !program.lines) { assert.fail('no program or no lines'); }
     assert.strictEqual(3, program.lines.length);
     assert.strictEqual(3, program.loc.end.line);

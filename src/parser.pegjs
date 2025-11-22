@@ -1,5 +1,5 @@
 {
-  var ast = require('./ast')  
+  var ast = import('./ast')  
   function extractList(list, index) {
     return list.map(function(element) { return element[index]; });
   }

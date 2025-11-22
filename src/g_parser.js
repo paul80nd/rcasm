@@ -2,6 +2,7 @@
 //
 // https://peggyjs.org/
 
+  import * as ast from './ast'
 
 class peg$SyntaxError extends SyntaxError {
   constructor(message, expected, found, location) {
@@ -3871,7 +3872,6 @@ function peg$parse(input, options) {
   }
 
 
-  var ast = require('./ast')  
   function extractList(list, index) {
     return list.map(function(element) { return element[index]; });
   }
