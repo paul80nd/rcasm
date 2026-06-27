@@ -57,9 +57,10 @@ export function assertError(code: string, message: string, offset: number) {
     parseTest(code);
     assert.fail('no error thrown');
   } catch (err) {
-    if ('name' in err && err.name === 'SyntaxError') {
-      assert.equal(err.message, message);
-      assert.equal(err.location.start.offset, offset);
+    if (err && typeof err === 'object' && 'name' in err && err.name === 'SyntaxError') {
+      const e = err as unknown as { message: string; location: { start: { offset: number } } };
+      assert.equal(e.message, message);
+      assert.equal(e.location.start.offset, offset);
     } else {
       throw err;
     }

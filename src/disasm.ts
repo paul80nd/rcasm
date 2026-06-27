@@ -21,11 +21,10 @@ function toHex16(v: number): string {
 * @param chunk_size {Integer} Size of every group
 */
 export function chunkArray<T>(myArray: T[], chunk_size: number) {
-  let index = 0;
   const arrayLength = myArray.length;
   const tempArray = [];
 
-  for (index = 0; index < arrayLength; index += chunk_size) {
+  for (let index = 0; index < arrayLength; index += chunk_size) {
     const myChunk = myArray.slice(index, index + chunk_size);
     // Do something if you want with the group
     tempArray.push(myChunk);

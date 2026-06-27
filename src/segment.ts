@@ -15,7 +15,6 @@ class Segment {
   end?: number;
   id: number;
   inferStart: boolean; // allow 'start' to be set lazily (so the platform default can be overridden)
-  initialStart: number;
   curBlock: Block;
   blocks: Block[];
 

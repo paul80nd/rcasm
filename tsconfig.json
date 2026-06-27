@@ -1,11 +1,13 @@
 {
   "compilerOptions": {
     "target": "es2020",
-		"module": "umd",
-		"moduleResolution": "node",
+    "module": "umd",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "removeComments": true,
     "declaration": true,
     "preserveConstEnums": true,
+    "rootDir": "./src",
     "outDir": "lib/umd",
     "sourceMap": true,
     "allowJs": true,
@@ -16,10 +18,9 @@
     "alwaysStrict": true,
     "noImplicitReturns": true,
     "stripInternal": true,
-    "downlevelIteration": true,
     "lib": [
-			"es2020"
-		]
+      "es2020"
+    ]
   },
   "include": [
     "src/**/*.ts"

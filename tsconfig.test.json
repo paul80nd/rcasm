@@ -1,7 +1,9 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "outDir": "lib/tst"
+    "rootDir": ".",
+    "outDir": "lib/tst",
+    "types": ["node", "mocha"]
   },
   "include": [
     "src/**/*.ts",

@@ -324,7 +324,7 @@ const runBinop = (a: EvalValue<number>, b: EvalValue<number>, f: (a: number, b: 
 }
 
 class Assembler {
-  private lineLoc: SourceLoc;
+  private lineLoc!: SourceLoc;
   private curSegmentName = '';
   private curSegment: Segment = new Segment(0, 0, false, 0); // invalid, setup at start of pass
   private pass = 0;
@@ -532,13 +532,14 @@ class Assembler {
           const complete = callee.completeFirstPass && combineEvalPassInfo(...argValues);
           return mkEvalValue(callee.value(...argValues.map(v => v.value)), complete);
         } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
           if (node.callee.type == 'qualified-ident') {
-            this.addError(`Call to '${formatSymbolPath(node.callee)}' failed with an error: ${err.message}`, node.loc);
+            this.addError(`Call to '${formatSymbolPath(node.callee)}' failed with an error: ${errMsg}`, node.loc);
           } else {
             this.addError(`Unexpected error calling function`, node.loc)
             // Generic error message as callees that are computed
             // expressions have lost their name once we get here.
-            this.addError(`Plugin call failed with an error: ${err.message}`, node.loc);
+            this.addError(`Plugin call failed with an error: ${errMsg}`, node.loc);
           }
           return mkErrorValue(0);
         }
@@ -846,7 +847,7 @@ class Assembler {
     if (!anyErrors(ev)) {
       const val = ev.value;
       if (val < min || val > max) {
-        let range = '';
+        let range: string;
         switch (rangeDisplay) {
           case 'b': {
             const maxb = max.toString(2);
@@ -1237,12 +1238,17 @@ class Assembler {
         this.assembleLines(program.lines);
       }
     } catch (err) {
-      if ('name' in err && err.name === 'SyntaxError') {
-        this.addError(`Syntax error: ${err.message}`, {
-          ...err.location
-        });
-      } else if ('name' in err && err.name === 'semantic') {
-        return;
+      if (err && typeof err === 'object' && 'name' in err) {
+        const e = err as { name: string; message: string; location: SourceLoc };
+        if (e.name === 'SyntaxError') {
+          this.addError(`Syntax error: ${e.message}`, {
+            ...e.location
+          });
+        } else if (e.name === 'semantic') {
+          return;
+        } else {
+          throw err;
+        }
       } else {
         throw err;
       }
@@ -1263,7 +1269,7 @@ class Assembler {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const range = (...args: any[]) => {
       let start = 0;
-      let end = undefined;
+      let end: number;
       if (args.length == 1) {
         end = this.requireNumber(args[0]);
       } else if (args.length == 2) {
