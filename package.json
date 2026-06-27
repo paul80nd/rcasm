@@ -36,15 +36,17 @@
     "serialize-javascript": "^7.0.6"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "3.3.5",
+    "@eslint/js": "10.0.1",
     "@types/mocha": "10.0.10",
     "@types/node": "24.10.1",
     "@typescript-eslint/eslint-plugin": "8.62.0",
     "@typescript-eslint/parser": "8.62.0",
-    "eslint": "9.39.2",
+    "eslint": "10.6.0",
     "glob": "13.0.6",
     "mocha": "11.7.6",
     "peggy": "5.1.0",
     "rimraf": "6.1.3",
-    "typescript": "5.9.3"
+    "typescript": "6.0.3"
   }
 }
