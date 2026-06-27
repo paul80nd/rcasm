@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
     "target": "es2020",
-		"module": "umd",
-		"moduleResolution": "node",
-		"ignoreDeprecations": "6.0",
+    "module": "umd",
+    "moduleResolution": "node",
+    "ignoreDeprecations": "6.0",
     "removeComments": true,
     "declaration": true,
     "preserveConstEnums": true,
@@ -19,8 +19,8 @@
     "noImplicitReturns": true,
     "stripInternal": true,
     "lib": [
-			"es2020"
-		]
+      "es2020"
+    ]
   },
   "include": [
     "src/**/*.ts"

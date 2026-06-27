@@ -2,6 +2,12 @@
   "name": "@paul80nd/rcasm",
   "version": "1.20.1",
   "description": "Relay Computer Assembler",
+  "keywords": [
+    "assembler",
+    "assembly",
+    "relay-computer",
+    "rcasm"
+  ],
   "main": "./lib/umd/index.js",
   "typings": "./lib/umd/index",
   "module": "./lib/esm/index.js",
@@ -9,6 +15,9 @@
     "/lib/esm",
     "/lib/umd"
   ],
+  "engines": {
+    "node": ">=20"
+  },
   "author": "Paul Law",
   "license": "MIT",
   "repository": {
@@ -26,7 +35,7 @@
     "clean": "rimraf lib",
     "gen": "npx peggy -o src/g_parser.js --format es src/parser.pegjs",
     "test": "npm run compile-tst && mocha --parallel",
-    "lint": "eslint **/*.ts",
+    "lint": "eslint .",
     "watch": "tsc --watch -p ."
   },
   "dependencies": {
@@ -36,17 +45,15 @@
     "serialize-javascript": "^7.0.6"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "3.3.5",
     "@eslint/js": "10.0.1",
     "@types/mocha": "10.0.10",
     "@types/node": "24.10.1",
-    "@typescript-eslint/eslint-plugin": "8.62.0",
-    "@typescript-eslint/parser": "8.62.0",
     "eslint": "10.6.0",
     "glob": "13.0.6",
     "mocha": "11.7.6",
     "peggy": "5.1.0",
     "rimraf": "6.1.3",
-    "typescript": "6.0.3"
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.0"
   }
 }
