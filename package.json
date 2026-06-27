@@ -32,11 +32,14 @@
   "dependencies": {
     "typedfastbitset": "^0.8.0"
   },
+  "overrides": {
+    "serialize-javascript": "^7.0.6"
+  },
   "devDependencies": {
     "@types/mocha": "10.0.10",
     "@types/node": "24.10.1",
-    "@typescript-eslint/eslint-plugin": "8.60.0",
-    "@typescript-eslint/parser": "8.60.0",
+    "@typescript-eslint/eslint-plugin": "8.62.0",
+    "@typescript-eslint/parser": "8.62.0",
     "eslint": "9.39.2",
     "glob": "13.0.6",
     "mocha": "11.7.6",
