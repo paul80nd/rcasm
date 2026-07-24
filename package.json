@@ -16,7 +16,7 @@
     "/lib/umd"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "author": "Paul Law",
   "license": "MIT",
