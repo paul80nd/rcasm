@@ -1,6 +1,6 @@
 {
   "name": "@paul80nd/rcasm",
-  "version": "1.20.2",
+  "version": "1.21.0",
   "description": "Relay Computer Assembler",
   "keywords": [
     "assembler",
@@ -16,7 +16,7 @@
     "/lib/umd"
   ],
   "engines": {
-    "node": ">=20"
+    "node": ">=24"
   },
   "author": "Paul Law",
   "license": "MIT",
@@ -47,13 +47,13 @@
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/mocha": "10.0.10",
-    "@types/node": "24.10.1",
-    "eslint": "10.6.0",
+    "@types/node": "24.13.3",
+    "eslint": "10.7.0",
     "glob": "13.0.6",
     "mocha": "11.7.6",
     "peggy": "5.1.0",
     "rimraf": "6.1.3",
     "typescript": "6.0.3",
-    "typescript-eslint": "8.62.0"
+    "typescript-eslint": "8.65.0"
   }
 }
