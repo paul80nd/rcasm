@@ -1,0 +1,16 @@
+; Macros declared in a label scope, called by qualified path
+sc: {
+!macro m(v) {
+        ldi a,v
+}
+        +m(1)
+inner: {
+!macro n() {
+        add d
+}
+}
+        +inner::n()
+}
+        +sc::m(2)
+        +::sc::m(3)
+        +sc::inner::n()

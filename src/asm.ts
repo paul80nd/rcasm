@@ -9,9 +9,18 @@ import { Segment, mergeSegments, collectSegmentInfo } from './segment';
 import { DebugInfoTracker } from './debugInfo';
 import { parse } from './g_parser';
 
+// A macro invocation site that a diagnostic was raised within
+export interface MacroExpansion {
+  name: string,
+  loc: SourceLoc
+}
+
 interface Error {
   loc: SourceLoc,
-  msg: string
+  msg: string,
+  // Macro invocation sites leading to `loc`, innermost first.  Present only
+  // for diagnostics raised while expanding a macro body.
+  expansions?: MacroExpansion[]
 }
 
 export interface Diagnostic extends Error {
@@ -125,7 +134,7 @@ class NamedScope<T> {
   }
 }
 
-type SymEntry = SymLabel | SymVar;
+type SymEntry = SymLabel | SymVar | SymMacro;
 
 interface SymLabel {
   type: 'label';
@@ -137,6 +146,11 @@ interface SymVar {
   type: 'var';
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: EvalValue<any>;
+}
+
+interface SymMacro {
+  type: 'macro';
+  data: ast.StmtMacro;
 }
 
 interface SymSegment {
@@ -230,6 +244,13 @@ class Scopes {
     return false;
   }
 
+  declareMacro(name: string, value: ast.StmtMacro): void {
+    this.curSymtab.addSymbol(name, {
+      type: 'macro',
+      data: value
+    }, this.passCount)
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   declareVar(name: string, value: EvalValue<any>): void {
     this.curSymtab.addSymbol(name, {
@@ -310,9 +331,29 @@ function formatTypename(v: any): string {
   return typeName;
 }
 
+// Render macro expansion sites for a formatted diagnostic, capped so deep
+// (e.g. runaway recursive) expansions stay readable
+function formatMacroContext(expansions: MacroExpansion[] | undefined): string {
+  if (expansions === undefined) {
+    return '';
+  }
+  const sites = expansions
+    .map(({ name, loc }) => ` (in macro '${name}' expanded at ${loc.start.line}:${loc.start.column})`);
+  if (sites.length > MAX_MACRO_CONTEXT) {
+    const more = sites.length - MAX_MACRO_CONTEXT;
+    sites.splice(MAX_MACRO_CONTEXT, more, ` (... ${more} more)`);
+  }
+  return sites.join('');
+}
+
 function formatSymbolPath(p: ast.ScopeQualifiedIdent): string {
   return `${p.absolute ? '::' : ''}${p.path.join('::')}`;
 }
+
+// Guard against runaway recursive macro expansion
+const MAX_MACRO_DEPTH = 100;
+// Number of expansion sites listed in a diagnostic raised inside a macro
+const MAX_MACRO_CONTEXT = 3;
 
 const runBinop = (a: EvalValue<number>, b: EvalValue<number>, f: (a: number, b: number) => number | boolean): EvalValue<number> => {
   const res = f(a.value as number, b.value as number);
@@ -333,6 +374,9 @@ class Assembler {
   private segments: [string, Segment][] = [];
   private errorList: Error[] = [];
   private warningList: Error[] = [];
+  private macroExpandStack: MacroExpansion[] = [];
+  private declaredMacros = new Set<ast.StmtMacro>();
+  private usedMacros = new Set<ast.StmtMacro>();
 
   // PC<->source location tracking for debugging support.  Reset on each pass
   debugInfo = new DebugInfoTracker();
@@ -352,14 +396,13 @@ class Assembler {
     // Remove duplicate errors
     const set = new Set(diags.map(v => JSON.stringify(v)));
     return [...set].map((errJson) => {
-      const { loc, msg } = JSON.parse(errJson) as Error;
-      let formatted = `<unknown>:1:1: ${errType}: ${msg}`;
-      if (loc) {
-        formatted = `${loc.start.line}:${loc.start.column}: ${errType}: ${msg}`;
-      }
+      const { loc, msg, expansions } = JSON.parse(errJson) as Error;
+      const where = loc ? `${loc.start.line}:${loc.start.column}` : '<unknown>:1:1';
+      const formatted = `${where}: ${errType}: ${msg}${formatMacroContext(expansions)}`;
       return {
         loc,
         msg,
+        ...(expansions && { expansions }),
         formatted
       };
     });
@@ -373,18 +416,40 @@ class Assembler {
     return this.formatErrors(this.warningList, 'warning');
   };
 
+  // Diagnostic raised at `loc`, tagged with the current chain of macro
+  // expansion sites so both the body line and invocation can be reported
+  private mkError(msg: string, loc: SourceLoc): Error {
+    if (this.macroExpandStack.length === 0) {
+      return { msg, loc };
+    }
+    return { msg, loc, expansions: [...this.macroExpandStack].reverse() };
+  }
+
   addError(msg: string, loc: SourceLoc): void {
-    this.errorList.push({ msg, loc });
+    this.errorList.push(this.mkError(msg, loc));
   }
 
   addWarning(msg: string, loc: SourceLoc): void {
-    this.warningList.push({ msg, loc });
+    this.warningList.push(this.mkError(msg, loc));
+  }
+
+  // Called once assembly has settled, so a macro only used under a condition
+  // that changed between passes isn't misreported
+  checkUnusedMacros(): void {
+    for (const m of this.declaredMacros) {
+      if (!this.usedMacros.has(m)) {
+        this.addWarning(`Macro '${m.name.name}' is never used`, m.name.loc);
+      }
+    }
   }
 
   startPass(pass: number): void {
     this.pass = pass;
     this.needPass = false;
     this.errorList = [];
+    this.macroExpandStack = [];
+    this.declaredMacros.clear();
+    this.usedMacros.clear();
     this.scopes.startPass(pass);
     this.debugInfo = new DebugInfoTracker();
 
@@ -512,6 +577,9 @@ class Assembler {
               this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
             }
             return sym.data;
+          case 'macro':
+            this.addError(`Macro '${formatSymbolPath(node)}' cannot be used as a value`, node.loc);
+            return mkErrorValue(0);
         }
         break;
       }
@@ -1084,14 +1152,80 @@ class Assembler {
       }
       case 'let': {
         const name = node.name;
-        const sym = this.scopes.findQualifiedSym([name.name], false);
         const eres = this.evalExpr(node.value);
 
-        if (sym !== undefined && this.scopes.symbolSeen(name.name)) {
+        if (this.isRedefinition(name.name)) {
           this.addError(`Variable '${name.name}' already defined`, node.loc);
           return;
         }
         this.scopes.declareVar(name.name, eres);
+        break;
+      }
+      case 'macro': {
+        const { name, args } = node;
+        const seenArgs = new Set<string>();
+        for (const a of args) {
+          if (seenArgs.has(a.name)) {
+            this.addError(`Duplicate macro argument '${a.name}'`, a.loc);
+            return;
+          }
+          seenArgs.add(a.name);
+        }
+        if (this.isRedefinition(name.name)) {
+          this.addError(`Macro '${name.name}' already defined`, name.loc);
+          return;
+        }
+        this.scopes.declareMacro(name.name, node);
+        this.declaredMacros.add(node);
+        break;
+      }
+      case 'callmacro': {
+        const { name, args } = node;
+        const macroName = formatSymbolPath(name);
+        const sym = this.scopes.findQualifiedSym(name.path, name.absolute);
+        if (sym === undefined) {
+          if (this.pass >= 1) {
+            this.addError(`Undefined macro '${macroName}'`, name.loc);
+            return;
+          }
+          // Might be a forward use; the next pass tells that apart from a
+          // missing macro so the right error can be reported
+          this.needPass = true;
+          return;
+        }
+        if (sym.type !== 'macro') {
+          this.addError(`'${macroName}' is not a macro`, name.loc);
+          return;
+        }
+        // Macros must be defined before use.  A definition seen only in an earlier
+        // pass doesn't count, as expanding it in this pass but not the earlier one
+        // would shift anonymous scope numbering and break label resolution.
+        if (sym.seen < this.pass) {
+          this.addError(`Undefined macro '${macroName}' (macros must be defined before use)`, name.loc);
+          return;
+        }
+        const macro = sym.data;
+        this.usedMacros.add(macro);
+        if (macro.args.length !== args.length) {
+          this.addError(`Macro '${macroName}' expects ${macro.args.length} argument(s), got ${args.length}`, node.loc);
+          return;
+        }
+        if (this.macroExpandStack.length >= MAX_MACRO_DEPTH) {
+          this.addError(`Macro expansion nested too deeply (limit ${MAX_MACRO_DEPTH}) - recursive macro?`, node.loc);
+          return;
+        }
+        // Arguments are evaluated in the scope of the expansion site
+        const argValues = args.map(e => this.evalExpr(e));
+        if (anyErrors(...argValues)) {
+          return; // Already reported, expanding would only add knock-on errors
+        }
+        this.macroExpandStack.push({ name: macroName, loc: node.loc });
+        // Each expansion gets its own scope so labels in the body are local to it
+        this.withAnonScope(_localScopeName, () => {
+          macro.args.forEach((a, i) => this.scopes.declareVar(a.name, argValues[i]));
+          this.assembleLines(macro.body);
+        });
+        this.macroExpandStack.pop();
         break;
       }
       default:
@@ -1132,6 +1266,11 @@ class Assembler {
     }
 
     return assemble(lst);
+  }
+
+  // Is `name` already declared in the current scope during this pass?
+  isRedefinition(name: string): boolean {
+    return this.scopes.findQualifiedSym([name], false) !== undefined && this.scopes.symbolSeen(name);
   }
 
   checkAndDeclareLabel(label: ast.Label) {
@@ -1334,6 +1473,8 @@ export function assemble(source: string) {
 
     pass += 1;
   } while (asm.needPass);
+
+  asm.checkUnusedMacros();
 
   return {
     prg: asm.prg(),

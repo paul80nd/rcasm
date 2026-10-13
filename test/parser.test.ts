@@ -112,7 +112,7 @@ suite('rcasm - Parser', () => {
     assertInstruction('loop: mov a,d', 'mov', 'a', 'd');
     assertInstruction('loop: mov a,d ; comment', 'mov', 'a', 'd');
     assertError('loop2: loop3:', 'Expected comment, end of input, end of line, or whitespace but ":" found.', 12);
-    assertError('loop2: 45', 'Expected "{", comment, directive, end of input, end of line, or mnemonic but "4" found.', 7);
+    assertError('loop2: 45', 'Expected "{", comment, directive, end of input, end of line, macro call, or mnemonic but "4" found.', 7);
   });
 
   test('Data', function () {

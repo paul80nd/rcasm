@@ -1,0 +1,26 @@
+!macro m(v) {
+        ldi a,v
+        bogus
+}
+!macro m() {
+}
+        +m(1)
+        +m(100)
+        +m()
+        +nope()
+        +m(1, 2)
+!macro rec() {
+        +rec()
+}
+        +rec()
+        +later()
+!macro later() {
+}
+!macro dup(v, w, v) {
+}
+        +m(a)
+sc: {
+!macro inner() {
+}
+}
+        +inner()

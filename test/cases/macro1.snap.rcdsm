@@ -1,0 +1,24 @@
+0000: 81           add
+0001: B0           ixy
+0002: 0E           mov b,x
+0003: 82           inc
+0004: 30           mov x,a
+0005: 13           mov c,d
+0006: 85           eor
+0007: E2 00 00     bne
+000A: 89           add d
+000B: B0           ixy
+000C: 0E           mov b,x
+000D: 82           inc
+000E: 30           mov x,a
+000F: 13           mov c,d
+0010: 85           eor
+0011: E2 00 0A     bne
+0014: B0           ixy
+0015: 0E           mov b,x
+0016: 82           inc
+0017: 30           mov x,a
+0018: 13           mov c,d
+0019: 85           eor
+001A: E2 00 1D     bne
+001D: 89           add d

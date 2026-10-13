@@ -1,0 +1,12 @@
+5:8: error: Macro 'm' already defined
+3:9: error: Unknown mnemonic 'bogus' (in macro 'm' expanded at 7:9)
+2:15: error: Literal out of range (must be between -16 and 15) (in macro 'm' expanded at 8:9)
+3:9: error: Unknown mnemonic 'bogus' (in macro 'm' expanded at 8:9)
+9:9: error: Macro 'm' expects 1 argument(s), got 0
+10:10: error: Undefined macro 'nope'
+11:9: error: Macro 'm' expects 1 argument(s), got 2
+13:9: error: Macro expansion nested too deeply (limit 100) - recursive macro? (in macro 'rec' expanded at 13:9) (in macro 'rec' expanded at 13:9) (in macro 'rec' expanded at 13:9) (... 97 more)
+16:10: error: Undefined macro 'later' (macros must be defined before use)
+19:18: error: Duplicate macro argument 'v'
+21:12: error: Unexpected register
+26:10: error: Undefined macro 'inner'

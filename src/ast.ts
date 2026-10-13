@@ -41,7 +41,9 @@ export type Stmt
   | StmtIfElse
   | StmtError
   | StmtFor
-  | StmtLet;
+  | StmtLet
+  | StmtMacro
+  | StmtCallMacro;
 
 export interface StmtSetPC extends Node {
   type: 'setpc';
@@ -160,6 +162,35 @@ export function mkLet(name: Ident, value: Expr, loc: SourceLoc): StmtLet {
   }
 }
 
+export interface StmtMacro extends Node {
+  type: 'macro',
+  name: Ident;
+  args: Ident[];
+  body: Line[];
+}
+export function mkMacro(name: Ident, args: Ident[] | null, body: Line[], loc: SourceLoc): StmtMacro {
+  return {
+    type: 'macro',
+    name,
+    args: args ?? [],
+    body,
+    loc
+  }
+}
+
+export interface StmtCallMacro extends Node {
+  type: 'callmacro',
+  name: ScopeQualifiedIdent;
+  args: Expr[];
+}
+export function mkCallMacro(name: ScopeQualifiedIdent, args: Expr[] | null, loc: SourceLoc): StmtCallMacro {
+  return {
+    type: 'callmacro',
+    name,
+    args: args ?? [],
+    loc
+  }
+}
 
 export type Expr
   = Ident
@@ -179,7 +210,7 @@ export function mkCallFunc(callee: Expr, args: Expr[], loc: SourceLoc): CallFunc
   return {
     type: 'callfunc',
     callee,
-    args: args == null ? [] : args,
+    args: args ?? [],
     loc
   }
 }
