@@ -36,5 +36,8 @@ jobs:
     - run: npm run compile
     - run: npm run compile-esm
     - run: npm run compile-tst 
-    - run: npm test
+    # github-actions reporter adds failure annotations and a job summary; source maps point them at test/*.ts
+    - run: npm test -- --reporter github-actions
+      env:
+        NODE_OPTIONS: --enable-source-maps
    

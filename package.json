@@ -41,16 +41,13 @@
   "dependencies": {
     "typedfastbitset": "^0.8.0"
   },
-  "overrides": {
-    "serialize-javascript": "^7.0.6"
-  },
   "devDependencies": {
     "@eslint/js": "10.0.1",
     "@types/mocha": "10.0.10",
     "@types/node": "24.19.2",
     "eslint": "10.12.0",
     "glob": "13.0.6",
-    "mocha": "11.8.0",
+    "mocha": "12.0.3",
     "peggy": "5.1.0",
     "rimraf": "6.1.3",
     "typescript": "6.0.3",
