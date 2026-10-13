@@ -314,6 +314,12 @@ class Scopes {
   }
 }
 
+// A register passed as a macro argument.  Only usable where an instruction
+// expects a register operand, never as a value in an expression.
+class RegisterValue {
+  constructor(readonly name: string) { }
+}
+
 function isTrueVal(cond: number | boolean): boolean {
   return (cond === true || cond != 0);
 }
@@ -326,6 +332,9 @@ function formatTypename(v: any): string {
   if (typeName === 'object') {
     if (v instanceof Array) {
       return 'array';
+    }
+    if (v instanceof RegisterValue) {
+      return 'register';
     }
   }
   return typeName;
@@ -575,6 +584,10 @@ class Assembler {
           case 'var':
             if (sym.seen < this.pass) {
               this.addError(`Undeclared variable '${formatSymbolPath(node)}'`, node.loc);
+            }
+            if (sym.data.value instanceof RegisterValue) {
+              this.addError(`Register '${sym.data.value.name}' can't be used as a value`, node.loc);
+              return mkErrorValue(0);
             }
             return sym.data;
           case 'macro':
@@ -881,7 +894,20 @@ class Assembler {
     this.emit(opcode);
   }
 
-  checkRegister(given: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
+  // Substitute a macro argument bound to a register with that register, so
+  // instruction operands can take registers passed into a macro
+  resolveRegister(given: ast.Expr): ast.Expr {
+    if (given.type === 'qualified-ident') {
+      const sym = this.scopes.findQualifiedSym(given.path, given.absolute);
+      if (sym?.type === 'var' && sym.data.value instanceof RegisterValue) {
+        return ast.mkRegister(sym.data.value.name, given.loc);
+      }
+    }
+    return given;
+  }
+
+  checkRegister(operand: ast.Expr, available: opc.OpCodeParam, furtherAvailable: opc.OpCodeParam | undefined = undefined): number | undefined {
+    const given = this.resolveRegister(operand);
     if (given.type !== 'register') {
       this.addError(`Register required`, given.loc);
     } else {
@@ -901,7 +927,8 @@ class Assembler {
     }
     return undefined;
   }
-  hasRegister(given: ast.Expr, available: opc.OpCodeParam): boolean {
+  hasRegister(operand: ast.Expr, available: opc.OpCodeParam): boolean {
+    const given = this.resolveRegister(operand);
     if (given.type !== 'register') {
       return false;
     } else {
@@ -1215,7 +1242,7 @@ class Assembler {
           return;
         }
         // Arguments are evaluated in the scope of the expansion site
-        const argValues = args.map(e => this.evalExpr(e));
+        const argValues = args.map(e => this.evalMacroArg(e));
         if (anyErrors(...argValues)) {
           return; // Already reported, expanding would only add knock-on errors
         }
@@ -1266,6 +1293,17 @@ class Assembler {
     }
 
     return assemble(lst);
+  }
+
+  // Registers (including a register argument passed on from an enclosing
+  // macro) are bound as register values, anything else is evaluated
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  evalMacroArg(arg: ast.Expr): EvalValue<any> {
+    const resolved = this.resolveRegister(arg);
+    if (resolved.type === 'register') {
+      return mkEvalValue(new RegisterValue(resolved.value), true);
+    }
+    return this.evalExpr(arg);
   }
 
   // Is `name` already declared in the current scope during this pass?

@@ -1,0 +1,11 @@
+0000: 09           clr b
+0001: 65           ldi b,5
+0002: 00           clr a
+0003: 5D           ldi a,-3
+0004: A0           mov xy,m
+0005: A6           mov pc,j
+0006: 19           mov d,b
+0007: 03           mov a,d
+0008: C0 00 0B     ldi m
+000B: E0 12 34     ldi j
+000E: 82           inc

@@ -8,5 +8,6 @@
 13:9: error: Macro expansion nested too deeply (limit 100) - recursive macro? (in macro 'rec' expanded at 13:9) (in macro 'rec' expanded at 13:9) (in macro 'rec' expanded at 13:9) (... 97 more)
 16:10: error: Undefined macro 'later' (macros must be defined before use)
 19:18: error: Duplicate macro argument 'v'
-21:12: error: Unexpected register
+2:15: error: Register 'a' can't be used as a value (in macro 'm' expanded at 21:9)
+3:9: error: Unknown mnemonic 'bogus' (in macro 'm' expanded at 21:9)
 26:10: error: Undefined macro 'inner'
