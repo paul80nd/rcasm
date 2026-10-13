@@ -13,6 +13,11 @@ updates:
       # the runtime, not on Dependabot's schedule. Minor/patch within the major still flow.
       - dependency-name: "@types/node"
         update-types: ["version-update:semver-major"]
+      # TypeScript 7 (the native Go port) ships no JS API, so typescript-eslint caps its peer
+      # range at <6.1.0 and `npm ci` fails. Remove once typescript-eslint supports TS 7.1+
+      # (tracking: https://github.com/typescript-eslint/typescript-eslint/issues/10940).
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       dev-minor-patch:
         dependency-type: development
