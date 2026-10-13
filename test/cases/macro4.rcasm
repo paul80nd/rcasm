@@ -1,0 +1,23 @@
+; Registers as macro arguments: 8-bit, 16-bit form selection, passed on to a nested macro
+!macro load(r, v) {
+        clr r
+        ldi r,v
+}
+!macro copy(dst, src) {
+        mov dst,src
+}
+!macro copy_via(tmp, dst, src) {
+        +copy(tmp, src)
+        +copy(dst, tmp)
+}
+!macro set16(r, addr) {
+        ldi r,addr
+}
+        +load(b, 5)
+        +load(a, -3)
+        +copy(xy, m)
+        +copy(pc, j)
+        +copy_via(d, a, b)
+        +set16(m, target)
+target: +set16(j, 0x1234)
+        inc

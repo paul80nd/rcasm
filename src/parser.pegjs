@@ -35,7 +35,13 @@ Line
 
 Statement
   = drct:Directive   { return drct; }
+  / mcall:MacroCall  { return mcall; }
   / insn:Instruction { return insn; }
+
+MacroCall "macro call"
+  = PLUS name:SQIDENTIFIER _ LPAR _ args:ExprList? _ RPAR {
+      return ast.mkCallMacro(name, args, loc());
+    }
 
 Directive "directive"
   = size:(PSEUDO_BYTE / PSEUDO_WORD) __ values:ExprList  {
@@ -63,6 +69,17 @@ Directive "directive"
   / PSEUDO_ALIGN __ alignBytes:Expr {
       return ast.mkAlign(alignBytes, loc());
     }
+  / PSEUDO_MACRO __ name:IDENTIFIER _ LPAR _ args:MacroArgNameList? _ RPAR _ LWING _ body:Lines _ RWING {
+      return ast.mkMacro(name, args, body, loc());
+    }
+
+MacroArgNameList = head:MacroArgName tail:(_ COMMA _ MacroArgName)* { return buildList(head, tail, 3); }
+
+// A name REGISTER would match (including trailing digits, e.g. b1 lexes as
+// register b then 1) could never be referenced as the argument in the body
+MacroArgName
+  = r:$(REGISTER [0-9]*) !alpha { error(`Macro argument '${r}' clashes with a register name`); }
+  / IDENTIFIER
 
 Elif = _ PSEUDO_ELIF _ LPAR _ condition:Expr _ RPAR _ LWING _ trueBranch:Lines _ RWING {
   return { condition, trueBranch };
@@ -194,6 +211,7 @@ PSEUDO_ELSE  = E L S E
 PSEUDO_ELIF  = E L I F
 PSEUDO_ERROR = BANG E R R O R
 PSEUDO_FILL  = BANG F I L L
+PSEUDO_MACRO = BANG M A C R O
 
 BIN = v:$binary B         { return parseInt(v,2); }
 HEX = _0 X v:$hexadecimal { return parseInt(v,16); }

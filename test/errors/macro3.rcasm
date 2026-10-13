@@ -1,0 +1,12 @@
+; Register arguments used where a value is needed
+!macro val(v) {
+        ldi a,v
+        !byte v
+        ldi m,v+1
+}
+        +val(b)
+!macro reg(r) {
+        mov r,a
+}
+        +reg(5)
+        +reg(pc)

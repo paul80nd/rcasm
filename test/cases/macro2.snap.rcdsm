@@ -1,0 +1,22 @@
+0000: 63           ldi b,3
+0001: E2 00 06     bne
+0004: 07           mov a,y
+0005: 08           mov b,a
+0006: C0 00 06     ldi m
+0009: 65           ldi b,5
+000A: E2 00 0F     bne
+000D: 0A           mov b,c
+000E: 0B           mov b,d
+000F: C0 00 0F     ldi m
+0012: 66           ldi b,6
+0013: E2 00 18     bne
+0016: 10           mov c,a
+0017: 11           mov c,b
+0018: C0 00 18     ldi m
+001B: 7E           ldi b,-2
+001C: E2 00 21     bne
+001F: 00           clr a
+0020: 01           mov a,b
+0021: C0 00 21     ldi m
+0024: C0 00 21     ldi m
+0027: 41           ldi a,1

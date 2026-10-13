@@ -1,0 +1,17 @@
+; Issue #34 example: pointer step with branch target as argument
+!macro ptr_step(target) {
+        ixy
+        mov b,x
+        inc
+        mov x,a
+        mov c,d
+        cmp
+        bne target
+}
+
+loop:   add a
+        +ptr_step(loop)
+loop_c: add d
+next_c: +ptr_step(loop_c)
+        +ptr_step(fwd)
+fwd:    add d
