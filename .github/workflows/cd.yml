@@ -3,6 +3,9 @@
 
 name: CD
 
+permissions:
+  contents: read
+
 on:
   release:
     types: [created]
